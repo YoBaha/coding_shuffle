@@ -1,482 +1,631 @@
-import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
 import 'package:code_shuffle/modals/modals.dart';
-import 'level_screen.dart';
 import 'sync_modal.dart';
-import 'package:code_shuffle/services/progress_service.dart';
-import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final List<PuzzleLevel> levels;
+  final Map<String, PuzzleProgress> progress;
+  final int xp;
+  final String? username;
+  final void Function(Map<String, PuzzleProgress> updated, int xpGained) onProgressUpdated;
+  final void Function(String username) onSynced;
+  final VoidCallback onSignedOut;
+  final VoidCallback onTrainingTap;
+  final VoidCallback? onSurvivalTap;
+  final VoidCallback onReviewTap;
+
+  const HomeScreen({
+    super.key,
+    required this.levels,
+    required this.progress,
+    required this.xp,
+    required this.username,
+    required this.onProgressUpdated,
+    required this.onSynced,
+    required this.onSignedOut,
+    required this.onTrainingTap,
+    this.onSurvivalTap,
+    required this.onReviewTap,
+  });
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final _progressService = ProgressService();
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _sb = Supabase.instance.client;
 
-  List<PuzzleLevel> _levels = [];
-  Map<String, PuzzleProgress> _progress = {};
-  int _xp = 0;
-  String? _username; // null = guest
-  bool _loading = true;
+  late AnimationController _ambientCtrl;
+  late AnimationController _entranceCtrl;
+  late Animation<double> _heroAnim;
+  late Animation<double> _playAnim;
+
+  bool get _isGuest => _sb.auth.currentUser == null;
+  int get _level => (widget.xp / 100).floor() + 1;
+  double get _xpProgress => (widget.xp % 100) / 100.0;
+
+  int get _totalStars => widget.levels.fold(
+      0, (s, l) => s + l.puzzles.fold(0, (ss, p) => ss + (widget.progress[p.id]?.stars ?? 0)));
+  int get _maxStars => widget.levels.fold(0, (s, l) => s + l.puzzles.length * 3);
+  int get _totalCompleted => widget.levels.fold(
+      0, (s, l) => s + l.puzzles.where((p) => (widget.progress[p.id]?.stars ?? 0) > 0).length);
+  int get _totalPuzzles => widget.levels.fold(0, (s, l) => s + l.puzzles.length);
 
   @override
   void initState() {
     super.initState();
-    _init();
+    _ambientCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat(reverse: true);
+    _entranceCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..forward();
+    _heroAnim = CurvedAnimation(
+      parent: _entranceCtrl,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
+    );
+    _playAnim = CurvedAnimation(
+      parent: _entranceCtrl,
+      curve: const Interval(0.25, 1.0, curve: Curves.easeOutBack),
+    );
   }
 
-  Future<void> _init() async {
-    // Load puzzle definitions from bundled JSON
-    final raw = await rootBundle.loadString('assets/sql_puzzles.json');
-    final data = jsonDecode(raw);
-    final levels = (data['levels'] as List)
-        .map((l) => PuzzleLevel.fromJson(l))
-        .toList();
+  @override
+  void dispose() {
+    _ambientCtrl.dispose();
+    _entranceCtrl.dispose();
+    super.dispose();
+  }
 
-    // Always load local progress first (offline-first)
-    final progress = await _progressService.loadLocalProgress();
-    final xp       = await _progressService.loadLocalXp();
+  void _openSyncModal() {
+    showSyncModal(context, progress: widget.progress, xp: widget.xp, onSynced: widget.onSynced);
+  }
 
-    // If already signed in, try to get username silently
-    String? username;
-    if (_sb.auth.currentUser != null) {
-      try {
-        final profile = await _progressService.fetchProfile();
-        username = profile?['username'] as String?;
-      } catch (_) {}
-    }
-
-    if (mounted) {
-      setState(() {
-        _levels   = levels;
-        _progress = progress;
-        _xp       = xp;
-        _username = username;
-        _loading  = false;
-      });
+  void _onSurvivalTap() {
+    if (widget.onSurvivalTap != null) {
+      widget.onSurvivalTap!();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Survival mode is coming soon 👀'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.grey.shade900,
+        ),
+      );
     }
   }
 
-  // ── Computed helpers ───────────────────────────────────────────────────────
-
-  bool get _isGuest => _sb.auth.currentUser == null;
-
-  int get _level => (_xp / 100).floor() + 1;
-  double get _xpProgress => (_xp % 100) / 100.0;
-
-  int _totalStarsFor(PuzzleLevel level) =>
-      level.puzzles.fold(0, (sum, p) => sum + (_progress[p.id]?.stars ?? 0));
-
-  int _maxStarsFor(PuzzleLevel level) => level.puzzles.length * 3;
-
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
-  Future<void> _openLevel(PuzzleLevel level) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LevelScreen(
-          level:    level,
-          progress: _progress,
-          onProgressUpdated: (updatedProgress, xpGained) {
-            setState(() {
-              _progress = updatedProgress;
-              _xp      += xpGained;
-            });
-            _progressService.saveLocalProgress(updatedProgress);
-            _progressService.saveLocalXp(_xp);
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(decoration: const BoxDecoration(gradient: kBgGradient)),
+        CustomPaint(painter: _GridPainter(), size: Size.infinite),
+        // Breathing radial glow
+        AnimatedBuilder(
+          animation: _ambientCtrl,
+          builder: (_, __) {
+            final t = _ambientCtrl.value;
+            return Positioned(
+              top: -80, left: -40, right: -40,
+              child: Container(
+                height: 480,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(0.0, -0.2),
+                    radius: 0.85,
+                    colors: [
+                      kPurpleMid.withOpacity(0.20 + 0.10 * t),
+                      kPurpleDark.withOpacity(0.10 + 0.04 * t),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            );
           },
         ),
+        SafeArea(
+          child: Column(
+            children: [
+              _buildHUD(),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _buildLogoHero(),
+                    const SizedBox(height: 10),
+                    _buildStatsStrip(),
+                    const SizedBox(height: 28),
+                    _buildModeButtons(),
+                    const SizedBox(height: 14),
+                    _buildReviewButton(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── HUD bar ────────────────────────────────────────────────────────────────
+
+  Widget _buildHUD() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+      child: Row(
+        children: [
+          _HudPill(icon: Icons.bolt_rounded, iconColor: kGold, label: '${widget.xp} XP'),
+          const Spacer(),
+          if (_isGuest)
+            GestureDetector(
+              onTap: _openSyncModal,
+              child: _HudPill(icon: Icons.cloud_upload_outlined, iconColor: kPurpleLight, label: 'Sync'),
+            )
+          else ...[
+            _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: widget.onSignedOut,
+              child: const Text('Sign out', style: TextStyle(fontSize: 10, color: Colors.white24)),
+            ),
+          ],
+          const SizedBox(width: 10),
+          _LevelBadge(level: _level, xpProgress: _xpProgress),
+        ],
       ),
     );
   }
 
-  // ── Auth actions ───────────────────────────────────────────────────────────
+  // ── Logo hero ──────────────────────────────────────────────────────────────
 
-  void _openSyncModal() {
-    showSyncModal(
-      context,
-      progress: _progress,
-      xp: _xp,
-      onSynced: (username) {
-        setState(() => _username = username);
+  Widget _buildLogoHero() {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_ambientCtrl, _heroAnim]),
+      builder: (_, __) {
+        final t = _ambientCtrl.value;
+        return Opacity(
+          opacity: _heroAnim.value.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - _heroAnim.value)),
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: kPurpleMid.withOpacity(.4 + .15 * t), blurRadius: 60 + 18 * t, spreadRadius: 6),
+                      BoxShadow(color: kGold.withOpacity(.14 + .08 * t), blurRadius: 36, spreadRadius: 3),
+                    ],
+                  ),
+                  child: Image.asset('assets/icon_no_bg.png', width: 190, height: 190, fit: BoxFit.contain),
+                ),
+                const SizedBox(height: 8),
+                ShaderMask(
+                  shaderCallback: (b) => LinearGradient(
+                    colors: [kPurpleLight, kGoldLight, kPurpleLight],
+                    stops: [0.0, .45 + .3 * t, 1.0],
+                  ).createShader(b),
+                  child: const Text(
+                    'CODING SHUFFLE DUEL',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 3.5, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text('Master SQL. Beat the clock.',
+                    style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(.3), letterSpacing: 1)),
+              ],
+            ),
+          ),
+        );
       },
     );
   }
 
-  Future<void> _signOut() async {
-    await _sb.auth.signOut();
-    setState(() => _username = null);
+  // ── Aggregated stats strip ─────────────────────────────────────────────────
+
+  Widget _buildStatsStrip() {
+    final ratio = _maxStars > 0 ? _totalStars / _maxStars : 0.0;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(.04),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(.06)),
+      ),
+      child: Row(
+        children: [
+          _MiniStat(label: 'PUZZLES', value: '$_totalCompleted/$_totalPuzzles', color: kPurpleLight),
+          const SizedBox(width: 26),
+          _MiniStat(label: 'STARS', value: '$_totalStars/$_maxStars', color: kGold),
+          const Spacer(),
+          SizedBox(
+            width: 42, height: 42,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: ratio,
+                  strokeWidth: 3.5,
+                  backgroundColor: Colors.white12,
+                  valueColor: const AlwaysStoppedAnimation<Color>(kGold),
+                ),
+                Text('${(ratio * 100).toInt()}%',
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white70)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  // ── Build ──────────────────────────────────────────────────────────────────
+  // ── Two side-by-side mode buttons ─────────────────────────────────────────
+
+  Widget _buildModeButtons() {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_ambientCtrl, _playAnim]),
+      builder: (_, __) {
+        final t = _ambientCtrl.value;
+        return Transform.scale(
+          scale: _playAnim.value.clamp(0.0, 1.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ModeButton(
+                  label: 'TRAINING',
+                  icon: Icons.fitness_center_rounded,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFFD060), Color(0xFFE6960A), Color(0xFFB36A00)],
+                  ),
+                  glowColor: kGold,
+                  glowIntensity: t,
+                  onTap: widget.onTrainingTap,
+                  enabled: true,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _ModeButton(
+                  label: 'SURVIVAL',
+                  icon: Icons.sports_kabaddi_rounded,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF3DFF8F), Color(0xFF0CBF5E), Color(0xFF087A3B)],
+                  ),
+                  glowColor: const Color(0xFF0CBF5E),
+                  glowIntensity: t,
+                  badge: 'SOON',
+                  onTap: _onSurvivalTap,
+                  enabled: false,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Review SQL button (purple) ────────────────────────────────────────────
+
+  Widget _buildReviewButton() {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_ambientCtrl, _playAnim]),
+      builder: (_, __) {
+        final t = _ambientCtrl.value;
+        return Transform.scale(
+          scale: _playAnim.value.clamp(0.0, 1.0),
+          child: GestureDetector(
+            onTap: widget.onReviewTap,
+            child: Container(
+              height: 58,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    const Color(0xFF7B2FFF),
+                    const Color(0xFF9B6DFF),
+                    const Color(0xFF7B2FFF),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFF9B6DFF).withOpacity(.5), width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7B2FFF).withOpacity(.38 + .15 * t),
+                    blurRadius: 20 + 8 * t,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 17),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'REVIEW SQL STATEMENTS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 2,
+                      shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+} // ← end of _HomeScreenState
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mode button widget — square with rounded corners, gradient fill
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ModeButton extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final LinearGradient gradient;
+  final Color glowColor;
+  final double glowIntensity;
+  final VoidCallback onTap;
+  final bool enabled;
+  final String? badge;
+
+  const _ModeButton({
+    required this.label,
+    required this.icon,
+    required this.gradient,
+    required this.glowColor,
+    required this.glowIntensity,
+    required this.onTap,
+    required this.enabled,
+    this.badge,
+  });
+
+  @override
+  State<_ModeButton> createState() => _ModeButtonState();
+}
+
+class _ModeButtonState extends State<_ModeButton> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: kPurpleLight)),
-      );
-    }
-
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: kBgGradient),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildXpBar(),
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _pressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Opacity(
+          opacity: widget.enabled ? 1.0 : 0.72,
+          child: Container(
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: widget.gradient,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: Colors.white.withOpacity(.22), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.glowColor.withOpacity(.45 + .2 * widget.glowIntensity),
+                  blurRadius: 24 + 10 * widget.glowIntensity,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: widget.glowColor.withOpacity(.15),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Soft inner highlight top
+                Positioned(
+                  top: 0, left: 0, right: 0,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.white.withOpacity(.18), Colors.transparent],
+                      ),
+                    ),
+                  ),
+                ),
+                // Content
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 16, left: 4),
-                      child: Text(
-                        'SQL CHALLENGES',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 3,
-                          color: Colors.white38,
+                    Center(
+                      child: Container(
+                        width: 52, height: 52,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(.18),
+                          borderRadius: BorderRadius.circular(16),
                         ),
+                        child: Icon(widget.icon, color: Colors.white, size: 28),
                       ),
                     ),
-                    ..._levels.map((level) => _buildLevelCard(level)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Row(
-        children: [
-          // App title
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ShaderMask(
-                  shaderCallback: (b) => kPurpleGradient.createShader(b),
-                  child: const Text(
-                    'CODING SHUFFLE',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                ShaderMask(
-                  shaderCallback: (b) => kGoldGradient.createShader(b),
-                  child: const Text(
-                    'DUEL',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 4,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Right side: guest sync button  OR  username + sign out
-          if (_isGuest)
-            _buildSyncButton()
-          else
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (_username != null)
-                  Text(
-                    _username!,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: kPurpleLight,
-                    ),
-                  ),
-                GestureDetector(
-                  onTap: _signOut,
-                  child: const Text(
-                    'Sign out',
-                    style: TextStyle(fontSize: 11, color: Colors.white38),
-                  ),
-                ),
-              ],
-            ),
-
-          const SizedBox(width: 8),
-
-          // Level badge
-GestureDetector(
-  onTap: () => Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => ProfileScreen(
-        progress: _progress,
-        xp: _xp,
-        levels: _levels,
-        username: _username,
-        onSynced: (username) => setState(() => _username = username),
-        onSignedOut: () => setState(() => _username = null),
-      ),
-    ),
-  ),
-  child: Container(
-    width: 44,
-    height: 44,
-    decoration: BoxDecoration(
-      gradient: kGoldGradient,
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(color: kGold.withOpacity(.5), blurRadius: 12),
-      ],
-    ),
-    child: Center(
-      child: Text('L$_level', style: const TextStyle(
-        fontWeight: FontWeight.w900, fontSize: 14, color: Colors.black,
-      )),
-    ),
-  ),
-),
-          
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSyncButton() {
-    return GestureDetector(
-      onTap: _openSyncModal,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          border: Border.all(color: kPurpleMid.withOpacity(.6)),
-          borderRadius: BorderRadius.circular(20),
-          color: kPurpleMid.withOpacity(.12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.cloud_upload_outlined, color: kPurpleLight, size: 16),
-            SizedBox(width: 6),
-            Text(
-              'Sync',
-              style: TextStyle(
-                color: kPurpleLight,
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildXpBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '$_xp XP',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: kGold,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                '${_level * 100} XP to level ${_level + 1}',
-                style: const TextStyle(fontSize: 11, color: Colors.white38),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: _xpProgress,
-              minHeight: 6,
-              backgroundColor: kBgCard,
-              valueColor: const AlwaysStoppedAnimation<Color>(kGold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLevelCard(PuzzleLevel level) {
-    final totalStars = _totalStarsFor(level);
-    final maxStars   = _maxStarsFor(level);
-    final completed  = level.puzzles
-        .where((p) => (_progress[p.id]?.stars ?? 0) > 0)
-        .length;
-
-    return GestureDetector(
-      onTap: () => _openLevel(level),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: kBgCard,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(.06)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(.4),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            children: [
-              // Gradient top bar
-              Container(
-                height: 4,
-                decoration: BoxDecoration(gradient: levelGradient(level.id)),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    // Level icon
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        gradient: levelGradient(level.id),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        level.id == 'beginner'
-                            ? Icons.local_fire_department_rounded
-                            : level.id == 'intermediate'
-                                ? Icons.bolt_rounded
-                                : Icons.military_tech_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            level.label.toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$completed / ${level.puzzles.length} completed',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white54,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-// Star progress
-Wrap(
-  spacing: 2,
-  runSpacing: 2,
-  children: List.generate(maxStars, (i) {
-    return Icon(
-      i < totalStars
-          ? Icons.star_rounded
-          : Icons.star_outline_rounded,
-      color: i < totalStars ? kGold : Colors.white24,
-      size: 14,
-    );
-  }),
-),
-                        ],
-                      ),
-                    ),
-                    // XP badge
-                    Column(
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            gradient: kGoldGradient,
-                            borderRadius: BorderRadius.circular(20),
+                        Text(
+                          widget.label,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                            shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
                           ),
-                          child: Text(
-                            '+${level.xpPerStar} XP/★',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
+                        ),
+                        if (widget.badge != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(.35),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              widget.badge!,
+                              style: const TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: Colors.white70, letterSpacing: 0.5),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Icon(
-                          Icons.chevron_right_rounded,
-                          color: Colors.white38,
-                        ),
+                        ],
                       ],
                     ),
                   ],
                 ),
-              ),
-              // Progress bar
-              Container(
-                height: 3,
-                margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(2),
-                  color: Colors.white12,
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: maxStars > 0 ? totalStars / maxStars : 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: levelGradient(level.id),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                // Lock overlay for disabled
+                if (!widget.enabled)
+                  Positioned(
+                    top: 10, right: 10,
+                    child: Icon(Icons.lock_rounded, size: 16, color: Colors.white.withOpacity(.5)),
                   ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Supporting widgets
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _HudPill extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  const _HudPill({required this.icon, required this.iconColor, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(.07)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: iconColor),
+          const SizedBox(width: 5),
+          Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: iconColor)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LevelBadge extends StatelessWidget {
+  final int level;
+  final double xpProgress;
+  const _LevelBadge({required this.level, required this.xpProgress});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: 44, height: 44,
+          child: CircularProgressIndicator(
+            value: xpProgress,
+            strokeWidth: 3,
+            backgroundColor: Colors.white12,
+            valueColor: const AlwaysStoppedAnimation<Color>(kGold),
+          ),
+        ),
+        Container(
+          width: 34, height: 34,
+          decoration: BoxDecoration(
+            gradient: kGoldGradient,
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: kGold.withOpacity(.4), blurRadius: 10)],
+          ),
+          child: Center(
+            child: Text('L$level', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.black)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  const _MiniStat({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: color.withOpacity(.6), letterSpacing: 1.5)),
+        Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white, height: 1.1)),
+      ],
+    );
+  }
+}
+
+class _GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(.022)
+      ..strokeWidth = 0.5;
+    const spacing = 44.0;
+    for (double x = 0; x < size.width; x += spacing) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += spacing) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_GridPainter _) => false;
 }

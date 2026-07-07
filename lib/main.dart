@@ -3,15 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_shell.dart'; // ← changed from home_screen.dart
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
   await dotenv.load(fileName: '.env');
 
-  // Lock portrait
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -34,9 +32,7 @@ class CodingShuffleDuel extends StatelessWidget {
       title: 'Coding Shuffle Duel',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      // Go straight to HomeScreen — no auth gate.
-      // Auth is opt-in via the Sync button inside HomeScreen.
-      home: const HomeScreen(),
+      home: const MainShell(), // ← was HomeScreen
     );
   }
 }

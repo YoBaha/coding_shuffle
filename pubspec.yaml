@@ -46,9 +46,8 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: true
-  image_path: "assets/icons/app_icon.png"
+  image_path: "assets/icons/icon_no_bg.png"
   adaptive_icon_background: "#1A1038" # optional
-  adaptive_icon_foreground: "assets/icons/app_icon.png" # optional
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -64,6 +63,7 @@ flutter:
   assets:
     - .env
     - assets/sql_puzzles.json
+    - assets/icon_no_bg.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
