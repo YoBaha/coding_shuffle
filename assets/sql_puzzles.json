@@ -1,0 +1,290 @@
+{
+  "version": "1.0.0",
+  "language": "SQL",
+  "levels": [
+    {
+      "id": "beginner",
+      "label": "Beginner",
+      "color": "#22C55E",
+      "xp_per_star": 10,
+      "puzzles": [
+        {
+          "id": "b001",
+          "order": 1,
+          "title": "Select Everything",
+          "tokens": ["SELECT", "*", "FROM", "users"],
+          "solution": ["SELECT", "*", "FROM", "users"],
+          "explanation": "This query retrieves all columns and all rows from the 'users' table. The * wildcard means 'every column'.",
+          "stars_criteria": { "3": 15, "2": 30, "1": 60 },
+          "hint": "Start with SELECT, then what columns, then where from."
+        },
+        {
+          "id": "b002",
+          "order": 2,
+          "title": "Pick One Column",
+          "tokens": ["SELECT", "username", "FROM", "users"],
+          "solution": ["SELECT", "username", "FROM", "users"],
+          "explanation": "Instead of *, you can name a specific column. This returns only the 'username' column from 'users'.",
+          "stars_criteria": { "3": 15, "2": 30, "1": 60 },
+          "hint": "Replace * with the column name you want."
+        },
+        {
+          "id": "b003",
+          "order": 3,
+          "title": "Two Columns",
+          "tokens": ["SELECT", "name,", "email", "FROM", "customers"],
+          "solution": ["SELECT", "name,", "email", "FROM", "customers"],
+          "explanation": "You can select multiple columns by separating them with commas. This gets 'name' and 'email' from 'customers'.",
+          "stars_criteria": { "3": 15, "2": 30, "1": 60 },
+          "hint": "Multiple columns are separated by commas before FROM."
+        },
+        {
+          "id": "b004",
+          "order": 4,
+          "title": "Filter Rows",
+          "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "100"],
+          "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "100"],
+          "explanation": "WHERE filters the rows returned. This returns only products where price is greater than 100.",
+          "stars_criteria": { "3": 20, "2": 40, "1": 75 },
+          "hint": "WHERE comes after FROM and sets a condition."
+        },
+        {
+          "id": "b005",
+          "order": 5,
+          "title": "Exact Match",
+          "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'"],
+          "solution": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'"],
+          "explanation": "Use = to match exact values. String values must be wrapped in single quotes like 'admin'.",
+          "stars_criteria": { "3": 20, "2": 40, "1": 75 },
+          "hint": "Text values in SQL need single quotes around them."
+        },
+        {
+          "id": "b006",
+          "order": 6,
+          "title": "Count Rows",
+          "tokens": ["SELECT", "COUNT(*)", "FROM", "orders"],
+          "solution": ["SELECT", "COUNT(*)", "FROM", "orders"],
+          "explanation": "COUNT(*) is an aggregate function that returns the total number of rows in the table.",
+          "stars_criteria": { "3": 20, "2": 40, "1": 75 },
+          "hint": "COUNT is a function — it wraps * inside parentheses."
+        },
+        {
+          "id": "b007",
+          "order": 7,
+          "title": "Alias a Column",
+          "tokens": ["SELECT", "price", "AS", "cost", "FROM", "products"],
+          "solution": ["SELECT", "price", "AS", "cost", "FROM", "products"],
+          "explanation": "AS renames a column in the result set. Here 'price' will appear as 'cost' in the output.",
+          "stars_criteria": { "3": 20, "2": 40, "1": 75 },
+          "hint": "AS comes right after the column name you want to rename."
+        },
+        {
+          "id": "b008",
+          "order": 8,
+          "title": "Not Equal",
+          "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "status", "!=", "'inactive'"],
+          "solution": ["SELECT", "*", "FROM", "users", "WHERE", "status", "!=", "'inactive'"],
+          "explanation": "!= means 'not equal to'. This returns all users who are NOT inactive.",
+          "stars_criteria": { "3": 20, "2": 40, "1": 75 },
+          "hint": "!= is the 'not equal' operator in SQL."
+        }
+      ]
+    },
+    {
+      "id": "intermediate",
+      "label": "Intermediate",
+      "color": "#3B82F6",
+      "xp_per_star": 20,
+      "puzzles": [
+        {
+          "id": "i001",
+          "order": 1,
+          "title": "Sort Results",
+          "tokens": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "ASC"],
+          "solution": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "ASC"],
+          "explanation": "ORDER BY sorts the results. ASC means ascending (lowest to highest). Use DESC for the reverse.",
+          "stars_criteria": { "3": 20, "2": 45, "1": 90 },
+          "hint": "ORDER BY comes after WHERE (or FROM if no WHERE)."
+        },
+        {
+          "id": "i002",
+          "order": 2,
+          "title": "Limit Results",
+          "tokens": ["SELECT", "*", "FROM", "users", "LIMIT", "10"],
+          "solution": ["SELECT", "*", "FROM", "users", "LIMIT", "10"],
+          "explanation": "LIMIT restricts how many rows are returned. Here only the first 10 rows are returned.",
+          "stars_criteria": { "3": 20, "2": 45, "1": 90 },
+          "hint": "LIMIT always goes at the very end of the query."
+        },
+        {
+          "id": "i003",
+          "order": 3,
+          "title": "Top 5 Most Expensive",
+          "tokens": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "5"],
+          "solution": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "5"],
+          "explanation": "Combining ORDER BY DESC and LIMIT gives you the top N rows. This gets the 5 most expensive products.",
+          "stars_criteria": { "3": 25, "2": 50, "1": 100 },
+          "hint": "Sort descending first, then cut to 5 rows with LIMIT."
+        },
+        {
+          "id": "i004",
+          "order": 4,
+          "title": "Group By Category",
+          "tokens": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category"],
+          "solution": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category"],
+          "explanation": "GROUP BY groups rows with the same value. This counts how many products exist in each category.",
+          "stars_criteria": { "3": 25, "2": 50, "1": 100 },
+          "hint": "Any non-aggregate column in SELECT must appear in GROUP BY."
+        },
+        {
+          "id": "i005",
+          "order": 5,
+          "title": "Filter After Grouping",
+          "tokens": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+          "solution": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+          "explanation": "HAVING filters groups after GROUP BY. Unlike WHERE, it can use aggregate functions like COUNT.",
+          "stars_criteria": { "3": 30, "2": 60, "1": 120 },
+          "hint": "HAVING is like WHERE but for grouped results — it comes after GROUP BY."
+        },
+        {
+          "id": "i006",
+          "order": 6,
+          "title": "AND Condition",
+          "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'shipped'", "AND", "total", ">", "200"],
+          "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'shipped'", "AND", "total", ">", "200"],
+          "explanation": "AND combines conditions — both must be true. This finds shipped orders worth more than 200.",
+          "stars_criteria": { "3": 25, "2": 50, "1": 100 },
+          "hint": "AND requires ALL conditions to be true."
+        },
+        {
+          "id": "i007",
+          "order": 7,
+          "title": "OR Condition",
+          "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'", "OR", "role", "=", "'moderator'"],
+          "solution": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'", "OR", "role", "=", "'moderator'"],
+          "explanation": "OR returns rows where at least one condition is true. This gets admins and moderators.",
+          "stars_criteria": { "3": 25, "2": 50, "1": 100 },
+          "hint": "OR means either condition can be true."
+        },
+        {
+          "id": "i008",
+          "order": 8,
+          "title": "Sum of Sales",
+          "tokens": ["SELECT", "SUM(total)", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+          "solution": ["SELECT", "SUM(total)", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+          "explanation": "SUM adds up all values in a column. This calculates total revenue from completed orders only.",
+          "stars_criteria": { "3": 25, "2": 50, "1": 100 },
+          "hint": "SUM is an aggregate function like COUNT."
+        },
+        {
+          "id": "i009",
+          "order": 9,
+          "title": "Average Score",
+          "tokens": ["SELECT", "AVG(score)", "AS", "average_score", "FROM", "quiz_results"],
+          "solution": ["SELECT", "AVG(score)", "AS", "average_score", "FROM", "quiz_results"],
+          "explanation": "AVG calculates the mean. Here we also use AS to give the result a readable name.",
+          "stars_criteria": { "3": 25, "2": 50, "1": 100 },
+          "hint": "AVG works like SUM but divides by the count automatically."
+        },
+        {
+          "id": "i010",
+          "order": 10,
+          "title": "Pattern Match",
+          "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+          "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+          "explanation": "LIKE with % wildcard matches patterns. % means 'any characters'. This finds all Gmail users.",
+          "stars_criteria": { "3": 25, "2": 50, "1": 100 },
+          "hint": "LIKE is used for pattern matching, % is the wildcard."
+        }
+      ]
+    },
+    {
+      "id": "advanced",
+      "label": "Advanced",
+      "color": "#A855F7",
+      "xp_per_star": 35,
+      "puzzles": [
+        {
+          "id": "a001",
+          "order": 1,
+          "title": "Inner Join",
+          "tokens": ["SELECT", "users.name,", "orders.total", "FROM", "users", "INNER JOIN", "orders", "ON", "users.id", "=", "orders.user_id"],
+          "solution": ["SELECT", "users.name,", "orders.total", "FROM", "users", "INNER JOIN", "orders", "ON", "users.id", "=", "orders.user_id"],
+          "explanation": "INNER JOIN combines rows from two tables where the ON condition matches. Only users who have orders appear.",
+          "stars_criteria": { "3": 35, "2": 70, "1": 140 },
+          "hint": "JOIN links tables, ON specifies the matching columns."
+        },
+        {
+          "id": "a002",
+          "order": 2,
+          "title": "Left Join",
+          "tokens": ["SELECT", "users.name,", "orders.total", "FROM", "users", "LEFT JOIN", "orders", "ON", "users.id", "=", "orders.user_id"],
+          "solution": ["SELECT", "users.name,", "orders.total", "FROM", "users", "LEFT JOIN", "orders", "ON", "users.id", "=", "orders.user_id"],
+          "explanation": "LEFT JOIN returns all rows from the left table (users), even if there's no matching order. Missing orders show as NULL.",
+          "stars_criteria": { "3": 35, "2": 70, "1": 140 },
+          "hint": "LEFT JOIN keeps all rows from the first (left) table."
+        },
+        {
+          "id": "a003",
+          "order": 3,
+          "title": "Join with Filter",
+          "tokens": ["SELECT", "u.name,", "o.total", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "WHERE", "o.total", ">", "500"],
+          "solution": ["SELECT", "u.name,", "o.total", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "WHERE", "o.total", ">", "500"],
+          "explanation": "You can alias table names (users as u) to write shorter queries. WHERE still filters after the JOIN.",
+          "stars_criteria": { "3": 40, "2": 80, "1": 150 },
+          "hint": "Table aliases go right after the table name. WHERE filters the joined result."
+        },
+        {
+          "id": "a004",
+          "order": 4,
+          "title": "Subquery in WHERE",
+          "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "(SELECT", "AVG(price)", "FROM", "products)"],
+          "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "(SELECT", "AVG(price)", "FROM", "products)"],
+          "explanation": "A subquery runs inside another query. Here we first calculate the average price, then find products above it.",
+          "stars_criteria": { "3": 45, "2": 90, "1": 180 },
+          "hint": "The subquery in parentheses runs first and returns a single value."
+        },
+        {
+          "id": "a005",
+          "order": 5,
+          "title": "Group with Join",
+          "tokens": ["SELECT", "u.name,", "COUNT(o.id)", "AS", "order_count", "FROM", "users", "u", "LEFT JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "GROUP BY", "u.name"],
+          "solution": ["SELECT", "u.name,", "COUNT(o.id)", "AS", "order_count", "FROM", "users", "u", "LEFT JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "GROUP BY", "u.name"],
+          "explanation": "This counts how many orders each user has made, including users with zero orders (LEFT JOIN returns NULL, COUNT ignores NULLs).",
+          "stars_criteria": { "3": 50, "2": 100, "1": 200 },
+          "hint": "LEFT JOIN + GROUP BY + COUNT gives you per-user totals including zeros."
+        },
+        {
+          "id": "a006",
+          "order": 6,
+          "title": "Having with Join",
+          "tokens": ["SELECT", "u.name,", "SUM(o.total)", "AS", "revenue", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "GROUP BY", "u.name", "HAVING", "SUM(o.total)", ">", "1000"],
+          "solution": ["SELECT", "u.name,", "SUM(o.total)", "AS", "revenue", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "GROUP BY", "u.name", "HAVING", "SUM(o.total)", ">", "1000"],
+          "explanation": "This finds users whose total spending exceeds 1000. HAVING filters after grouping, allowing aggregate conditions.",
+          "stars_criteria": { "3": 50, "2": 100, "1": 200 },
+          "hint": "HAVING filters GROUPS. Use it when WHERE won't work with aggregate functions."
+        },
+        {
+          "id": "a007",
+          "order": 7,
+          "title": "Nested Subquery",
+          "tokens": ["SELECT", "name", "FROM", "users", "WHERE", "id", "IN", "(SELECT", "user_id", "FROM", "orders", "WHERE", "total", ">", "500)"],
+          "solution": ["SELECT", "name", "FROM", "users", "WHERE", "id", "IN", "(SELECT", "user_id", "FROM", "orders", "WHERE", "total", ">", "500)"],
+          "explanation": "IN with a subquery checks if a value exists in a list. This finds users who placed at least one large order.",
+          "stars_criteria": { "3": 50, "2": 100, "1": 200 },
+          "hint": "The subquery inside IN returns a list of IDs to match against."
+        },
+        {
+          "id": "a008",
+          "order": 8,
+          "title": "Full Aggregation Pipeline",
+          "tokens": ["SELECT", "category,", "COUNT(*)", "AS", "total,", "AVG(price)", "AS", "avg_price", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">=", "3", "ORDER BY", "avg_price", "DESC"],
+          "solution": ["SELECT", "category,", "COUNT(*)", "AS", "total,", "AVG(price)", "AS", "avg_price", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">=", "3", "ORDER BY", "avg_price", "DESC"],
+          "explanation": "This is a full pipeline: group products by category, count them, average their prices, filter categories with 3+ products, sort by average price descending.",
+          "stars_criteria": { "3": 60, "2": 120, "1": 240 },
+          "hint": "Remember the order: SELECT → FROM → GROUP BY → HAVING → ORDER BY."
+        }
+      ]
+    }
+  ]
+}
