@@ -159,27 +159,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // ── HUD bar ────────────────────────────────────────────────────────────────
 
   Widget _buildHUD() {
+    final xpInLevel = widget.xp % 100;
+    final xpToNext  = 100 - xpInLevel;
+    final nextLevel = _level + 1;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _HudPill(icon: Icons.bolt_rounded, iconColor: kGold, label: '${widget.xp} XP'),
-          const Spacer(),
-          if (_isGuest)
-            GestureDetector(
-              onTap: _openSyncModal,
-              child: _HudPill(icon: Icons.cloud_upload_outlined, iconColor: kPurpleLight, label: 'Sync'),
-            )
-          else ...[
-            _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: widget.onSignedOut,
-              child: const Text('Sign out', style: TextStyle(fontSize: 10, color: Colors.white24)),
-            ),
-          ],
-          const SizedBox(width: 10),
-          _LevelBadge(level: _level, xpProgress: _xpProgress),
+          // ── Top row: XP pill | username | level badge ──────────────────
+          Row(
+            children: [
+              _HudPill(icon: Icons.bolt_rounded, iconColor: kGold, label: '${widget.xp} XP'),
+              const Spacer(),
+              if (_isGuest)
+                GestureDetector(
+                  onTap: _openSyncModal,
+                  child: _HudPill(icon: Icons.cloud_upload_outlined, iconColor: kPurpleLight, label: 'Sync'),
+                )
+              else ...[
+                _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: widget.onSignedOut,
+                  child: const Text('Sign out', style: TextStyle(fontSize: 10, color: Colors.white24)),
+                ),
+              ],
+              const SizedBox(width: 10),
+              _LevelBadge(level: _level, xpProgress: _xpProgress),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── XP progress bar ────────────────────────────────────────────
+          _XpProgressBar(
+            xpProgress: _xpProgress,
+            xpInLevel:  xpInLevel,
+            xpToNext:   xpToNext,
+            nextLevel:  nextLevel,
+          ),
         ],
       ),
     );
@@ -206,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       BoxShadow(color: kGold.withOpacity(.14 + .08 * t), blurRadius: 36, spreadRadius: 3),
                     ],
                   ),
-                  child: Image.asset('assets/icon_no_bg.png', width: 190, height: 190, fit: BoxFit.contain),
+                  child: Image.asset('assets/icon_app.png', width: 190, height: 190, fit: BoxFit.contain),
                 ),
                 const SizedBox(height: 8),
                 ShaderMask(
@@ -628,4 +648,146 @@ class _GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GridPainter _) => false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// XP Progress Bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _XpProgressBar extends StatefulWidget {
+  final double xpProgress;   // 0.0 – 1.0 within current level
+  final int    xpInLevel;    // raw XP within this level (e.g. 30)
+  final int    xpToNext;     // XP remaining to next level (e.g. 70)
+  final int    nextLevel;
+
+  const _XpProgressBar({
+    required this.xpProgress,
+    required this.xpInLevel,
+    required this.xpToNext,
+    required this.nextLevel,
+  });
+
+  @override
+  State<_XpProgressBar> createState() => _XpProgressBarState();
+}
+
+class _XpProgressBarState extends State<_XpProgressBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double>   _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+    // Animate from 0 to current value on first build
+    _anim = Tween<double>(begin: 0, end: widget.xpProgress).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
+    );
+    _ctrl.forward();
+  }
+
+  @override
+  void didUpdateWidget(_XpProgressBar old) {
+    super.didUpdateWidget(old);
+    if (old.xpProgress != widget.xpProgress) {
+      _anim = Tween<double>(
+        begin: old.xpProgress,
+        end: widget.xpProgress,
+      ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+      _ctrl
+        ..reset()
+        ..forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Labels row ───────────────────────────────────────────────────
+        Row(
+          children: [
+            Text(
+              '${widget.xpInLevel} / 100 XP',
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: Colors.white38,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const Spacer(),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 10, color: Colors.white38),
+                children: [
+                  TextSpan(text: '${widget.xpToNext} XP '),
+                  TextSpan(
+                    text: 'to Level ${widget.nextLevel}',
+                    style: const TextStyle(
+                      color: kGold,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 5),
+
+        // ── Animated bar ─────────────────────────────────────────────────
+        AnimatedBuilder(
+          animation: _anim,
+          builder: (_, __) {
+            return Stack(
+              children: [
+                // Track
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(.08),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                // Fill
+                FractionallySizedBox(
+                  widthFactor: _anim.value.clamp(0.0, 1.0),
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [kGold, kGoldLight],
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kGold.withOpacity(.55),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
 }

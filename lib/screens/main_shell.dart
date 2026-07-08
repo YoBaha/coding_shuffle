@@ -6,41 +6,56 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
 import 'package:code_shuffle/modals/modals.dart';
 import 'package:code_shuffle/services/progress_service.dart';
+import 'package:code_shuffle/services/music_service.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'level_screen.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MainShell — tab host with custom bottom nav
-// ─────────────────────────────────────────────────────────────────────────────
+import 'support_screen.dart';
+import 'settings_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
-
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   final _progressService = ProgressService();
   final _sb = Supabase.instance.client;
+  final _music = MusicService.instance;
 
-  // ── Shared state (lifted up so tabs stay in sync) ──────────────────────────
   List<PuzzleLevel> _levels = [];
   Map<String, PuzzleProgress> _progress = {};
   int _xp = 0;
   String? _username;
   bool _loading = true;
-
-  int _tab = 0; // 0=home, 1=train(action), 2=profile, 3=settings
+  int _tab = 0; // 0=home, 1=train(action), 2=profile, 3=settings, 4=support
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _init();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _music.stop();
+    } else if (state == AppLifecycleState.resumed) {
+      _music.playHome();
+    }
+  }
+
   Future<void> _init() async {
+    await _music.init();
+
     final raw = await rootBundle.loadString('assets/sql_puzzles.json');
     final data = jsonDecode(raw);
     final levels =
@@ -65,6 +80,7 @@ class _MainShellState extends State<MainShell> {
         _username = username;
         _loading = false;
       });
+      _music.playHome();
     }
   }
 
@@ -77,7 +93,6 @@ class _MainShellState extends State<MainShell> {
     _progressService.saveLocalXp(_xp);
   }
 
-  // ── Train: show level picker sheet instead of navigating directly ──────────
   void _showTrainSheet() {
     if (_levels.isEmpty) return;
     showModalBottomSheet(
@@ -88,39 +103,29 @@ class _MainShellState extends State<MainShell> {
         levels: _levels,
         progress: _progress,
         onLevelSelected: (level) {
-          Navigator.pop(context); // close sheet first
+          Navigator.pop(context);
           _openLevel(level);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => LevelScreen(
-                level: level,
-                progress: _progress,
-                onProgressUpdated: _onProgressUpdated,
-              ),
-            ),
-          );
         },
       ),
     );
   }
-// ── Navigate to a level screen (used by Home cards and the Train sheet) ────
-void _openLevel(PuzzleLevel level) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => LevelScreen(
-        level: level,
-        progress: _progress,
-        onProgressUpdated: _onProgressUpdated,
+
+  void _openLevel(PuzzleLevel level) {
+    _music.playTraining();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LevelScreen(
+          level: level,
+          progress: _progress,
+          onProgressUpdated: _onProgressUpdated,
+        ),
       ),
-    ),
-  );
-}
-  // ── Tab press handler ──────────────────────────────────────────────────────
+    ).then((_) => _music.playHome());
+  }
+
   void _onTabTap(int index) {
     if (index == 1) {
-      // Train is an action button, not a persistent tab
       _showTrainSheet();
       return;
     }
@@ -136,33 +141,28 @@ void _openLevel(PuzzleLevel level) {
       );
     }
 
-    // Map tab index → screen (train=1 is an action, skip it in IndexedStack)
-    // Tab mapping: 0→home, 2→profile, 3→settings
-    // IndexedStack uses: 0→home, 1→profile, 2→settings
-    final stackIndex = _tab == 0 ? 0 : _tab == 2 ? 1 : 2;
+    final stackIndex = _tab == 0 ? 0 : _tab == 2 ? 1 : _tab == 3 ? 2 : 3;
 
     return Scaffold(
       backgroundColor: kBgDark,
-      extendBody: true, // content goes under the nav bar cutout area
+      extendBody: true,
       body: IndexedStack(
         index: stackIndex,
         children: [
-          // 0 — Home
-HomeScreen(
-  levels: _levels,
-  progress: _progress,
-  xp: _xp,
-  username: _username,
-  onProgressUpdated: _onProgressUpdated,
-  onSynced: (u) => setState(() => _username = u),
-  onSignedOut: () => setState(() => _username = null),
-  onTrainingTap: _showTrainSheet,   // ← replaces onLevelTap
-onReviewTap: () => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const ReviewSqlScreen()),
-  ),
-),
-          // 1 — Profile
+          HomeScreen(
+            levels: _levels,
+            progress: _progress,
+            xp: _xp,
+            username: _username,
+            onProgressUpdated: _onProgressUpdated,
+            onSynced: (u) => setState(() => _username = u),
+            onSignedOut: () => setState(() => _username = null),
+            onTrainingTap: _showTrainSheet,
+            onReviewTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReviewSqlScreen()),
+            ),
+          ),
           ProfileScreen(
             progress: _progress,
             xp: _xp,
@@ -171,8 +171,8 @@ onReviewTap: () => Navigator.push(
             onSynced: (u) => setState(() => _username = u),
             onSignedOut: () => setState(() => _username = null),
           ),
-          // 2 — Settings (placeholder)
-          _SettingsPlaceholder(),
+          const SettingsScreen(),
+          const SupportScreen(),
         ],
       ),
       bottomNavigationBar: _CSDBottomNav(
@@ -184,7 +184,7 @@ onReviewTap: () => Navigator.push(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Train bottom sheet — level picker
+// Train bottom sheet
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _TrainSheet extends StatelessWidget {
@@ -218,11 +218,9 @@ class _TrainSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: 40, height: 4,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   color: Colors.white24,
@@ -230,8 +228,6 @@ class _TrainSheet extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Title
             Row(
               children: [
                 Container(
@@ -247,26 +243,17 @@ class _TrainSheet extends StatelessWidget {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'TRAIN',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      'Choose your difficulty',
-                      style: TextStyle(fontSize: 12, color: Colors.white54),
-                    ),
+                    Text('TRAIN',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w900,
+                            letterSpacing: 2, color: Colors.white)),
+                    Text('Choose your difficulty',
+                        style: TextStyle(fontSize: 12, color: Colors.white54)),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 20),
-
-            // Level cards
             ...levels.map((level) => _LevelPickerCard(
                   level: level,
                   completed: _completedFor(level),
@@ -287,20 +274,15 @@ class _LevelPickerCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _LevelPickerCard({
-    required this.level,
-    required this.completed,
-    required this.stars,
-    required this.onTap,
+    required this.level, required this.completed,
+    required this.stars, required this.onTap,
   });
 
   IconData get _icon {
     switch (level.id) {
-      case 'beginner':
-        return Icons.local_fire_department_rounded;
-      case 'intermediate':
-        return Icons.bolt_rounded;
-      default:
-        return Icons.military_tech_rounded;
+      case 'beginner': return Icons.local_fire_department_rounded;
+      case 'intermediate': return Icons.bolt_rounded;
+      default: return Icons.military_tech_rounded;
     }
   }
 
@@ -322,18 +304,11 @@ class _LevelPickerCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           child: Row(
             children: [
-              // Gradient accent bar
-              Container(
-                width: 4,
-                height: 76,
-                decoration:
-                    BoxDecoration(gradient: levelGradient(level.id)),
-              ),
+              Container(width: 4, height: 76,
+                  decoration: BoxDecoration(gradient: levelGradient(level.id))),
               const SizedBox(width: 16),
-              // Icon
               Container(
-                width: 44,
-                height: 44,
+                width: 44, height: 44,
                 decoration: BoxDecoration(
                   gradient: levelGradient(level.id),
                   borderRadius: BorderRadius.circular(12),
@@ -341,38 +316,25 @@ class _LevelPickerCard extends StatelessWidget {
                 child: Icon(_icon, color: Colors.white, size: 22),
               ),
               const SizedBox(width: 14),
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      level.label.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    Text(level.label.toUpperCase(),
+                        style: const TextStyle(fontSize: 14,
+                            fontWeight: FontWeight.w800, letterSpacing: 1.2)),
                     const SizedBox(height: 4),
-                    Text(
-                      '$completed / ${level.puzzles.length} done · $stars/$maxStars ★',
-                      style: const TextStyle(
-                          fontSize: 11, color: Colors.white38),
-                    ),
+                    Text('$completed / ${level.puzzles.length} done · $stars/$maxStars ★',
+                        style: const TextStyle(fontSize: 11, color: Colors.white38)),
                     const SizedBox(height: 6),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(2),
                       child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 3,
+                        value: progress, minHeight: 3,
                         backgroundColor: Colors.white10,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          level.id == 'beginner'
-                              ? kGreen
-                              : level.id == 'intermediate'
-                                  ? kBlue
-                                  : kAdvPurple,
+                          level.id == 'beginner' ? kGreen
+                              : level.id == 'intermediate' ? kBlue : kAdvPurple,
                         ),
                       ),
                     ),
@@ -381,8 +343,7 @@ class _LevelPickerCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.play_arrow_rounded,
-                  color: kPurpleLight, size: 26),
+              const Icon(Icons.play_arrow_rounded, color: kPurpleLight, size: 26),
               const SizedBox(width: 14),
             ],
           ),
@@ -393,71 +354,27 @@ class _LevelPickerCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Settings placeholder
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SettingsPlaceholder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(gradient: kBgGradient),
-      child: const SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.settings_rounded, size: 52, color: Colors.white12),
-              SizedBox(height: 16),
-              Text(
-                'SETTINGS',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 3,
-                  color: Colors.white24,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Coming soon',
-                style: TextStyle(fontSize: 12, color: Colors.white24),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Custom bottom nav bar — Marvel Snap–style with raised center arc
+// Custom bottom nav bar
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CSDBottomNav extends StatelessWidget {
   final int currentIndex;
   final void Function(int) onTap;
-
-  const _CSDBottomNav({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _CSDBottomNav({required this.currentIndex, required this.onTap});
 
   static const double _navHeight = 68;
-  static const double _arcRadius = 36; // half-width of center notch arc
-  static const double _arcHeight = 22; // how high the arc rises
+  static const double _arcRadius = 36;
+  static const double _arcHeight = 22;
 
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-
     return SizedBox(
       height: _navHeight + bottomPadding,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.topCenter,
         children: [
-          // ── Painted bar background ──────────────────────────────────────
           Positioned.fill(
             child: CustomPaint(
               painter: _NavBarPainter(
@@ -467,74 +384,46 @@ class _CSDBottomNav extends StatelessWidget {
               ),
             ),
           ),
-
-          // ── Nav items row ───────────────────────────────────────────────
           Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
+            left: 0, right: 0, top: 0, bottom: 0,
             child: Padding(
               padding: EdgeInsets.only(bottom: bottomPadding),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _NavItem(
-                    icon: Icons.home_rounded,
-                    label: 'Home',
-                    active: currentIndex == 0,
-                    onTap: () => onTap(0),
-                  ),
-                  // Left spacer for center button
+                  _NavItem(icon: Icons.home_rounded, label: 'Home',
+                      active: currentIndex == 0, onTap: () => onTap(0)),
+                  _NavItem(icon: Icons.volunteer_activism_rounded, label: 'Support',
+                      active: currentIndex == 4, onTap: () => onTap(4)),
                   const SizedBox(width: 72),
-                  _NavItem(
-                    icon: Icons.person_rounded,
-                    label: 'Profile',
-                    active: currentIndex == 2,
-                    onTap: () => onTap(2),
-                  ),
-                  _NavItem(
-                    icon: Icons.settings_rounded,
-                    label: 'Settings',
-                    active: currentIndex == 3,
-                    onTap: () => onTap(3),
-                  ),
+                  _NavItem(icon: Icons.person_rounded, label: 'Profile',
+                      active: currentIndex == 2, onTap: () => onTap(2)),
+                  _NavItem(icon: Icons.settings_rounded, label: 'Settings',
+                      active: currentIndex == 3, onTap: () => onTap(3)),
                 ],
               ),
             ),
           ),
-
-          // ── Center raised TRAIN button ──────────────────────────────────
           Positioned(
             top: -(_arcHeight + 4),
             child: GestureDetector(
               onTap: () => onTap(1),
               child: Container(
-                width: 64,
-                height: 64,
+                width: 64, height: 64,
                 decoration: BoxDecoration(
                   gradient: kButtonGradient,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(
-                      color: kPurpleMid.withOpacity(.55),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                    BoxShadow(
-                      color: kPurpleLight.withOpacity(.2),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                    ),
+                    BoxShadow(color: kPurpleMid.withOpacity(.55),
+                        blurRadius: 20, offset: const Offset(0, 6)),
+                    BoxShadow(color: kPurpleLight.withOpacity(.2),
+                        blurRadius: 8, spreadRadius: 2),
                   ],
                   border: Border.all(color: kPurpleLight.withOpacity(.3), width: 1.5),
                 ),
-                child: const Icon(
-                  Icons.fitness_center_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                child: const Icon(Icons.fitness_center_rounded,
+                    color: Colors.white, size: 28),
               ),
             ),
           ),
@@ -544,19 +433,13 @@ class _CSDBottomNav extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CustomPainter — draws the nav bar shape with upward arc for center button
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _NavBarPainter extends CustomPainter {
   final double arcRadius;
   final double arcHeight;
   final double bottomPadding;
 
   const _NavBarPainter({
-    required this.arcRadius,
-    required this.arcHeight,
-    required this.bottomPadding,
+    required this.arcRadius, required this.arcHeight, required this.bottomPadding,
   });
 
   @override
@@ -566,8 +449,7 @@ class _NavBarPainter extends CustomPainter {
 
     final paint = Paint()
       ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+        begin: Alignment.topLeft, end: Alignment.bottomRight,
         colors: [Color(0xFF1E1838), Color(0xFF150F28)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
@@ -577,36 +459,17 @@ class _NavBarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    final path = Path();
-
-    // Start top-left
-    path.moveTo(0, topY);
-
-    // Line to where arc begins (left side of the notch)
     final arcLeft = cx - arcRadius;
     final arcRight = cx + arcRadius;
-
-    path.lineTo(arcLeft - 12, topY);
-
-    // Smooth cubic bezier up into the arc
-    path.cubicTo(
-      arcLeft - 4, topY,         // cp1
-      arcLeft, topY - arcHeight, // cp2
-      cx, topY - arcHeight,      // peak
-    );
-    path.cubicTo(
-      arcRight, topY - arcHeight, // cp1
-      arcRight + 4, topY,         // cp2
-      arcRight + 12, topY,        // end
-    );
-
-    // Continue to right edge
-    path.lineTo(size.width, topY);
-
-    // Bottom edge (include system bottom padding)
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
+    final path = Path()
+      ..moveTo(0, topY)
+      ..lineTo(arcLeft - 12, topY)
+      ..cubicTo(arcLeft - 4, topY, arcLeft, topY - arcHeight, cx, topY - arcHeight)
+      ..cubicTo(arcRight, topY - arcHeight, arcRight + 4, topY, arcRight + 12, topY)
+      ..lineTo(size.width, topY)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
 
     canvas.drawPath(path, paint);
     canvas.drawPath(path, borderPaint);
@@ -614,14 +477,9 @@ class _NavBarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _NavBarPainter old) =>
-      old.arcRadius != arcRadius ||
-      old.arcHeight != arcHeight ||
+      old.arcRadius != arcRadius || old.arcHeight != arcHeight ||
       old.bottomPadding != bottomPadding;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Individual nav item
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
@@ -630,10 +488,8 @@ class _NavItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
+    required this.icon, required this.label,
+    required this.active, required this.onTap,
   });
 
   @override
@@ -650,17 +506,13 @@ class _NavItem extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
-              width: 36,
-              height: 36,
+              width: 36, height: 36,
               decoration: BoxDecoration(
                 color: active ? kPurpleMid.withOpacity(.18) : Colors.transparent,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                size: 22,
-                color: active ? kPurpleLight : Colors.white38,
-              ),
+              child: Icon(icon, size: 22,
+                  color: active ? kPurpleLight : Colors.white38),
             ),
             const SizedBox(height: 2),
             AnimatedDefaultTextStyle(
