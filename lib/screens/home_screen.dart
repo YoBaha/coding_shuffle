@@ -5,6 +5,7 @@ import '../theme.dart';
 import 'package:code_shuffle/modals/modals.dart';
 import 'sync_modal.dart';
 
+
 class HomeScreen extends StatefulWidget {
   final List<PuzzleLevel> levels;
   final Map<String, PuzzleProgress> progress;
@@ -16,6 +17,8 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onTrainingTap;
   final VoidCallback? onSurvivalTap;
   final VoidCallback onReviewTap;
+  final bool dailyCompleted;
+  final VoidCallback onDailyTap;
 
   const HomeScreen({
     super.key,
@@ -29,6 +32,8 @@ class HomeScreen extends StatefulWidget {
     required this.onTrainingTap,
     this.onSurvivalTap,
     required this.onReviewTap,
+    required this.dailyCompleted,   // ← new
+    required this.onDailyTap, 
   });
 
   @override
@@ -47,12 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int get _level => (widget.xp / 100).floor() + 1;
   double get _xpProgress => (widget.xp % 100) / 100.0;
 
-  int get _totalStars => widget.levels.fold(
-      0, (s, l) => s + l.puzzles.fold(0, (ss, p) => ss + (widget.progress[p.id]?.stars ?? 0)));
-  int get _maxStars => widget.levels.fold(0, (s, l) => s + l.puzzles.length * 3);
-  int get _totalCompleted => widget.levels.fold(
-      0, (s, l) => s + l.puzzles.where((p) => (widget.progress[p.id]?.stars ?? 0) > 0).length);
-  int get _totalPuzzles => widget.levels.fold(0, (s, l) => s + l.puzzles.length);
+
 
   @override
   void initState() {
@@ -140,9 +140,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   physics: const BouncingScrollPhysics(),
                   children: [
                     _buildLogoHero(),
-                    const SizedBox(height: 10),
-                    _buildStatsStrip(),
                     const SizedBox(height: 28),
+                    _buildDailyButton(),
+                    const SizedBox(height: 14),
                     _buildModeButtons(),
                     const SizedBox(height: 14),
                     _buildReviewButton(),
@@ -250,94 +250,141 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ── Aggregated stats strip ─────────────────────────────────────────────────
+  // ── Daily challenge button ─────────────────────────────────────────────────
 
-  Widget _buildStatsStrip() {
-    final ratio = _maxStars > 0 ? _totalStars / _maxStars : 0.0;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.04),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(.06)),
-      ),
-      child: Row(
-        children: [
-          _MiniStat(label: 'PUZZLES', value: '$_totalCompleted/$_totalPuzzles', color: kPurpleLight),
-          const SizedBox(width: 26),
-          _MiniStat(label: 'STARS', value: '$_totalStars/$_maxStars', color: kGold),
-          const Spacer(),
-          SizedBox(
-            width: 42, height: 42,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(
-                  value: ratio,
-                  strokeWidth: 3.5,
-                  backgroundColor: Colors.white12,
-                  valueColor: const AlwaysStoppedAnimation<Color>(kGold),
-                ),
-                Text('${(ratio * 100).toInt()}%',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white70)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Two side-by-side mode buttons ─────────────────────────────────────────
-
-  Widget _buildModeButtons() {
+  Widget _buildDailyButton() {
     return AnimatedBuilder(
       animation: Listenable.merge([_ambientCtrl, _playAnim]),
       builder: (_, __) {
         final t = _ambientCtrl.value;
         return Transform.scale(
           scale: _playAnim.value.clamp(0.0, 1.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: _ModeButton(
-                  label: 'TRAINING',
-                  icon: Icons.fitness_center_rounded,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFFD060), Color(0xFFE6960A), Color(0xFFB36A00)],
+          child: GestureDetector(
+            onTap: widget.dailyCompleted ? null : widget.onDailyTap,
+            child: Opacity(
+              opacity: widget.dailyCompleted ? 0.55 : 1.0,
+              child: Container(
+                height: 76,
+                decoration: BoxDecoration(
+                  gradient: widget.dailyCompleted
+                      ? const LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [Color(0xFF1A2A4A), Color(0xFF1D3461)],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color.lerp(const Color(0xFF1D4ED8), const Color(0xFF2563EB), t)!,
+                            Color.lerp(const Color(0xFF3B82F6), const Color(0xFF60A5FA), t)!,
+                            Color.lerp(const Color(0xFF1D4ED8), const Color(0xFF2563EB), t)!,
+                          ],
+                        ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: widget.dailyCompleted
+                        ? Colors.white.withOpacity(.08)
+                        : const Color(0xFF3B82F6).withOpacity(.5),
+                    width: 1.2,
                   ),
-                  glowColor: kGold,
-                  glowIntensity: t,
-                  onTap: widget.onTrainingTap,
-                  enabled: true,
+                  boxShadow: widget.dailyCompleted
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: const Color(0xFF1D4ED8).withOpacity(.38 + .15 * t),
+                            blurRadius: 20 + 8 * t,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: Image.asset(
+                        'assets/images/calendar_icon.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      widget.dailyCompleted
+                          ? 'DAILY CHALLENGE  ✓'
+                          : 'DAILY CHALLENGE',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 2,
+                        shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    if (!widget.dailyCompleted)
+                      const Icon(Icons.arrow_forward_ios_rounded,
+                          color: Colors.white54, size: 12),
+                  ],
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _ModeButton(
-                  label: 'SURVIVAL',
-                  icon: Icons.sports_kabaddi_rounded,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF3DFF8F), Color(0xFF0CBF5E), Color(0xFF087A3B)],
-                  ),
-                  glowColor: const Color(0xFF0CBF5E),
-                  glowIntensity: t,
-                  badge: 'SOON',
-                  onTap: _onSurvivalTap,
-                  enabled: false,
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
     );
   }
+
+  // ── Two side-by-side mode buttons ─────────────────────────────────────────
+Widget _buildModeButtons() {
+  return AnimatedBuilder(
+    animation: Listenable.merge([_ambientCtrl, _playAnim]),
+    builder: (_, __) {
+      final t = _ambientCtrl.value;
+      return Transform.scale(
+        scale: _playAnim.value.clamp(0.0, 1.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: _ModeButton(
+                label: 'TRAINING',
+                assetIcon: 'assets/images/duel_icon.png',   // ← was Icons.fitness_center
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFFFD060), Color(0xFFE6960A), Color(0xFFB36A00)],
+                ),
+                glowColor: kGold,
+                glowIntensity: t,
+                onTap: widget.onTrainingTap,
+                enabled: true,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _ModeButton(
+                label: 'SURVIVAL',
+                assetIcon: 'assets/images/skull_icon.png',  // ← was Icons.sports_kabaddi
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF3DFF8F), Color(0xFF0CBF5E), Color(0xFF087A3B)],
+                ),
+                glowColor: const Color(0xFF0CBF5E),
+                glowIntensity: t,
+                badge: 'SOON',
+                onTap: _onSurvivalTap,
+                enabled: false,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   // ── Review SQL button (purple) ────────────────────────────────────────────
 
@@ -351,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: GestureDetector(
             onTap: widget.onReviewTap,
             child: Container(
-              height: 58,
+              height: 68,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
@@ -375,13 +422,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 32, height: 32,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 17),
+                  SizedBox(
+  width: 56, height: 56,
+  child: Image.asset('assets/images/sql_book_icon.png', fit: BoxFit.contain),
+
                   ),
                   const SizedBox(width: 12),
                   const Text(
@@ -409,10 +453,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 // ─────────────────────────────────────────────────────────────────────────────
 // Mode button widget — square with rounded corners, gradient fill
 // ─────────────────────────────────────────────────────────────────────────────
-
 class _ModeButton extends StatefulWidget {
   final String label;
-  final IconData icon;
+  final String assetIcon;          // ← was IconData icon
   final LinearGradient gradient;
   final Color glowColor;
   final double glowIntensity;
@@ -422,7 +465,7 @@ class _ModeButton extends StatefulWidget {
 
   const _ModeButton({
     required this.label,
-    required this.icon,
+    required this.assetIcon,       // ← was icon
     required this.gradient,
     required this.glowColor,
     required this.glowIntensity,
@@ -491,15 +534,14 @@ class _ModeButtonState extends State<_ModeButton> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Center(
-                      child: Container(
-                        width: 52, height: 52,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(.18),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Icon(widget.icon, color: Colors.white, size: 28),
-                      ),
-                    ),
+  child: SizedBox(
+    width: 72, height: 72,
+    child: Image.asset(
+      widget.assetIcon,
+      fit: BoxFit.contain,
+    ),
+  ),
+),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -524,7 +566,10 @@ class _ModeButtonState extends State<_ModeButton> {
                             ),
                             child: Text(
                               widget.badge!,
-                              style: const TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: Colors.white70, letterSpacing: 0.5),
+                              style: const TextStyle(
+                                fontSize: 7, fontWeight: FontWeight.w900,
+                                color: Colors.white70, letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ],
@@ -613,23 +658,6 @@ class _LevelBadge extends StatelessWidget {
   }
 }
 
-class _MiniStat extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  const _MiniStat({required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: color.withOpacity(.6), letterSpacing: 1.5)),
-        Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white, height: 1.1)),
-      ],
-    );
-  }
-}
 
 class _GridPainter extends CustomPainter {
   @override

@@ -41,5 +41,7 @@ flutter:
     - assets/music/home_song1.mp3
     - assets/music/home_song2.mp3
     - assets/music/chill_mode.mp3
+    - assets/images/
+    - assets/daily_chall_puzzles.json
 
   uses-material-design: true

@@ -1,5 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+// ── Fonts ───────────────────────────────────────────────────────────────────
+// GAME TITLE → Orbitron · UI (buttons/labels/headers) → Bebas Neue
+// SQL / code → JetBrains Mono · Descriptions/body → Inter
+class AppFonts {
+  static const title = 'Orbitron';
+  static const ui = 'BebasNeue';
+  static const code = 'JetBrainsMono';
+  static const body = 'Inter';
+}
+
+const TextStyle kTitleStyle = TextStyle(
+  fontFamily: AppFonts.title,
+  fontWeight: FontWeight.w800,
+  letterSpacing: 1.5,
+);
+
+const TextStyle kUiLabelStyle = TextStyle(
+  fontFamily: AppFonts.ui,
+  fontWeight: FontWeight.w400,
+  letterSpacing: 1.2,
+);
+
+const TextStyle kCodeStyle = TextStyle(
+  fontFamily: AppFonts.code,
+  fontWeight: FontWeight.w500,
+);
+
+const TextStyle kBodyStyle = TextStyle(
+  fontFamily: AppFonts.body,
+  fontWeight: FontWeight.w400,
+);
+
 // ── Brand colours (from the logo) ──────────────────────────────────────────
 const Color kBgDark      = Color(0xFF0D0B1A); // deep dark purple-black
 const Color kBgCard      = Color(0xFF1A1530); // card surface
@@ -60,7 +92,7 @@ ThemeData buildAppTheme() {
       secondary: kGold,
       surface: kBgCard,
     ),
-    textTheme: GoogleFonts.spaceGroteskTextTheme(ThemeData.dark().textTheme),
+    fontFamily: AppFonts.body, // Inter as the app-wide default (descriptions/body)
     useMaterial3: true,
   );
 }

@@ -12,6 +12,8 @@ import 'profile_screen.dart';
 import 'level_screen.dart';
 import 'support_screen.dart';
 import 'settings_screen.dart';
+import 'package:code_shuffle/services/daily_challenge_service.dart';
+import 'daily_game_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -23,7 +25,9 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   final _progressService = ProgressService();
   final _sb = Supabase.instance.client;
   final _music = MusicService.instance;
-
+final _dailyService = DailyChallengeService();
+bool _dailyCompleted = false;
+DailyPuzzle? _todaysPuzzle;
   List<PuzzleLevel> _levels = [];
   Map<String, PuzzleProgress> _progress = {};
   int _xp = 0;
@@ -71,19 +75,49 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
         username = profile?['username'] as String?;
       } catch (_) {}
     }
-
+final dailyCompleted = await _dailyService.isCompletedToday();
+DailyPuzzle? todaysPuzzle;
+try {
+  todaysPuzzle = await _dailyService.loadTodaysPuzzle();
+} catch (e, st) {
+  debugPrint('Daily puzzle load failed: \$e\n\$st');
+}
     if (mounted) {
       setState(() {
         _levels = levels;
         _progress = progress;
         _xp = xp;
         _username = username;
+        _dailyCompleted = dailyCompleted;
+        _todaysPuzzle = todaysPuzzle;
         _loading = false;
       });
       _music.playHome();
     }
   }
-
+void _openDailyChallenge() {
+  if (_todaysPuzzle == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not load today\'s puzzle. Please restart the app.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    return;
+  }
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => DailyGameScreen(
+        puzzle: _todaysPuzzle!,
+        onCompleted: () async {
+          await _dailyService.markCompleted();
+          if (mounted) setState(() => _dailyCompleted = true);
+        },
+      ),
+    ),
+  );
+}
   void _onProgressUpdated(Map<String, PuzzleProgress> updated, int xpGained) {
     setState(() {
       _progress = updated;
@@ -162,6 +196,9 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
               context,
               MaterialPageRoute(builder: (_) => const ReviewSqlScreen()),
             ),
+              dailyCompleted: _dailyCompleted,        // ← new
+  onDailyTap: _openDailyChallenge,        // ← new
+
           ),
           ProfileScreen(
             progress: _progress,
@@ -352,7 +389,6 @@ class _LevelPickerCard extends StatelessWidget {
     );
   }
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Custom bottom nav bar
 // ─────────────────────────────────────────────────────────────────────────────
@@ -392,41 +428,73 @@ class _CSDBottomNav extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _NavItem(icon: Icons.home_rounded, label: 'Home',
-                      active: currentIndex == 0, onTap: () => onTap(0)),
-                  _NavItem(icon: Icons.volunteer_activism_rounded, label: 'Support',
-                      active: currentIndex == 4, onTap: () => onTap(4)),
+                  _NavItem(
+                    assetPath: 'assets/images/home_icon.png',
+                    label: 'Home',
+                    active: currentIndex == 0,
+                    onTap: () => onTap(0),
+                  ),
+                  _NavItem(
+                    assetPath: 'assets/images/support_icon.png',
+                    label: 'Support',
+                    active: currentIndex == 4,
+                    onTap: () => onTap(4),
+                  ),
                   const SizedBox(width: 72),
-                  _NavItem(icon: Icons.person_rounded, label: 'Profile',
-                      active: currentIndex == 2, onTap: () => onTap(2)),
-                  _NavItem(icon: Icons.settings_rounded, label: 'Settings',
-                      active: currentIndex == 3, onTap: () => onTap(3)),
+                  _NavItem(
+                    assetPath: 'assets/images/profile_icon.png',
+                    label: 'Profile',
+                    active: currentIndex == 2,
+                    onTap: () => onTap(2),
+                  ),
+                  _NavItem(
+                    assetPath: 'assets/images/settings_icon.png',
+                    label: 'Settings',
+                    active: currentIndex == 3,
+                    onTap: () => onTap(3),
+                  ),
                 ],
               ),
             ),
           ),
-          Positioned(
-            top: -(_arcHeight + 4),
-            child: GestureDetector(
-              onTap: () => onTap(1),
-              child: Container(
-                width: 64, height: 64,
-                decoration: BoxDecoration(
-                  gradient: kButtonGradient,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(color: kPurpleMid.withOpacity(.55),
-                        blurRadius: 20, offset: const Offset(0, 6)),
-                    BoxShadow(color: kPurpleLight.withOpacity(.2),
-                        blurRadius: 8, spreadRadius: 2),
-                  ],
-                  border: Border.all(color: kPurpleLight.withOpacity(.3), width: 1.5),
-                ),
-                child: const Icon(Icons.fitness_center_rounded,
-                    color: Colors.white, size: 28),
-              ),
-            ),
+          // ── Center duel button ──
+// ── Center duel button ──
+Positioned(
+  top: -(_arcHeight + 4),
+  child: GestureDetector(
+    onTap: () => onTap(1),
+    child: Container(
+      width: 68, height: 68,          // slightly larger circle
+      decoration: BoxDecoration(
+        gradient: kButtonGradient,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: kPurpleMid.withOpacity(.55),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
+          BoxShadow(
+            color: kPurpleLight.withOpacity(.2),
+            blurRadius: 8,
+            spreadRadius: 2,
+          ),
+        ],
+        border: Border.all(
+          color: kPurpleLight.withOpacity(.3),
+          width: 1.5,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),   // icon breathes inside the circle
+        child: Image.asset(
+          'assets/images/duel_icon.png',
+          fit: BoxFit.contain,              // never clips, never overflows
+        ),
+      ),
+    ),
+  ),
+),
         ],
       ),
     );
@@ -439,7 +507,9 @@ class _NavBarPainter extends CustomPainter {
   final double bottomPadding;
 
   const _NavBarPainter({
-    required this.arcRadius, required this.arcHeight, required this.bottomPadding,
+    required this.arcRadius,
+    required this.arcHeight,
+    required this.bottomPadding,
   });
 
   @override
@@ -449,7 +519,8 @@ class _NavBarPainter extends CustomPainter {
 
     final paint = Paint()
       ..shader = const LinearGradient(
-        begin: Alignment.topLeft, end: Alignment.bottomRight,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
         colors: [Color(0xFF1E1838), Color(0xFF150F28)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
@@ -477,19 +548,21 @@ class _NavBarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _NavBarPainter old) =>
-      old.arcRadius != arcRadius || old.arcHeight != arcHeight ||
+      old.arcRadius != arcRadius ||
+      old.arcHeight != arcHeight ||
       old.bottomPadding != bottomPadding;
 }
-
 class _NavItem extends StatelessWidget {
-  final IconData icon;
+  final String assetPath;
   final String label;
   final bool active;
   final VoidCallback onTap;
 
   const _NavItem({
-    required this.icon, required this.label,
-    required this.active, required this.onTap,
+    required this.assetPath,
+    required this.label,
+    required this.active,
+    required this.onTap,
   });
 
   @override
@@ -498,7 +571,7 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 64,
+        width: 68,                          // wider tap target
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -506,15 +579,27 @@ class _NavItem extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
-              width: 36, height: 36,
+              width: 52, height: 52,        // ← bigger icon area
               decoration: BoxDecoration(
-                color: active ? kPurpleMid.withOpacity(.18) : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
+                color: active ? kPurpleMid.withOpacity(.15) : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: active
+                    ? Border.all(color: kPurpleLight.withOpacity(.25), width: 1)
+                    : null,
               ),
-              child: Icon(icon, size: 22,
-                  color: active ? kPurpleLight : Colors.white38),
+              child: Padding(
+                padding: const EdgeInsets.all(4),   // minimal padding, more icon
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: active ? 1.0 : 0.5,
+                  child: Image.asset(
+                    assetPath,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: TextStyle(

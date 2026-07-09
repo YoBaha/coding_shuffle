@@ -130,26 +130,14 @@ Future<void> _showAd() async {
                 child: Column(
                   children: [
                     // Crown icon with gold glow
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        gradient: kGoldGradient,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFFB800).withOpacity(.35),
-                            blurRadius: 24,
-                            spreadRadius: 4,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.workspace_premium_rounded,
-                        color: Colors.black,
-                        size: 36,
-                      ),
-                    ),
+                    SizedBox(
+  width: 100,
+  height: 100,
+  child: Image.asset(
+    'assets/images/support_icon.png',
+    fit: BoxFit.contain,
+  ),
+),
                     const SizedBox(height: 16),
                     const Text(
                       'Support the project',
