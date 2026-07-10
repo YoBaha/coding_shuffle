@@ -1,6 +1,9 @@
+// lib/services/daily_challenge_service.dart
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 /// A single daily-challenge puzzle (mirrors the JSON structure).
 class DailyPuzzle {
@@ -35,6 +38,9 @@ class DailyPuzzle {
 
 class DailyChallengeService {
   static const _completedKey = 'daily_challenge_completed_date';
+  static const _lastLoginCheckKey = 'last_login_check_date';
+  
+  final _sb = Supabase.instance.client;
 
   // ── Load today's puzzle ──────────────────────────────────────────────────
 
@@ -73,6 +79,37 @@ class DailyChallengeService {
   Future<bool> isCompletedToday() async {
     final stored = await loadCompletedDate();
     return stored == _todayString();
+  }
+
+  // ── Login streak tracking ──────────────────────────────────────────────────
+
+  /// Update login streak in Supabase (only if logged in)
+  Future<void> updateLoginStreak() async {
+    final user = _sb.auth.currentUser;
+    if (user == null) return;
+    
+    try {
+      await _sb.rpc('update_login_streak', params: {'p_uid': user.id});
+    } catch (e) {
+      // Silent fail — we'll retry next time
+      print('Failed to update login streak: $e');
+    }
+  }
+
+  /// Check and update login streak if today hasn't been recorded yet
+  /// Call this when the app starts or user logs in
+  Future<void> checkAndUpdateLoginStreak() async {
+    final user = _sb.auth.currentUser;
+    if (user == null) return;
+    
+    final prefs = await SharedPreferences.getInstance();
+    final lastCheck = prefs.getString(_lastLoginCheckKey);
+    final today = _todayString();
+    
+    if (lastCheck != today) {
+      await updateLoginStreak();
+      await prefs.setString(_lastLoginCheckKey, today);
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

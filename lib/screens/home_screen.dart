@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:code_shuffle/screens/survival_difficulty_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
@@ -86,20 +87,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     showSyncModal(context, progress: widget.progress, xp: widget.xp, onSynced: widget.onSynced);
   }
 
-  void _onSurvivalTap() {
-    if (widget.onSurvivalTap != null) {
-      widget.onSurvivalTap!();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Survival mode is coming soon 👀'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.grey.shade900,
-        ),
-      );
-    }
-  }
 
+
+void _onSurvivalTap() {
+  if (widget.onSurvivalTap != null) {
+    widget.onSurvivalTap!();
+  } else {
+    // Navigate to Survival difficulty screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SurvivalDifficultyScreen(),
+      ),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Stack(

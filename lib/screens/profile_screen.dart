@@ -1,9 +1,11 @@
+// lib/screens/profile_screen.dart
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
 import 'package:code_shuffle/modals/modals.dart';
 import 'package:code_shuffle/services/progress_service.dart';
+import 'package:code_shuffle/services/survival_service.dart';
 import 'sync_modal.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -31,6 +33,10 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen>
     with TickerProviderStateMixin {
   final _sb = Supabase.instance.client;
+  final _survivalService = SurvivalService();
+  
+  Map<SurvivalDifficulty, SurvivalBest?> _survivalBests = {};
+  bool _loadingSurvival = true;
 
   late AnimationController _entranceCtrl;
   late AnimationController _pulseCtrl;
@@ -75,6 +81,9 @@ class _ProfileScreenState extends State<ProfileScreen>
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) _xpBarCtrl.forward();
     });
+    
+    // Load survival stats
+    _loadSurvivalBests();
   }
 
   @override
@@ -83,6 +92,21 @@ class _ProfileScreenState extends State<ProfileScreen>
     _pulseCtrl.dispose();
     _xpBarCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSurvivalBests() async {
+    setState(() => _loadingSurvival = true);
+    final result = <SurvivalDifficulty, SurvivalBest?>{};
+    for (final diff in SurvivalDifficulty.values) {
+      final best = await _survivalService.loadBest(diff);
+      result[diff] = best;
+    }
+    if (mounted) {
+      setState(() {
+        _survivalBests = result;
+        _loadingSurvival = false;
+      });
+    }
   }
 
   // ── Stats ──────────────────────────────────────────────────────────────────
@@ -173,6 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   SliverToBoxAdapter(child: _buildTopBar()),
                   SliverToBoxAdapter(child: _buildHeroSection()),
                   SliverToBoxAdapter(child: _buildStatsSection()),
+                  SliverToBoxAdapter(child: _buildSurvivalStatsSection()),
                   SliverToBoxAdapter(child: _buildLevelSection()),
                   SliverToBoxAdapter(
                     child: Padding(
@@ -507,6 +532,137 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
+  // ── Survival Stats section ──────────────────────────────────────────────────
+
+  Widget _buildSurvivalStatsSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionLabel('SURVIVAL BEST SCORES'),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: kBgCard,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(.05)),
+            ),
+            child: _loadingSurvival
+                ? const Center(
+                    child: SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : Column(
+                    children: SurvivalDifficulty.values.map((diff) {
+                      final best = _survivalBests[diff];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 60,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _diffColor(diff).withOpacity(.2),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                diff.label,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: _diffColor(diff),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: best != null
+                                  ? Row(
+                                      children: [
+                                        Text(
+                                          '${best.score} pts',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(.05),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            '🔥 ${best.streak} streak',
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.white38,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(.05),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            '${best.solved} solved',
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.white38,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const Text(
+                                      '—',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white24,
+                                      ),
+                                    ),
+                            ),
+                            if (best != null)
+                              Text(
+                                _formatTime(best.timeSec),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white38,
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _diffColor(SurvivalDifficulty diff) {
+    switch (diff) {
+      case SurvivalDifficulty.easy:
+        return const Color(0xFF3B82F6);
+      case SurvivalDifficulty.medium:
+        return const Color(0xFF22C55E);
+      case SurvivalDifficulty.hard:
+        return const Color(0xFFEF4444);
+    }
+  }
+
   // ── Level breakdown ────────────────────────────────────────────────────────
 
   Widget _buildLevelSection() {
@@ -818,7 +974,7 @@ class _StatPanel extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,  // ← key fix: don't stretch to fill
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [

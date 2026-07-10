@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:code_shuffle/screens/review_sql_screen.dart';
+import 'package:code_shuffle/screens/survival_difficulty_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -198,8 +199,17 @@ void _openDailyChallenge() {
             ),
               dailyCompleted: _dailyCompleted,        // ← new
   onDailyTap: _openDailyChallenge,        // ← new
+onSurvivalTap: () {
+    // Navigate to Survival difficulty picker
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SurvivalDifficultyScreen(),
+      ),
+    );
+  },
+),
 
-          ),
           ProfileScreen(
             progress: _progress,
             xp: _xp,
