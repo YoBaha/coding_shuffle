@@ -1,0 +1,2356 @@
+{
+  "version": "1.0.0",
+  "difficulty": "hard",
+  "language": "SQL",
+  "puzzles": [
+    {
+      "id": "s_h_001",
+      "title": "Customers with Multiple Orders",
+      "tokens": [
+        "SELECT", "customer_id,", "COUNT(*)", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "solution": [
+        "SELECT", "customer_id,", "COUNT(*)", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_aggregate", "label": "Select Customer and Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "group_customers", "label": "Group by Customer", "range": [5, 6], "complexity": 2},
+        {"id": "filter_groups", "label": "Filter for Multiple Orders", "range": [7, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_002",
+      "title": "Products Never Ordered",
+      "tokens": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "LEFT JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "WHERE", "oi.product_id", "IS", "NULL"
+      ],
+      "solution": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "LEFT JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "WHERE", "oi.product_id", "IS", "NULL"
+      ],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Fields", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "left_join_items", "label": "Left Join Order Items", "range": [6, 12], "complexity": 3},
+        {"id": "filter_no_orders", "label": "Find Products with No Orders", "range": [13, 16], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_003",
+      "title": "Employees with Above Average Salary",
+      "tokens": [
+        "SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "(", "SELECT", "AVG(salary)", "FROM", "employees", ")"
+      ],
+      "solution": [
+        "SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "(", "SELECT", "AVG(salary)", "FROM", "employees", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Fields", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "compare_to_avg", "label": "Compare to Average", "range": [5, 8], "complexity": 2},
+        {"id": "calculate_avg", "label": "Calculate Department Average", "range": [9, 13], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_004",
+      "title": "Monthly Sales Trend",
+      "tokens": [
+        "WITH", "monthly_sales", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", ")", "SELECT", "month,", "total_sales", "FROM", "monthly_sales", "ORDER BY", "month"
+      ],
+      "solution": [
+        "WITH", "monthly_sales", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", ")", "SELECT", "month,", "total_sales", "FROM", "monthly_sales", "ORDER BY", "month"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Monthly Totals", "range": [4, 16], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [17, 21], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Month", "range": [22, 23], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_005",
+      "title": "Products with Price Above Category Average",
+      "tokens": [
+        "SELECT", "p.name,", "p.price,", "p.category", "FROM", "products", "p", "WHERE", "p.price", ">", "(", "SELECT", "AVG(p2.price)", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p.category", ")"
+      ],
+      "solution": [
+        "SELECT", "p.name,", "p.price,", "p.category", "FROM", "products", "p", "WHERE", "p.price", ">", "(", "SELECT", "AVG(p2.price)", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p.category", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [4, 6], "complexity": 2},
+        {"id": "compare_to_avg", "label": "Compare to Category Average", "range": [7, 10], "complexity": 3},
+        {"id": "calculate_cat_avg", "label": "Calculate Category Average", "range": [11, 20], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_006",
+      "title": "Customers with Orders in Last 30 Days",
+      "tokens": [
+        "SELECT", "DISTINCT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'"
+      ],
+      "solution": [
+        "SELECT", "DISTINCT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_unique", "label": "Select Unique Customers", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_dates", "label": "Filter by Date Range", "range": [5, 11], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_007",
+      "title": "Top 5 Products by Revenue",
+      "tokens": [
+        "SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name", "ORDER BY", "revenue", "DESC", "LIMIT", "5"
+      ],
+      "solution": [
+        "SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name", "ORDER BY", "revenue", "DESC", "LIMIT", "5"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product and Revenue", "range": [0, 6], "complexity": 2},
+        {"id": "join_order_items", "label": "Join Order Items", "range": [7, 16], "complexity": 3},
+        {"id": "group_products", "label": "Group by Product", "range": [17, 18], "complexity": 2},
+        {"id": "sort_and_limit", "label": "Sort by Revenue and Limit", "range": [19, 23], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_008",
+      "title": "Employees with Salaries Above Department Average",
+      "tokens": [
+        "SELECT", "e1.name,", "e1.salary", "FROM", "employees", "e1", "WHERE", "e1.salary", ">", "(", "SELECT", "AVG(e2.salary)", "FROM", "employees", "e2", "WHERE", "e2.department", "=", "e1.department", ")"
+      ],
+      "solution": [
+        "SELECT", "e1.name,", "e1.salary", "FROM", "employees", "e1", "WHERE", "e1.salary", ">", "(", "SELECT", "AVG(e2.salary)", "FROM", "employees", "e2", "WHERE", "e2.department", "=", "e1.department", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Employees", "range": [3, 5], "complexity": 2},
+        {"id": "compare_to_avg", "label": "Compare to Department Average", "range": [6, 9], "complexity": 3},
+        {"id": "calculate_dept_avg", "label": "Calculate Department Average", "range": [10, 19], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_009",
+      "title": "Running Total of Sales by Date",
+      "tokens": [
+        "SELECT", "sale_date,", "amount,", "SUM(amount)", "OVER", "(ORDER BY", "sale_date", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "CURRENT ROW)", "AS", "running_total", "FROM", "sales"
+      ],
+      "solution": [
+        "SELECT", "sale_date,", "amount,", "SUM(amount)", "OVER", "(ORDER BY", "sale_date", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "CURRENT ROW)", "AS", "running_total", "FROM", "sales"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Sale Info", "range": [0, 2], "complexity": 2},
+        {"id": "running_sum", "label": "Calculate Running Sum", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_date", "label": "Order by Date", "range": [5, 6], "complexity": 2},
+        {"id": "frame_spec", "label": "Define Running Window", "range": [7, 10], "complexity": 3},
+        {"id": "label_result", "label": "Label as Running Total", "range": [11, 12], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [13, 14], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_010",
+      "title": "Find Duplicate Emails",
+      "tokens": [
+        "SELECT", "email,", "COUNT(*)", "FROM", "users", "GROUP BY", "email", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "solution": [
+        "SELECT", "email,", "COUNT(*)", "FROM", "users", "GROUP BY", "email", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Email and Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "group_by_email", "label": "Group by Email", "range": [5, 6], "complexity": 2},
+        {"id": "filter_duplicates", "label": "Find Duplicate Emails", "range": [7, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_011",
+      "title": "Products with Low Stock",
+      "tokens": [
+        "SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<", "(", "SELECT", "AVG(stock)", "FROM", "products", ")"
+      ],
+      "solution": [
+        "SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<", "(", "SELECT", "AVG(stock)", "FROM", "products", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "compare_to_avg", "label": "Compare to Average Stock", "range": [5, 8], "complexity": 2},
+        {"id": "calculate_avg", "label": "Calculate Average Stock", "range": [9, 13], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_012",
+      "title": "Orders with Multiple Items",
+      "tokens": [
+        "SELECT", "order_id,", "COUNT(*)", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "solution": [
+        "SELECT", "order_id,", "COUNT(*)", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_aggregate", "label": "Select Order and Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "group_orders", "label": "Group by Order", "range": [5, 6], "complexity": 2},
+        {"id": "filter_multi_items", "label": "Find Orders with Multiple Items", "range": [7, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_013",
+      "title": "Revenue by Product Category",
+      "tokens": [
+        "SELECT", "p.category,", "SUM(oi.quantity", "*", "oi.price)", "AS", "total_revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category", "ORDER BY", "total_revenue", "DESC"
+      ],
+      "solution": [
+        "SELECT", "p.category,", "SUM(oi.quantity", "*", "oi.price)", "AS", "total_revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category", "ORDER BY", "total_revenue", "DESC"
+      ],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Category and Revenue", "range": [0, 6], "complexity": 2},
+        {"id": "join_order_items", "label": "Join Order Items", "range": [7, 16], "complexity": 3},
+        {"id": "group_by_category", "label": "Group by Category", "range": [17, 18], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Revenue", "range": [19, 21], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_014",
+      "title": "Monthly Active Users",
+      "tokens": [
+        "SELECT", "DATE_TRUNC('month',", "login_date)", "AS", "month,", "COUNT(DISTINCT", "user_id)", "AS", "active_users", "FROM", "user_logins", "GROUP BY", "DATE_TRUNC('month',", "login_date)", "ORDER BY", "month"
+      ],
+      "solution": [
+        "SELECT", "DATE_TRUNC('month',", "login_date)", "AS", "month,", "COUNT(DISTINCT", "user_id)", "AS", "active_users", "FROM", "user_logins", "GROUP BY", "DATE_TRUNC('month',", "login_date)", "ORDER BY", "month"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "Group by Month", "range": [0, 4], "complexity": 2},
+        {"id": "count_distinct", "label": "Count Distinct Users", "range": [5, 8], "complexity": 3},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1},
+        {"id": "group_results", "label": "Finish Grouping", "range": [11, 13], "complexity": 3},
+        {"id": "sort_results", "label": "Sort by Month", "range": [14, 15], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_015",
+      "title": "Employees with No Direct Reports",
+      "tokens": [
+        "SELECT", "e1.name", "FROM", "employees", "e1", "LEFT JOIN", "employees", "e2", "ON", "e1.id", "=", "e2.manager_id", "WHERE", "e2.id", "IS", "NULL"
+      ],
+      "solution": [
+        "SELECT", "e1.name", "FROM", "employees", "e1", "LEFT JOIN", "employees", "e2", "ON", "e1.id", "=", "e2.manager_id", "WHERE", "e2.id", "IS", "NULL"
+      ],
+      "category": "Self Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Name", "range": [0, 1], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Employees", "range": [2, 4], "complexity": 2},
+        {"id": "self_join", "label": "Self Join on Manager", "range": [5, 11], "complexity": 3},
+        {"id": "filter_no_reports", "label": "Find Employees with No Reports", "range": [12, 15], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_016",
+      "title": "Customer Lifetime Value",
+      "tokens": [
+        "SELECT", "c.id,", "c.name,", "SUM(o.total)", "AS", "ltv", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.id,", "c.name", "ORDER BY", "ltv", "DESC"
+      ],
+      "solution": [
+        "SELECT", "c.id,", "c.name,", "SUM(o.total)", "AS", "ltv", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.id,", "c.name", "ORDER BY", "ltv", "DESC"
+      ],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Customer Info and Value", "range": [0, 5], "complexity": 2},
+        {"id": "join_orders", "label": "Join Orders", "range": [6, 15], "complexity": 3},
+        {"id": "group_customers", "label": "Group by Customer", "range": [16, 18], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Lifetime Value", "range": [19, 21], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_017",
+      "title": "Customers with Orders in Both 2023 and 2024",
+      "tokens": [
+        "SELECT", "customer_id", "FROM", "orders", "WHERE", "EXTRACT(YEAR", "FROM", "order_date)", "=", "2023", "INTERSECT", "SELECT", "customer_id", "FROM", "orders", "WHERE", "EXTRACT(YEAR", "FROM", "order_date)", "=", "2024"
+      ],
+      "solution": [
+        "SELECT", "customer_id", "FROM", "orders", "WHERE", "EXTRACT(YEAR", "FROM", "order_date)", "=", "2023", "INTERSECT", "SELECT", "customer_id", "FROM", "orders", "WHERE", "EXTRACT(YEAR", "FROM", "order_date)", "=", "2024"
+      ],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "select_2023", "label": "Get 2023 Customers", "range": [0, 9], "complexity": 2},
+        {"id": "intersect", "label": "Find Common Customers", "range": [10, 10], "complexity": 3},
+        {"id": "select_2024", "label": "Get 2024 Customers", "range": [11, 20], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_018",
+      "title": "Products Ordered by Active Customers Only",
+      "tokens": [
+        "SELECT", "DISTINCT", "p.name", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "JOIN", "orders", "o", "ON", "oi.order_id", "=", "o.id", "JOIN", "customers", "c", "ON", "o.customer_id", "=", "c.id", "WHERE", "c.status", "=", "'active'"
+      ],
+      "solution": [
+        "SELECT", "DISTINCT", "p.name", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "JOIN", "orders", "o", "ON", "oi.order_id", "=", "o.id", "JOIN", "customers", "c", "ON", "o.customer_id", "=", "c.id", "WHERE", "c.status", "=", "'active'"
+      ],
+      "category": "Multiple Joins",
+      "chunks": [
+        {"id": "choose_distinct", "label": "Select Distinct Products", "range": [0, 2], "complexity": 2},
+        {"id": "join_order_items", "label": "Join Order Items", "range": [3, 12], "complexity": 3},
+        {"id": "join_orders", "label": "Join Orders", "range": [13, 19], "complexity": 3},
+        {"id": "join_customers", "label": "Join Customers", "range": [20, 26], "complexity": 3},
+        {"id": "filter_active", "label": "Filter Active Customers", "range": [27, 30], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_019",
+      "title": "Ranking Employees by Salary",
+      "tokens": [
+        "SELECT", "name,", "salary,", "RANK()", "OVER", "(ORDER BY", "salary", "DESC)", "AS", "rank", "FROM", "employees"
+      ],
+      "solution": [
+        "SELECT", "name,", "salary,", "RANK()", "OVER", "(ORDER BY", "salary", "DESC)", "AS", "rank", "FROM", "employees"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 2], "complexity": 2},
+        {"id": "rank_salary", "label": "Rank by Salary", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_salary", "label": "Order by Salary", "range": [5, 7], "complexity": 2},
+        {"id": "label_rank", "label": "Label as Rank", "range": [8, 10], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [11, 12], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_020",
+      "title": "Percentage of Total Sales by Product",
+      "tokens": [
+        "SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "product_sales,", "SUM(oi.quantity", "*", "oi.price)", "*", "100.0", "/", "SUM(SUM(oi.quantity", "*", "oi.price))", "OVER", "()", "AS", "percentage", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"
+      ],
+      "solution": [
+        "SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "product_sales,", "SUM(oi.quantity", "*", "oi.price)", "*", "100.0", "/", "SUM(SUM(oi.quantity", "*", "oi.price))", "OVER", "()", "AS", "percentage", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product and Sales", "range": [0, 6], "complexity": 2},
+        {"id": "join_items", "label": "Join Order Items", "range": [18, 27], "complexity": 3},
+        {"id": "calc_percentage", "label": "Calculate Percentage of Total", "range": [7, 17], "complexity": 4},
+        {"id": "group_product", "label": "Group by Product", "range": [28, 29], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_021",
+      "title": "Customers Who Bought Both Products A and B",
+      "tokens": [
+        "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "1", "INTERSECT", "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "2"
+      ],
+      "solution": [
+        "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "1", "INTERSECT", "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "2"
+      ],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "buyers_product_a", "label": "Buyers of Product A", "range": [0, 15], "complexity": 2},
+        {"id": "intersect", "label": "Find Common Buyers", "range": [16, 16], "complexity": 3},
+        {"id": "buyers_product_b", "label": "Buyers of Product B", "range": [17, 32], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_022",
+      "title": "Employees with Salaries Above Company Average",
+      "tokens": [
+        "SELECT", "name,", "salary,", "department", "FROM", "employees", "WHERE", "salary", ">", "(", "SELECT", "AVG(salary)", "FROM", "employees", ")"
+      ],
+      "solution": [
+        "SELECT", "name,", "salary,", "department", "FROM", "employees", "WHERE", "salary", ">", "(", "SELECT", "AVG(salary)", "FROM", "employees", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "compare_to_avg", "label": "Compare to Company Average", "range": [6, 9], "complexity": 2},
+        {"id": "calculate_avg", "label": "Calculate Company Average", "range": [10, 14], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_023",
+      "title": "Quarterly Sales Summary",
+      "tokens": [
+        "SELECT", "EXTRACT(QUARTER", "FROM", "sale_date)", "AS", "quarter,", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(QUARTER", "FROM", "sale_date),", "EXTRACT(YEAR", "FROM", "sale_date)", "ORDER BY", "year,", "quarter"
+      ],
+      "solution": [
+        "SELECT", "EXTRACT(QUARTER", "FROM", "sale_date)", "AS", "quarter,", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(QUARTER", "FROM", "sale_date),", "EXTRACT(YEAR", "FROM", "sale_date)", "ORDER BY", "year,", "quarter"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_quarter", "label": "Extract Quarter", "range": [0, 5], "complexity": 2},
+        {"id": "choose_year", "label": "Extract Year", "range": [6, 10], "complexity": 2},
+        {"id": "sum_sales", "label": "Sum Sales", "range": [11, 13], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [14, 15], "complexity": 1},
+        {"id": "group_results", "label": "Group by Quarter and Year", "range": [16, 22], "complexity": 3},
+        {"id": "sort_results", "label": "Sort by Year and Quarter", "range": [23, 25], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_024",
+      "title": "Customers with No Orders in 2024",
+      "tokens": [
+        "SELECT", "c.id,", "c.name", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.customer_id", "=", "c.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "2024", ")"
+      ],
+      "solution": [
+        "SELECT", "c.id,", "c.name", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.customer_id", "=", "c.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "2024", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Customer Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [3, 5], "complexity": 2},
+        {"id": "not_exists", "label": "Check for No Orders", "range": [6, 9], "complexity": 3},
+        {"id": "subquery_orders", "label": "Build Order Lookup", "range": [10, 25], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_025",
+      "title": "Employees with Salaries in Top 10%",
+      "tokens": [
+        "SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">=", "(", "SELECT", "PERCENTILE_CONT(0.9)", "WITHIN", "GROUP", "(ORDER BY", "salary)", "FROM", "employees", ")"
+      ],
+      "solution": [
+        "SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">=", "(", "SELECT", "PERCENTILE_CONT(0.9)", "WITHIN", "GROUP", "(ORDER BY", "salary)", "FROM", "employees", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "compare_to_threshold", "label": "Compare to 90th Percentile", "range": [5, 8], "complexity": 3},
+        {"id": "calculate_percentile", "label": "Calculate 90th Percentile", "range": [9, 17], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_026",
+      "title": "Orders Shipped Late",
+      "tokens": [
+        "SELECT", "id,", "order_date,", "shipped_date", "FROM", "orders", "WHERE", "shipped_date", ">", "order_date", "+", "INTERVAL", "'5 days'"
+      ],
+      "solution": [
+        "SELECT", "id,", "order_date,", "shipped_date", "FROM", "orders", "WHERE", "shipped_date", ">", "order_date", "+", "INTERVAL", "'5 days'"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Order Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_late", "label": "Filter Late Shipments", "range": [6, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_027",
+      "title": "Products Ordered by All Customers",
+      "tokens": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "WHERE", "NOT", "EXISTS", "(", "SELECT", "c.id", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "o.customer_id", "=", "c.id", "AND", "oi.product_id", "=", "p.id", ")", ")"
+      ],
+      "solution": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "WHERE", "NOT", "EXISTS", "(", "SELECT", "c.id", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "o.customer_id", "=", "c.id", "AND", "oi.product_id", "=", "p.id", ")", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "outer_not_exists", "label": "Check for Missing Customers", "range": [6, 9], "complexity": 3},
+        {"id": "customer_check", "label": "Look for Customers", "range": [10, 15], "complexity": 3},
+        {"id": "inner_not_exists", "label": "Check Customer Orders", "range": [16, 19], "complexity": 4},
+        {"id": "order_check", "label": "Look for Product in Orders", "range": [20, 36], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_028",
+      "title": "Year-over-Year Sales Growth",
+      "tokens": [
+        "WITH", "yearly_sales", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "year,", "total_sales,", "LAG(total_sales)", "OVER", "(ORDER BY", "year)", "AS", "prev_year_sales", "FROM", "yearly_sales"
+      ],
+      "solution": [
+        "WITH", "yearly_sales", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "year,", "total_sales,", "LAG(total_sales)", "OVER", "(ORDER BY", "year)", "AS", "prev_year_sales", "FROM", "yearly_sales"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Yearly Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_year", "label": "Calculate Yearly Sales", "range": [4, 18], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [19, 23], "complexity": 2},
+        {"id": "previous_year", "label": "Get Previous Year Sales", "range": [24, 28], "complexity": 4},
+        {"id": "label_prev", "label": "Label Previous Year Sales", "range": [29, 29], "complexity": 1},
+        {"id": "finish_query", "label": "Finish Query", "range": [30, 31], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_029",
+      "title": "Employee Hierarchy Depth",
+      "tokens": [
+        "WITH", "RECURSIVE", "emp_hierarchy", "AS", "(", "SELECT", "id,", "name,", "manager_id,", "0", "AS", "level", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL", "UNION", "ALL", "SELECT", "e.id,", "e.name,", "e.manager_id,", "h.level", "+", "1", "FROM", "employees", "e", "JOIN", "emp_hierarchy", "h", "ON", "e.manager_id", "=", "h.id", ")", "SELECT", "name,", "level", "FROM", "emp_hierarchy", "ORDER BY", "level,", "name"
+      ],
+      "solution": [
+        "WITH", "RECURSIVE", "emp_hierarchy", "AS", "(", "SELECT", "id,", "name,", "manager_id,", "0", "AS", "level", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL", "UNION", "ALL", "SELECT", "e.id,", "e.name,", "e.manager_id,", "h.level", "+", "1", "FROM", "employees", "e", "JOIN", "emp_hierarchy", "h", "ON", "e.manager_id", "=", "h.id", ")", "SELECT", "name,", "level", "FROM", "emp_hierarchy", "ORDER BY", "level,", "name"
+      ],
+      "category": "Recursive CTEs",
+      "chunks": [
+        {"id": "recursive_cte", "label": "Define Recursive CTE", "range": [0, 3], "complexity": 3},
+        {"id": "anchor_members", "label": "Select Top-Level Managers", "range": [4, 17], "complexity": 3},
+        {"id": "recursive_step", "label": "Join Employees at Each Level", "range": [18, 35], "complexity": 4},
+        {"id": "query_cte", "label": "Query the Hierarchy", "range": [36, 40], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Level and Name", "range": [41, 43], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_030",
+      "title": "Product Categories with Multiple Subcategories",
+      "tokens": [
+        "SELECT", "parent_category,", "COUNT(*)", "FROM", "categories", "WHERE", "parent_category", "IS", "NOT", "NULL", "GROUP BY", "parent_category", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "solution": [
+        "SELECT", "parent_category,", "COUNT(*)", "FROM", "categories", "WHERE", "parent_category", "IS", "NOT", "NULL", "GROUP BY", "parent_category", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Parent Category and Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_null", "label": "Exclude Top-Level Categories", "range": [5, 9], "complexity": 2},
+        {"id": "group_and_filter", "label": "Group and Find Multiples", "range": [10, 15], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_031",
+      "title": "Users with Session Count Above Average",
+      "tokens": [
+        "SELECT", "user_id,", "COUNT(*)", "AS", "session_count", "FROM", "sessions", "GROUP BY", "user_id", "HAVING", "COUNT(*)", ">", "(", "SELECT", "AVG(session_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "session_count", "FROM", "sessions", "GROUP BY", "user_id", ")", "sub", ")"
+      ],
+      "solution": [
+        "SELECT", "user_id,", "COUNT(*)", "AS", "session_count", "FROM", "sessions", "GROUP BY", "user_id", "HAVING", "COUNT(*)", ">", "(", "SELECT", "AVG(session_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "session_count", "FROM", "sessions", "GROUP BY", "user_id", ")", "sub", ")"
+      ],
+      "category": "Nested Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select User and Session Count", "range": [0, 4], "complexity": 2},
+        {"id": "group_users", "label": "Group by User", "range": [5, 8], "complexity": 2},
+        {"id": "filter_above_avg", "label": "Filter Above Average", "range": [9, 12], "complexity": 3},
+        {"id": "avg_subquery", "label": "Calculate Average Session Count", "range": [13, 27], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_032",
+      "title": "Orders with Total Above Customer Average",
+      "tokens": [
+        "SELECT", "o.id,", "o.total", "FROM", "orders", "o", "WHERE", "o.total", ">", "(", "SELECT", "AVG(o2.total)", "FROM", "orders", "o2", "WHERE", "o2.customer_id", "=", "o.customer_id", ")"
+      ],
+      "solution": [
+        "SELECT", "o.id,", "o.total", "FROM", "orders", "o", "WHERE", "o.total", ">", "(", "SELECT", "AVG(o2.total)", "FROM", "orders", "o2", "WHERE", "o2.customer_id", "=", "o.customer_id", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Order Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Orders", "range": [3, 5], "complexity": 2},
+        {"id": "compare_to_avg", "label": "Compare to Customer Average", "range": [6, 9], "complexity": 3},
+        {"id": "calculate_customer_avg", "label": "Calculate Customer Average", "range": [10, 19], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_033",
+      "title": "Products with Multiple Reviews",
+      "tokens": [
+        "SELECT", "product_id,", "COUNT(*)", "FROM", "reviews", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "5"
+      ],
+      "solution": [
+        "SELECT", "product_id,", "COUNT(*)", "FROM", "reviews", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "5"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "group_products", "label": "Group by Product", "range": [5, 6], "complexity": 2},
+        {"id": "filter_many_reviews", "label": "Filter Products with Many Reviews", "range": [7, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_034",
+      "title": "Average Review Score by Product",
+      "tokens": [
+        "SELECT", "product_id,", "AVG(rating)", "AS", "avg_rating", "FROM", "reviews", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">=", "3", "ORDER BY", "avg_rating", "DESC"
+      ],
+      "solution": [
+        "SELECT", "product_id,", "AVG(rating)", "AS", "avg_rating", "FROM", "reviews", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">=", "3", "ORDER BY", "avg_rating", "DESC"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Average", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_products", "label": "Group by Product", "range": [7, 8], "complexity": 2},
+        {"id": "filter_min_reviews", "label": "Filter Products with Min Reviews", "range": [9, 12], "complexity": 3},
+        {"id": "sort_results", "label": "Sort by Average Rating", "range": [13, 15], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_035",
+      "title": "Employees with Multiple Role Changes",
+      "tokens": [
+        "SELECT", "employee_id,", "COUNT(*)", "FROM", "role_history", "GROUP BY", "employee_id", "HAVING", "COUNT(*)", ">", "2"
+      ],
+      "solution": [
+        "SELECT", "employee_id,", "COUNT(*)", "FROM", "role_history", "GROUP BY", "employee_id", "HAVING", "COUNT(*)", ">", "2"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_aggregate", "label": "Select Employee and Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "group_employees", "label": "Group by Employee", "range": [5, 6], "complexity": 2},
+        {"id": "filter_many_changes", "label": "Find Employees with Many Changes", "range": [7, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_036",
+      "title": "Products Never Reviewed",
+      "tokens": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "LEFT JOIN", "reviews", "r", "ON", "p.id", "=", "r.product_id", "WHERE", "r.id", "IS", "NULL"
+      ],
+      "solution": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "LEFT JOIN", "reviews", "r", "ON", "p.id", "=", "r.product_id", "WHERE", "r.id", "IS", "NULL"
+      ],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "left_join_reviews", "label": "Left Join Reviews", "range": [6, 12], "complexity": 3},
+        {"id": "filter_no_reviews", "label": "Find Products with No Reviews", "range": [13, 16], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_037",
+      "title": "Customers with Recent and Past Orders",
+      "tokens": [
+        "SELECT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'", "INTERSECT", "SELECT", "customer_id", "FROM", "orders", "WHERE", "order_date", "<", "CURRENT_DATE", "-", "INTERVAL", "'90 days'"
+      ],
+      "solution": [
+        "SELECT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'", "INTERSECT", "SELECT", "customer_id", "FROM", "orders", "WHERE", "order_date", "<", "CURRENT_DATE", "-", "INTERVAL", "'90 days'"
+      ],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "recent_orders", "label": "Recent Orders (30 Days)", "range": [0, 10], "complexity": 2},
+        {"id": "intersect", "label": "Find Common Customers", "range": [11, 11], "complexity": 3},
+        {"id": "past_orders", "label": "Past Orders (90 Days)", "range": [12, 22], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_038",
+      "title": "Products with Price Above All Products in Same Category",
+      "tokens": [
+        "SELECT", "p1.name,", "p1.price", "FROM", "products", "p1", "WHERE", "p1.price", ">", "ALL", "(", "SELECT", "p2.price", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", "AND", "p2.id", "!=", "p1.id", ")"
+      ],
+      "solution": [
+        "SELECT", "p1.name,", "p1.price", "FROM", "products", "p1", "WHERE", "p1.price", ">", "ALL", "(", "SELECT", "p2.price", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", "AND", "p2.id", "!=", "p1.id", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "compare_to_all", "label": "Compare to All in Category", "range": [6, 10], "complexity": 3},
+        {"id": "find_other_products", "label": "Find Other Products in Category", "range": [11, 24], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_039",
+      "title": "Monthly New User Signups",
+      "tokens": [
+        "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_users", "FROM", "users", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", "ORDER BY", "month"
+      ],
+      "solution": [
+        "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_users", "FROM", "users", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", "ORDER BY", "month"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "Group by Month", "range": [0, 4], "complexity": 2},
+        {"id": "count_users", "label": "Count Users", "range": [5, 7], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [8, 9], "complexity": 1},
+        {"id": "group_results", "label": "Finish Grouping", "range": [10, 12], "complexity": 3},
+        {"id": "sort_results", "label": "Sort by Month", "range": [13, 14], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_040",
+      "title": "Employees with Overlapping Projects",
+      "tokens": [
+        "SELECT", "e1.employee_id,", "e2.employee_id", "FROM", "project_assignments", "e1", "JOIN", "project_assignments", "e2", "ON", "e1.project_id", "=", "e2.project_id", "AND", "e1.employee_id", "<", "e2.employee_id"
+      ],
+      "solution": [
+        "SELECT", "e1.employee_id,", "e2.employee_id", "FROM", "project_assignments", "e1", "JOIN", "project_assignments", "e2", "ON", "e1.project_id", "=", "e2.project_id", "AND", "e1.employee_id", "<", "e2.employee_id"
+      ],
+      "category": "Self Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Employee Pairs", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Project Assignments", "range": [3, 5], "complexity": 2},
+        {"id": "join_assignment", "label": "Join Another Assignment", "range": [6, 9], "complexity": 3},
+        {"id": "on_conditions", "label": "Match Project and Distinct Employees", "range": [10, 16], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_041",
+      "title": "Products with Sales Growth",
+      "tokens": [
+        "WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total", "FROM", "sales", "GROUP BY", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "ps1.product_id,", "ps1.total", "AS", "current_year,", "ps2.total", "AS", "previous_year", "FROM", "product_sales", "ps1", "LEFT JOIN", "product_sales", "ps2", "ON", "ps1.product_id", "=", "ps2.product_id", "AND", "ps1.year", "=", "ps2.year", "+", "1", "WHERE", "ps2.total", "IS", "NOT", "NULL", "AND", "ps1.total", ">", "ps2.total"
+      ],
+      "solution": [
+        "WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total", "FROM", "sales", "GROUP BY", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "ps1.product_id,", "ps1.total", "AS", "current_year,", "ps2.total", "AS", "previous_year", "FROM", "product_sales", "ps1", "LEFT JOIN", "product_sales", "ps2", "ON", "ps1.product_id", "=", "ps2.product_id", "AND", "ps1.year", "=", "ps2.year", "+", "1", "WHERE", "ps2.total", "IS", "NOT", "NULL", "AND", "ps1.total", ">", "ps2.total"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Yearly Product Sales", "range": [4, 19], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [20, 28], "complexity": 2},
+        {"id": "self_join_cte", "label": "Join CTE for Previous Year", "range": [29, 44], "complexity": 4},
+        {"id": "filter_growth", "label": "Filter for Sales Growth", "range": [45, 52], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_042",
+      "title": "Customer Churn Risk",
+      "tokens": [
+        "SELECT", "customer_id,", "MAX(order_date)", "AS", "last_order_date", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "MAX(order_date)", "<", "CURRENT_DATE", "-", "INTERVAL", "'60 days'"
+      ],
+      "solution": [
+        "SELECT", "customer_id,", "MAX(order_date)", "AS", "last_order_date", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "MAX(order_date)", "<", "CURRENT_DATE", "-", "INTERVAL", "'60 days'"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer and Last Order", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_customers", "label": "Group by Customer", "range": [7, 8], "complexity": 2},
+        {"id": "filter_inactive", "label": "Find Inactive Customers", "range": [9, 15], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_043",
+      "title": "Employees Reporting to Same Manager",
+      "tokens": [
+        "SELECT", "e1.name,", "e2.name", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.manager_id", "=", "e2.manager_id", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.manager_id", "IS", "NOT", "NULL"
+      ],
+      "solution": [
+        "SELECT", "e1.name,", "e2.name", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.manager_id", "=", "e2.manager_id", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.manager_id", "IS", "NOT", "NULL"
+      ],
+      "category": "Self Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Employee Pairs", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Employees", "range": [3, 5], "complexity": 2},
+        {"id": "join_employees", "label": "Join Another Employee", "range": [6, 9], "complexity": 3},
+        {"id": "on_conditions", "label": "Match Manager and Distinct IDs", "range": [10, 16], "complexity": 3},
+        {"id": "filter_non_managers", "label": "Filter Out Managers", "range": [17, 21], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_044",
+      "title": "Products with Highest Sales Each Category",
+      "tokens": [
+        "WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "category,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "JOIN", "products", "ON", "order_items.product_id", "=", "products.id", "GROUP BY", "product_id,", "category", ")", "SELECT", "category,", "product_id,", "total_sold", "FROM", "product_sales", "WHERE", "(category,", "total_sold)", "IN", "(", "SELECT", "category,", "MAX(total_sold)", "FROM", "product_sales", "GROUP BY", "category", ")"
+      ],
+      "solution": [
+        "WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "category,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "JOIN", "products", "ON", "order_items.product_id", "=", "products.id", "GROUP BY", "product_id,", "category", ")", "SELECT", "category,", "product_id,", "total_sold", "FROM", "product_sales", "WHERE", "(category,", "total_sold)", "IN", "(", "SELECT", "category,", "MAX(total_sold)", "FROM", "product_sales", "GROUP BY", "category", ")"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Product Sales", "range": [4, 20], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [21, 25], "complexity": 2},
+        {"id": "filter_max", "label": "Find Max Sales per Category", "range": [26, 29], "complexity": 3},
+        {"id": "subquery_max", "label": "Subquery for Maximum", "range": [30, 37], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_045",
+      "title": "Users with Consecutive Logins",
+      "tokens": [
+        "WITH", "login_dates", "AS", "(", "SELECT", "user_id,", "DATE(login_time)", "AS", "login_date", "FROM", "user_logins", "GROUP BY", "user_id,", "DATE(login_time)", ")", "SELECT", "user_id,", "COUNT(*)", "AS", "consecutive_days", "FROM", "login_dates", "l1", "WHERE", "EXISTS", "(", "SELECT", "1", "FROM", "login_dates", "l2", "WHERE", "l2.user_id", "=", "l1.user_id", "AND", "l2.login_date", "=", "l1.login_date", "+", "INTERVAL", "'1 day'", ")", "GROUP BY", "user_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "solution": [
+        "WITH", "login_dates", "AS", "(", "SELECT", "user_id,", "DATE(login_time)", "AS", "login_date", "FROM", "user_logins", "GROUP BY", "user_id,", "DATE(login_time)", ")", "SELECT", "user_id,", "COUNT(*)", "AS", "consecutive_days", "FROM", "login_dates", "l1", "WHERE", "EXISTS", "(", "SELECT", "1", "FROM", "login_dates", "l2", "WHERE", "l2.user_id", "=", "l1.user_id", "AND", "l2.login_date", "=", "l1.login_date", "+", "INTERVAL", "'1 day'", ")", "GROUP BY", "user_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Login Dates CTE", "range": [0, 3], "complexity": 2},
+        {"id": "distinct_dates", "label": "Get Unique Login Dates", "range": [4, 13], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [14, 21], "complexity": 2},
+        {"id": "check_consecutive", "label": "Check for Next Day Login", "range": [22, 38], "complexity": 4},
+        {"id": "group_and_filter", "label": "Group and Filter with Consecutive Days", "range": [39, 45], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_046",
+      "title": "Revenue Contribution by Product",
+      "tokens": [
+        "SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "product_revenue,", "SUM(oi.quantity", "*", "oi.price)", "/", "SUM(SUM(oi.quantity", "*", "oi.price))", "OVER", "()", "*", "100", "AS", "percent_contribution", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"
+      ],
+      "solution": [
+        "SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "product_revenue,", "SUM(oi.quantity", "*", "oi.price)", "/", "SUM(SUM(oi.quantity", "*", "oi.price))", "OVER", "()", "*", "100", "AS", "percent_contribution", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Revenue", "range": [0, 6], "complexity": 2},
+        {"id": "join_items", "label": "Join Order Items", "range": [17, 26], "complexity": 3},
+        {"id": "calc_contribution", "label": "Calculate Percentage Contribution", "range": [7, 16], "complexity": 4},
+        {"id": "group_product", "label": "Group by Product", "range": [27, 28], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_047",
+      "title": "Orders That Included the Best-Selling Product",
+      "tokens": [
+        "WITH", "best_product", "AS", "(", "SELECT", "product_id", "FROM", "order_items", "GROUP BY", "product_id", "ORDER BY", "COUNT(*)", "DESC", "LIMIT", "1", ")", "SELECT", "DISTINCT", "order_id", "FROM", "order_items", "WHERE", "product_id", "IN", "(", "SELECT", "product_id", "FROM", "best_product", ")"
+      ],
+      "solution": [
+        "WITH", "best_product", "AS", "(", "SELECT", "product_id", "FROM", "order_items", "GROUP BY", "product_id", "ORDER BY", "COUNT(*)", "DESC", "LIMIT", "1", ")", "SELECT", "DISTINCT", "order_id", "FROM", "order_items", "WHERE", "product_id", "IN", "(", "SELECT", "product_id", "FROM", "best_product", ")"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Best Product CTE", "range": [0, 3], "complexity": 2},
+        {"id": "find_best_product", "label": "Find Best-Selling Product", "range": [4, 14], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [15, 20], "complexity": 2},
+        {"id": "filter_orders", "label": "Filter Orders with Product", "range": [21, 28], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_048",
+      "title": "Employee Salary by Department Percentile",
+      "tokens": [
+        "SELECT", "department,", "name,", "salary,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees"
+      ],
+      "solution": [
+        "SELECT", "department,", "name,", "salary,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Employee Info", "range": [0, 3], "complexity": 2},
+        {"id": "percent_rank", "label": "Calculate Percent Rank", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Department", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_salary", "label": "Order by Salary", "range": [8, 10], "complexity": 2},
+        {"id": "label_pct", "label": "Label as Percent Rank", "range": [11, 12], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [13, 14], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_049",
+      "title": "Cumulative Sales by Category",
+      "tokens": [
+        "SELECT", "category,", "sale_date,", "amount,", "SUM(amount)", "OVER", "(PARTITION BY", "category", "ORDER BY", "sale_date)", "AS", "cumulative_sales", "FROM", "sales", "JOIN", "products", "ON", "sales.product_id", "=", "products.id"
+      ],
+      "solution": [
+        "SELECT", "category,", "sale_date,", "amount,", "SUM(amount)", "OVER", "(PARTITION BY", "category", "ORDER BY", "sale_date)", "AS", "cumulative_sales", "FROM", "sales", "JOIN", "products", "ON", "sales.product_id", "=", "products.id"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Category, Date, and Amount", "range": [0, 3], "complexity": 2},
+        {"id": "cumulative_sum", "label": "Calculate Cumulative Sum", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Category", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_date", "label": "Order by Date", "range": [8, 10], "complexity": 2},
+        {"id": "label_cumulative", "label": "Label as Cumulative Sales", "range": [11, 12], "complexity": 1},
+        {"id": "join_products", "label": "Join Products for Category", "range": [13, 19], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_050",
+      "title": "Month-over-Month Retention Rate",
+      "tokens": [
+        "WITH", "monthly_users", "AS", "(", "SELECT", "user_id,", "DATE_TRUNC('month',", "login_date)", "AS", "month", "FROM", "user_logins", "GROUP BY", "user_id,", "DATE_TRUNC('month',", "login_date)", ")", "SELECT", "this.month,", "COUNT(DISTINCT", "this.user_id)", "AS", "retained_users,", "COUNT(DISTINCT", "prev.user_id)", "AS", "previous_month_users", "FROM", "monthly_users", "this", "LEFT JOIN", "monthly_users", "prev", "ON", "this.user_id", "=", "prev.user_id", "AND", "this.month", "=", "prev.month", "+", "INTERVAL", "'1 month'", "WHERE", "prev.month", "IS", "NOT", "NULL", "GROUP BY", "this.month", "ORDER BY", "this.month"
+      ],
+      "solution": [
+        "WITH", "monthly_users", "AS", "(", "SELECT", "user_id,", "DATE_TRUNC('month',", "login_date)", "AS", "month", "FROM", "user_logins", "GROUP BY", "user_id,", "DATE_TRUNC('month',", "login_date)", ")", "SELECT", "this.month,", "COUNT(DISTINCT", "this.user_id)", "AS", "retained_users,", "COUNT(DISTINCT", "prev.user_id)", "AS", "previous_month_users", "FROM", "monthly_users", "this", "LEFT JOIN", "monthly_users", "prev", "ON", "this.user_id", "=", "prev.user_id", "AND", "this.month", "=", "prev.month", "+", "INTERVAL", "'1 month'", "WHERE", "prev.month", "IS", "NOT", "NULL", "GROUP BY", "this.month", "ORDER BY", "this.month"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Users CTE", "range": [0, 3], "complexity": 2},
+        {"id": "get_monthly_users", "label": "Get Users by Month", "range": [4, 14], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [15, 25], "complexity": 2},
+        {"id": "self_join_cte", "label": "Join CTE for Previous Month", "range": [26, 36], "complexity": 4},
+        {"id": "filter_retained", "label": "Filter Retained Users", "range": [43, 48], "complexity": 3},
+        {"id": "group_and_order", "label": "Group and Order by Month", "range": [49, 52], "complexity": 2}
+      ]
+    },
+  {
+      "id": "s_h_051",
+      "title": "Department Salary Ranking",
+      "tokens": [
+        "SELECT", "department,", "name,", "salary,", "RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "dept_rank", "FROM", "employees"
+      ],
+      "solution": [
+        "SELECT", "department,", "name,", "salary,", "RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "dept_rank", "FROM", "employees"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 3], "complexity": 2},
+        {"id": "rank_salary", "label": "Rank by Salary", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Department", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_salary", "label": "Order by Salary", "range": [8, 10], "complexity": 2},
+        {"id": "label_rank", "label": "Label as Department Rank", "range": [11, 12], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [13, 14], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_052",
+      "title": "Customers Who Bought Product A Not B",
+      "tokens": [
+        "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "1", "EXCEPT", "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "2"
+      ],
+      "solution": [
+        "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "1", "EXCEPT", "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "WHERE", "oi.product_id", "=", "2"
+      ],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "buyers_product_a", "label": "Buyers of Product A", "range": [0, 15], "complexity": 2},
+        {"id": "except", "label": "Exclude Buyers of Product B", "range": [16, 16], "complexity": 3},
+        {"id": "buyers_product_b", "label": "Buyers of Product B", "range": [17, 32], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_053",
+      "title": "3-Month Rolling Average Sales",
+      "tokens": [
+        "WITH", "daily_sales", "AS", "(", "SELECT", "sale_date,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "sale_date", ")", "SELECT", "sale_date,", "total_sales,", "AVG(total_sales)", "OVER", "(ORDER BY", "sale_date", "ROWS BETWEEN", "2", "PRECEDING", "AND", "CURRENT ROW)", "AS", "rolling_avg_3d", "FROM", "daily_sales", "ORDER BY", "sale_date"
+      ],
+      "solution": [
+        "WITH", "daily_sales", "AS", "(", "SELECT", "sale_date,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "sale_date", ")", "SELECT", "sale_date,", "total_sales,", "AVG(total_sales)", "OVER", "(ORDER BY", "sale_date", "ROWS BETWEEN", "2", "PRECEDING", "AND", "CURRENT ROW)", "AS", "rolling_avg_3d", "FROM", "daily_sales", "ORDER BY", "sale_date"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Daily Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_daily", "label": "Calculate Daily Totals", "range": [4, 12], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [13, 17], "complexity": 2},
+        {"id": "rolling_average", "label": "Calculate 3-Day Rolling Average", "range": [18, 20], "complexity": 4},
+        {"id": "frame_spec", "label": "Define Rolling Window", "range": [21, 25], "complexity": 3},
+        {"id": "label_result", "label": "Label as Rolling Average", "range": [26, 27], "complexity": 1},
+        {"id": "sort_results", "label": "Sort by Date", "range": [28, 29], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_054",
+      "title": "Products with Above Average Category Sales",
+      "tokens": [
+        "SELECT", "p.name,", "p.category,", "SUM(oi.quantity", "*", "oi.price)", "AS", "product_revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name,", "p.category", "HAVING", "SUM(oi.quantity", "*", "oi.price)", ">", "(", "SELECT", "AVG(category_revenue)", "FROM", "(", "SELECT", "p2.category,", "SUM(oi2.quantity", "*", "oi2.price)", "AS", "category_revenue", "FROM", "products", "p2", "JOIN", "order_items", "oi2", "ON", "p2.id", "=", "oi2.product_id", "GROUP BY", "p2.category", ")", "cat_avg", "WHERE", "cat_avg.category", "=", "p.category", ")"
+      ],
+      "solution": [
+        "SELECT", "p.name,", "p.category,", "SUM(oi.quantity", "*", "oi.price)", "AS", "product_revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name,", "p.category", "HAVING", "SUM(oi.quantity", "*", "oi.price)", ">", "(", "SELECT", "AVG(category_revenue)", "FROM", "(", "SELECT", "p2.category,", "SUM(oi2.quantity", "*", "oi2.price)", "AS", "category_revenue", "FROM", "products", "p2", "JOIN", "order_items", "oi2", "ON", "p2.id", "=", "oi2.product_id", "GROUP BY", "p2.category", ")", "cat_avg", "WHERE", "cat_avg.category", "=", "p.category", ")"
+      ],
+      "category": "Nested Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 7], "complexity": 2},
+        {"id": "join_items", "label": "Join Order Items", "range": [8, 17], "complexity": 3},
+        {"id": "group_product", "label": "Group by Product", "range": [18, 20], "complexity": 2},
+        {"id": "compare_avg", "label": "Compare to Category Average", "range": [21, 24], "complexity": 3},
+        {"id": "avg_subquery", "label": "Calculate Category Average", "range": [25, 58], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_055",
+      "title": "Employees with Same Salary in Department",
+      "tokens": [
+        "SELECT", "e1.name,", "e2.name,", "e1.salary", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.department", "=", "e2.department", "AND", "e1.salary", "=", "e2.salary", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.salary", "IS", "NOT", "NULL"
+      ],
+      "solution": [
+        "SELECT", "e1.name,", "e2.name,", "e1.salary", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.department", "=", "e2.department", "AND", "e1.salary", "=", "e2.salary", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.salary", "IS", "NOT", "NULL"
+      ],
+      "category": "Self Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Employee Pairs", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Employees", "range": [4, 6], "complexity": 2},
+        {"id": "join_employees", "label": "Join Another Employee", "range": [7, 10], "complexity": 3},
+        {"id": "match_department", "label": "Match Department", "range": [11, 13], "complexity": 2},
+        {"id": "match_salary", "label": "Match Salary", "range": [14, 17], "complexity": 2},
+        {"id": "distinct_pairs", "label": "Ensure Distinct Pairs", "range": [18, 21], "complexity": 3},
+        {"id": "filter_null", "label": "Exclude Null Salaries", "range": [22, 26], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_056",
+      "title": "Products with Price Above All Products in Category",
+      "tokens": [
+        "SELECT", "p1.name,", "p1.price,", "p1.category", "FROM", "products", "p1", "WHERE", "p1.price", ">", "ALL", "(", "SELECT", "p2.price", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", "AND", "p2.id", "!=", "p1.id", ")"
+      ],
+      "solution": [
+        "SELECT", "p1.name,", "p1.price,", "p1.category", "FROM", "products", "p1", "WHERE", "p1.price", ">", "ALL", "(", "SELECT", "p2.price", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", "AND", "p2.id", "!=", "p1.id", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [4, 6], "complexity": 2},
+        {"id": "compare_to_all", "label": "Compare to All in Category", "range": [7, 11], "complexity": 3},
+        {"id": "find_other_products", "label": "Find Other Products in Category", "range": [12, 25], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_057",
+      "title": "Cumulative Revenue with Percentage",
+      "tokens": [
+        "SELECT", "sale_date,", "SUM(amount)", "OVER", "(ORDER BY", "sale_date)", "AS", "cumulative_revenue,", "SUM(amount)", "OVER", "(ORDER BY", "sale_date)", "/", "SUM(amount)", "OVER", "()", "*", "100", "AS", "cumulative_percentage", "FROM", "sales"
+      ],
+      "solution": [
+        "SELECT", "sale_date,", "SUM(amount)", "OVER", "(ORDER BY", "sale_date)", "AS", "cumulative_revenue,", "SUM(amount)", "OVER", "(ORDER BY", "sale_date)", "/", "SUM(amount)", "OVER", "()", "*", "100", "AS", "cumulative_percentage", "FROM", "sales"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Sale Date", "range": [0, 1], "complexity": 1},
+        {"id": "cumulative_sum", "label": "Calculate Cumulative Sum", "range": [2, 7], "complexity": 3},
+        {"id": "total_sum", "label": "Calculate Total Revenue", "range": [8, 15], "complexity": 3},
+        {"id": "calc_percentage", "label": "Calculate Percentage of Total", "range": [16, 17], "complexity": 4},
+        {"id": "label_result", "label": "Label as Percentage", "range": [18, 19], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [20, 21], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_058",
+      "title": "Customers with Repeat Purchases in Consecutive Months",
+      "tokens": [
+        "WITH", "customer_months", "AS", "(", "SELECT", "customer_id,", "DATE_TRUNC('month',", "order_date)", "AS", "purchase_month", "FROM", "orders", "GROUP BY", "customer_id,", "DATE_TRUNC('month',", "order_date)", ")", "SELECT", "DISTINCT", "c1.customer_id", "FROM", "customer_months", "c1", "JOIN", "customer_months", "c2", "ON", "c1.customer_id", "=", "c2.customer_id", "AND", "c1.purchase_month", "=", "c2.purchase_month", "-", "INTERVAL", "'1 month'"
+      ],
+      "solution": [
+        "WITH", "customer_months", "AS", "(", "SELECT", "customer_id,", "DATE_TRUNC('month',", "order_date)", "AS", "purchase_month", "FROM", "orders", "GROUP BY", "customer_id,", "DATE_TRUNC('month',", "order_date)", ")", "SELECT", "DISTINCT", "c1.customer_id", "FROM", "customer_months", "c1", "JOIN", "customer_months", "c2", "ON", "c1.customer_id", "=", "c2.customer_id", "AND", "c1.purchase_month", "=", "c2.purchase_month", "-", "INTERVAL", "'1 month'"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Customer Months CTE", "range": [0, 3], "complexity": 2},
+        {"id": "get_customer_months", "label": "Get Months with Purchases", "range": [4, 14], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [15, 19], "complexity": 2},
+        {"id": "self_join_cte", "label": "Join CTE for Consecutive Months", "range": [20, 27], "complexity": 4},
+        {"id": "distinct_customers", "label": "Get Distinct Customers", "range": [16, 17], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_059",
+      "title": "Top 3 Products by Revenue in Each Category",
+      "tokens": [
+        "WITH", "product_revenue", "AS", "(", "SELECT", "p.category,", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category,", "p.name", ")", "SELECT", "category,", "name,", "revenue", "FROM", "(", "SELECT", "category,", "name,", "revenue,", "RANK()", "OVER", "(PARTITION BY", "category", "ORDER BY", "revenue", "DESC)", "AS", "rank", "FROM", "product_revenue", ")", "ranked", "WHERE", "rank", "<=", "3"
+      ],
+      "solution": [
+        "WITH", "product_revenue", "AS", "(", "SELECT", "p.category,", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category,", "p.name", ")", "SELECT", "category,", "name,", "revenue", "FROM", "(", "SELECT", "category,", "name,", "revenue,", "RANK()", "OVER", "(PARTITION BY", "category", "ORDER BY", "revenue", "DESC)", "AS", "rank", "FROM", "product_revenue", ")", "ranked", "WHERE", "rank", "<=", "3"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Revenue CTE", "range": [0, 3], "complexity": 2},
+        {"id": "calculate_revenue", "label": "Calculate Revenue by Product", "range": [4, 23], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [24, 28], "complexity": 2},
+        {"id": "rank_products", "label": "Rank Products within Category", "range": [29, 44], "complexity": 4},
+        {"id": "filter_ranks", "label": "Filter Top 3 Products", "range": [45, 49], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_060",
+      "title": "Products with Price Above 75th Percentile",
+      "tokens": [
+        "SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">=", "(", "SELECT", "PERCENTILE_CONT(0.75)", "WITHIN", "GROUP", "(ORDER BY", "price)", "FROM", "products", ")"
+      ],
+      "solution": [
+        "SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">=", "(", "SELECT", "PERCENTILE_CONT(0.75)", "WITHIN", "GROUP", "(ORDER BY", "price)", "FROM", "products", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "compare_to_percentile", "label": "Compare to 75th Percentile", "range": [5, 8], "complexity": 3},
+        {"id": "calculate_percentile", "label": "Calculate 75th Percentile", "range": [9, 17], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_061",
+      "title": "Customers with Orders in Last 3 Months",
+      "tokens": [
+        "SELECT", "DISTINCT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "DATE_TRUNC('month',", "CURRENT_DATE)", "-", "INTERVAL", "'2 months'"
+      ],
+      "solution": [
+        "SELECT", "DISTINCT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "DATE_TRUNC('month',", "CURRENT_DATE)", "-", "INTERVAL", "'2 months'"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_unique", "label": "Select Unique Customers", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_last_3_months", "label": "Filter Last 3 Months", "range": [5, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_062",
+      "title": "Employees with 5+ Years Tenure",
+      "tokens": [
+        "SELECT", "name,", "hire_date,", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", "AS", "tenure_years", "FROM", "employees", "WHERE", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", ">=", "5"
+      ],
+      "solution": [
+        "SELECT", "name,", "hire_date,", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", "AS", "tenure_years", "FROM", "employees", "WHERE", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", ">=", "5"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 2], "complexity": 1},
+        {"id": "calculate_tenure", "label": "Calculate Tenure in Years", "range": [3, 8], "complexity": 3},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1},
+        {"id": "filter_tenure", "label": "Filter Employees with 5+ Years", "range": [11, 17], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_063",
+      "title": "Products with Zero Sales in 2024",
+      "tokens": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "LEFT JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "LEFT JOIN", "orders", "o", "ON", "oi.order_id", "=", "o.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "2024", "WHERE", "o.id", "IS", "NULL"
+      ],
+      "solution": [
+        "SELECT", "p.id,", "p.name", "FROM", "products", "p", "LEFT JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "LEFT JOIN", "orders", "o", "ON", "oi.order_id", "=", "o.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "2024", "WHERE", "o.id", "IS", "NULL"
+      ],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "join_order_items", "label": "Join Order Items", "range": [6, 12], "complexity": 3},
+        {"id": "join_orders_2024", "label": "Join Only 2024 Orders", "range": [13, 24], "complexity": 4},
+        {"id": "filter_no_sales", "label": "Find Products with No Sales", "range": [25, 29], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_064",
+      "title": "Running Total of Users by Month",
+      "tokens": [
+        "SELECT", "month,", "SUM(new_users)", "OVER", "(ORDER BY", "month)", "AS", "cumulative_users", "FROM", "(", "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_users", "FROM", "users", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", ")", "monthly_signups"
+      ],
+      "solution": [
+        "SELECT", "month,", "SUM(new_users)", "OVER", "(ORDER BY", "month)", "AS", "cumulative_users", "FROM", "(", "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_users", "FROM", "users", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", ")", "monthly_signups"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "Group by Month", "range": [10, 16], "complexity": 2},
+        {"id": "count_users", "label": "Count New Users", "range": [17, 18], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [19, 20], "complexity": 1},
+        {"id": "group_results", "label": "Finish Grouping", "range": [21, 23], "complexity": 3},
+        {"id": "cumulative_sum", "label": "Calculate Cumulative Users", "range": [0, 8], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_065",
+      "title": "Orders with Multiple Returns",
+      "tokens": [
+        "SELECT", "order_id,", "COUNT(*)", "AS", "return_count", "FROM", "returns", "GROUP BY", "order_id", "HAVING", "COUNT(*)", ">", "2"
+      ],
+      "solution": [
+        "SELECT", "order_id,", "COUNT(*)", "AS", "return_count", "FROM", "returns", "GROUP BY", "order_id", "HAVING", "COUNT(*)", ">", "2"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Order and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_orders", "label": "Group by Order", "range": [7, 8], "complexity": 2},
+        {"id": "filter_many_returns", "label": "Find Orders with Many Returns", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_066",
+      "title": "Yearly Revenue with Growth Rate",
+      "tokens": [
+        "WITH", "yearly_revenue", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "revenue", "FROM", "sales", "GROUP BY", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "year,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "AS", "previous_year,", "ROUND(", "(", "revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "year)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "*", "100,", "2)", "AS", "growth_percent", "FROM", "yearly_revenue"
+      ],
+      "solution": [
+        "WITH", "yearly_revenue", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "revenue", "FROM", "sales", "GROUP BY", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "year,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "AS", "previous_year,", "ROUND(", "(", "revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "year)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "*", "100,", "2)", "AS", "growth_percent", "FROM", "yearly_revenue"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Yearly Revenue CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_yearly", "label": "Calculate Yearly Revenue", "range": [4, 18], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [19, 23], "complexity": 2},
+        {"id": "previous_year", "label": "Get Previous Year Revenue", "range": [24, 28], "complexity": 4},
+        {"id": "calc_growth", "label": "Calculate Growth Percentage", "range": [29, 46], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_067",
+      "title": "Products with Most Reviews in Each Category",
+      "tokens": [
+        "WITH", "review_counts", "AS", "(", "SELECT", "p.category,", "p.id,", "p.name,", "COUNT(r.id)", "AS", "review_count", "FROM", "products", "p", "LEFT JOIN", "reviews", "r", "ON", "p.id", "=", "r.product_id", "GROUP BY", "p.category,", "p.id,", "p.name", ")", "SELECT", "category,", "name,", "review_count", "FROM", "(", "SELECT", "category,", "name,", "review_count,", "RANK()", "OVER", "(PARTITION BY", "category", "ORDER BY", "review_count", "DESC)", "AS", "rank", "FROM", "review_counts", ")", "ranked", "WHERE", "rank", "=", "1"
+      ],
+      "solution": [
+        "WITH", "review_counts", "AS", "(", "SELECT", "p.category,", "p.id,", "p.name,", "COUNT(r.id)", "AS", "review_count", "FROM", "products", "p", "LEFT JOIN", "reviews", "r", "ON", "p.id", "=", "r.product_id", "GROUP BY", "p.category,", "p.id,", "p.name", ")", "SELECT", "category,", "name,", "review_count", "FROM", "(", "SELECT", "category,", "name,", "review_count,", "RANK()", "OVER", "(PARTITION BY", "category", "ORDER BY", "review_count", "DESC)", "AS", "rank", "FROM", "review_counts", ")", "ranked", "WHERE", "rank", "=", "1"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Review Counts CTE", "range": [0, 3], "complexity": 2},
+        {"id": "count_reviews", "label": "Count Reviews by Product", "range": [4, 23], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [24, 28], "complexity": 2},
+        {"id": "rank_products", "label": "Rank Products by Review Count", "range": [29, 44], "complexity": 4},
+        {"id": "filter_top", "label": "Filter Top Product per Category", "range": [45, 49], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_068",
+      "title": "Employee Salary Increase History",
+      "tokens": [
+        "SELECT", "employee_id,", "salary,", "effective_date,", "LAG(salary)", "OVER", "(PARTITION BY", "employee_id", "ORDER BY", "effective_date)", "AS", "previous_salary,", "salary", "-", "LAG(salary)", "OVER", "(PARTITION BY", "employee_id", "ORDER BY", "effective_date)", "AS", "increase_amount", "FROM", "salary_history"
+      ],
+      "solution": [
+        "SELECT", "employee_id,", "salary,", "effective_date,", "LAG(salary)", "OVER", "(PARTITION BY", "employee_id", "ORDER BY", "effective_date)", "AS", "previous_salary,", "salary", "-", "LAG(salary)", "OVER", "(PARTITION BY", "employee_id", "ORDER BY", "effective_date)", "AS", "increase_amount", "FROM", "salary_history"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 3], "complexity": 2},
+        {"id": "previous_salary", "label": "Get Previous Salary", "range": [4, 11], "complexity": 3},
+        {"id": "calculate_increase", "label": "Calculate Salary Increase", "range": [12, 20], "complexity": 4},
+        {"id": "label_result", "label": "Label as Increase Amount", "range": [21, 21], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [22, 23], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_069",
+      "title": "Customers with Most Frequent Orders",
+      "tokens": [
+        "SELECT", "customer_id,", "COUNT(*)", "AS", "order_frequency", "FROM", "orders", "WHERE", "EXTRACT(YEAR", "FROM", "order_date)", "=", "2024", "GROUP BY", "customer_id", "HAVING", "COUNT(*)", ">", "5", "ORDER BY", "order_frequency", "DESC"
+      ],
+      "solution": [
+        "SELECT", "customer_id,", "COUNT(*)", "AS", "order_frequency", "FROM", "orders", "WHERE", "EXTRACT(YEAR", "FROM", "order_date)", "=", "2024", "GROUP BY", "customer_id", "HAVING", "COUNT(*)", ">", "5", "ORDER BY", "order_frequency", "DESC"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "filter_year", "label": "Filter by Year", "range": [7, 12], "complexity": 2},
+        {"id": "group_customers", "label": "Group by Customer", "range": [13, 14], "complexity": 2},
+        {"id": "filter_frequent", "label": "Filter Frequent Customers", "range": [15, 18], "complexity": 3},
+        {"id": "sort_descending", "label": "Sort by Frequency", "range": [19, 21], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_070",
+      "title": "Products with Review Count Above Average",
+      "tokens": [
+        "SELECT", "product_id,", "COUNT(*)", "AS", "review_count", "FROM", "reviews", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "(", "SELECT", "AVG(review_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "review_count", "FROM", "reviews", "GROUP BY", "product_id", ")", "avg_reviews", ")"
+      ],
+      "solution": [
+        "SELECT", "product_id,", "COUNT(*)", "AS", "review_count", "FROM", "reviews", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "(", "SELECT", "AVG(review_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "review_count", "FROM", "reviews", "GROUP BY", "product_id", ")", "avg_reviews", ")"
+      ],
+      "category": "Nested Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_products", "label": "Group by Product", "range": [7, 8], "complexity": 2},
+        {"id": "filter_above_avg", "label": "Filter Above Average", "range": [9, 12], "complexity": 3},
+        {"id": "avg_subquery", "label": "Calculate Average Review Count", "range": [13, 28], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_071",
+      "title": "Month-over-Month Sales Comparison",
+      "tokens": [
+        "WITH", "monthly_sales", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", ")", "SELECT", "month,", "total_sales,", "LAG(total_sales)", "OVER", "(ORDER BY", "month)", "AS", "prev_month_sales,", "total_sales", "-", "LAG(total_sales)", "OVER", "(ORDER BY", "month)", "AS", "difference", "FROM", "monthly_sales", "ORDER BY", "month"
+      ],
+      "solution": [
+        "WITH", "monthly_sales", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", ")", "SELECT", "month,", "total_sales,", "LAG(total_sales)", "OVER", "(ORDER BY", "month)", "AS", "prev_month_sales,", "total_sales", "-", "LAG(total_sales)", "OVER", "(ORDER BY", "month)", "AS", "difference", "FROM", "monthly_sales", "ORDER BY", "month"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_monthly", "label": "Calculate Monthly Totals", "range": [4, 16], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [17, 21], "complexity": 2},
+        {"id": "previous_month", "label": "Get Previous Month Sales", "range": [22, 27], "complexity": 4},
+        {"id": "calc_difference", "label": "Calculate Difference", "range": [28, 35], "complexity": 4},
+        {"id": "sort_results", "label": "Sort by Month", "range": [36, 37], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_072",
+      "title": "Employees with Longest Tenure in Each Department",
+      "tokens": [
+        "WITH", "department_tenure", "AS", "(", "SELECT", "department,", "name,", "hire_date,", "RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "hire_date)", "AS", "tenure_rank", "FROM", "employees", "WHERE", "hire_date", "IS", "NOT", "NULL", ")", "SELECT", "department,", "name,", "hire_date", "FROM", "department_tenure", "WHERE", "tenure_rank", "=", "1"
+      ],
+      "solution": [
+        "WITH", "department_tenure", "AS", "(", "SELECT", "department,", "name,", "hire_date,", "RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "hire_date)", "AS", "tenure_rank", "FROM", "employees", "WHERE", "hire_date", "IS", "NOT", "NULL", ")", "SELECT", "department,", "name,", "hire_date", "FROM", "department_tenure", "WHERE", "tenure_rank", "=", "1"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Department Tenure CTE", "range": [0, 3], "complexity": 2},
+        {"id": "rank_employees", "label": "Rank by Hire Date", "range": [4, 20], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [21, 27], "complexity": 2},
+        {"id": "filter_oldest", "label": "Filter Oldest Employees", "range": [28, 30], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_073",
+      "title": "Orders with Highest Item Count",
+      "tokens": [
+        "SELECT", "order_id,", "COUNT(*)", "AS", "item_count", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(*)", "=", "(", "SELECT", "MAX(item_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "item_count", "FROM", "order_items", "GROUP BY", "order_id", ")", "max_counts", ")"
+      ],
+      "solution": [
+        "SELECT", "order_id,", "COUNT(*)", "AS", "item_count", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(*)", "=", "(", "SELECT", "MAX(item_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "item_count", "FROM", "order_items", "GROUP BY", "order_id", ")", "max_counts", ")"
+      ],
+      "category": "Nested Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Order and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_orders", "label": "Group by Order", "range": [7, 8], "complexity": 2},
+        {"id": "match_max", "label": "Match Maximum Count", "range": [9, 12], "complexity": 3},
+        {"id": "max_subquery", "label": "Find Maximum Item Count", "range": [13, 28], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_074",
+      "title": "Product Sales by Date with Moving Average",
+      "tokens": [
+        "SELECT", "sale_date,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date", "ROWS BETWEEN", "6", "PRECEDING", "AND", "CURRENT ROW)", "AS", "7_day_moving_avg", "FROM", "sales"
+      ],
+      "solution": [
+        "SELECT", "sale_date,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date", "ROWS BETWEEN", "6", "PRECEDING", "AND", "CURRENT ROW)", "AS", "7_day_moving_avg", "FROM", "sales"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Sale Date", "range": [0, 1], "complexity": 1},
+        {"id": "moving_average", "label": "Calculate 7-Day Moving Average", "range": [2, 3], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Product", "range": [4, 5], "complexity": 2},
+        {"id": "order_by_date", "label": "Order by Date", "range": [6, 7], "complexity": 2},
+        {"id": "frame_spec", "label": "Define 7-Day Window", "range": [8, 12], "complexity": 3},
+        {"id": "label_result", "label": "Label as Moving Average", "range": [13, 14], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [15, 16], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_075",
+      "title": "Customers Who Haven't Ordered in 60 Days",
+      "tokens": [
+        "SELECT", "c.id,", "c.name", "FROM", "customers", "c", "LEFT JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "AND", "o.order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'60 days'", "WHERE", "o.id", "IS", "NULL"
+      ],
+      "solution": [
+        "SELECT", "c.id,", "c.name", "FROM", "customers", "c", "LEFT JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "AND", "o.order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'60 days'", "WHERE", "o.id", "IS", "NULL"
+      ],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Customer Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [3, 5], "complexity": 2},
+        {"id": "left_join_orders", "label": "Join Recent Orders", "range": [6, 19], "complexity": 3},
+        {"id": "filter_no_orders", "label": "Find Customers with No Recent Orders", "range": [20, 23], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_076",
+      "title": "Product Sales Growth Rate",
+      "tokens": [
+        "WITH", "product_yearly", "AS", "(", "SELECT", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "sales", "FROM", "sales", "GROUP BY", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "product_id,", "year,", "sales,", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", "AS", "prev_year_sales,", "CASE", "WHEN", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", "IS", "NULL", "THEN", "NULL", "ELSE", "ROUND(", "(", "sales", "-", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", ")", "/", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", "*", "100,", "2)", "END", "AS", "growth_rate", "FROM", "product_yearly"
+      ],
+      "solution": [
+        "WITH", "product_yearly", "AS", "(", "SELECT", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "sales", "FROM", "sales", "GROUP BY", "product_id,", "EXTRACT(YEAR", "FROM", "sale_date)", ")", "SELECT", "product_id,", "year,", "sales,", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", "AS", "prev_year_sales,", "CASE", "WHEN", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", "IS", "NULL", "THEN", "NULL", "ELSE", "ROUND(", "(", "sales", "-", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", ")", "/", "LAG(sales)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "year)", "*", "100,", "2)", "END", "AS", "growth_rate", "FROM", "product_yearly"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Yearly CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_yearly", "label": "Calculate Yearly Sales by Product", "range": [4, 19], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [20, 25], "complexity": 2},
+        {"id": "previous_year", "label": "Get Previous Year Sales", "range": [26, 33], "complexity": 4},
+        {"id": "handle_nulls", "label": "Handle Null Growth Rate", "range": [34, 41], "complexity": 3},
+        {"id": "calc_growth", "label": "Calculate Growth Rate", "range": [42, 63], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_077",
+      "title": "Customers with All Order Types",
+      "tokens": [
+        "SELECT", "customer_id", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "COUNT(DISTINCT", "order_type)", "=", "(", "SELECT", "COUNT(DISTINCT", "order_type)", "FROM", "orders", ")"
+      ],
+      "solution": [
+        "SELECT", "customer_id", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "COUNT(DISTINCT", "order_type)", "=", "(", "SELECT", "COUNT(DISTINCT", "order_type)", "FROM", "orders", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer", "range": [0, 1], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "group_customers", "label": "Group by Customer", "range": [4, 5], "complexity": 2},
+        {"id": "count_types", "label": "Count Distinct Order Types", "range": [6, 9], "complexity": 3},
+        {"id": "total_types", "label": "Get Total Order Types", "range": [10, 16], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_078",
+      "title": "First Order Date by Customer",
+      "tokens": [
+        "SELECT", "customer_id,", "MIN(order_date)", "AS", "first_order", "FROM", "orders", "GROUP BY", "customer_id"
+      ],
+      "solution": [
+        "SELECT", "customer_id,", "MIN(order_date)", "AS", "first_order", "FROM", "orders", "GROUP BY", "customer_id"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer and Min Date", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_customers", "label": "Group by Customer", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_079",
+      "title": "Products with All Categories Ordered",
+      "tokens": [
+        "WITH", "category_counts", "AS", "(", "SELECT", "p.id,", "p.name,", "COUNT(DISTINCT", "p.category)", "AS", "categories_ordered", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "JOIN", "orders", "o", "ON", "oi.order_id", "=", "o.id", "GROUP BY", "p.id,", "p.name", ")", "SELECT", "id,", "name", "FROM", "category_counts", "WHERE", "categories_ordered", "=", "(", "SELECT", "COUNT(DISTINCT", "category)", "FROM", "products", ")"
+      ],
+      "solution": [
+        "WITH", "category_counts", "AS", "(", "SELECT", "p.id,", "p.name,", "COUNT(DISTINCT", "p.category)", "AS", "categories_ordered", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "JOIN", "orders", "o", "ON", "oi.order_id", "=", "o.id", "GROUP BY", "p.id,", "p.name", ")", "SELECT", "id,", "name", "FROM", "category_counts", "WHERE", "categories_ordered", "=", "(", "SELECT", "COUNT(DISTINCT", "category)", "FROM", "products", ")"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Category Counts CTE", "range": [0, 3], "complexity": 2},
+        {"id": "count_categories", "label": "Count Categories per Product", "range": [4, 28], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [29, 33], "complexity": 2},
+        {"id": "filter_all_categories", "label": "Filter Products with All Categories", "range": [34, 37], "complexity": 3},
+        {"id": "total_categories", "label": "Get Total Categories", "range": [38, 43], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_080",
+      "title": "Running Average of Orders per Day",
+      "tokens": [
+        "WITH", "daily_orders", "AS", "(", "SELECT", "order_date,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "order_date", ")", "SELECT", "order_date,", "order_count,", "AVG(order_count)", "OVER", "(ORDER BY", "order_date", "ROWS BETWEEN", "6", "PRECEDING", "AND", "CURRENT ROW)", "AS", "7_day_avg_orders", "FROM", "daily_orders"
+      ],
+      "solution": [
+        "WITH", "daily_orders", "AS", "(", "SELECT", "order_date,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "order_date", ")", "SELECT", "order_date,", "order_count,", "AVG(order_count)", "OVER", "(ORDER BY", "order_date", "ROWS BETWEEN", "6", "PRECEDING", "AND", "CURRENT ROW)", "AS", "7_day_avg_orders", "FROM", "daily_orders"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Daily Orders CTE", "range": [0, 3], "complexity": 2},
+        {"id": "count_daily", "label": "Count Daily Orders", "range": [4, 12], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [13, 17], "complexity": 2},
+        {"id": "rolling_average", "label": "Calculate 7-Day Rolling Average", "range": [18, 20], "complexity": 4},
+        {"id": "frame_spec", "label": "Define Rolling Window", "range": [21, 25], "complexity": 3},
+        {"id": "label_result", "label": "Label as Average", "range": [26, 27], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_081",
+      "title": "Employees with Salaries Below Department Minimum",
+      "tokens": [
+        "SELECT", "e.name,", "e.salary,", "e.department", "FROM", "employees", "e", "WHERE", "e.salary", "<", "(", "SELECT", "MIN(e2.salary)", "FROM", "employees", "e2", "WHERE", "e2.department", "=", "e.department", "AND", "e2.id", "!=", "e.id", ")"
+      ],
+      "solution": [
+        "SELECT", "e.name,", "e.salary,", "e.department", "FROM", "employees", "e", "WHERE", "e.salary", "<", "(", "SELECT", "MIN(e2.salary)", "FROM", "employees", "e2", "WHERE", "e2.department", "=", "e.department", "AND", "e2.id", "!=", "e.id", ")"
+      ],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Employees", "range": [4, 6], "complexity": 2},
+        {"id": "compare_to_min", "label": "Compare to Department Minimum", "range": [7, 10], "complexity": 3},
+        {"id": "find_min", "label": "Find Minimum in Department", "range": [11, 24], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_082",
+      "title": "Most Common Product Category by Customer",
+      "tokens": [
+        "WITH", "customer_categories", "AS", "(", "SELECT", "o.customer_id,", "p.category,", "COUNT(*)", "AS", "category_count", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "o.customer_id,", "p.category", ")", "SELECT", "customer_id,", "category", "FROM", "(", "SELECT", "customer_id,", "category,", "RANK()", "OVER", "(PARTITION BY", "customer_id", "ORDER BY", "category_count", "DESC)", "AS", "rank", "FROM", "customer_categories", ")", "ranked", "WHERE", "rank", "=", "1"
+      ],
+      "solution": [
+        "WITH", "customer_categories", "AS", "(", "SELECT", "o.customer_id,", "p.category,", "COUNT(*)", "AS", "category_count", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "o.customer_id,", "p.category", ")", "SELECT", "customer_id,", "category", "FROM", "(", "SELECT", "customer_id,", "category,", "RANK()", "OVER", "(PARTITION BY", "customer_id", "ORDER BY", "category_count", "DESC)", "AS", "rank", "FROM", "customer_categories", ")", "ranked", "WHERE", "rank", "=", "1"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Customer Categories CTE", "range": [0, 3], "complexity": 2},
+        {"id": "count_categories", "label": "Count Categories by Customer", "range": [4, 28], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [29, 33], "complexity": 2},
+        {"id": "rank_categories", "label": "Rank Categories per Customer", "range": [34, 49], "complexity": 4},
+        {"id": "filter_top", "label": "Filter Top Category", "range": [50, 54], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_083",
+      "title": "Monthly Revenue Growth Rate",
+      "tokens": [
+        "WITH", "monthly_revenue", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "revenue", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", ")", "SELECT", "month,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "month)", "AS", "prev_month,", "ROUND(", "(", "revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "month)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "month)", "*", "100,", "2)", "AS", "growth_pct", "FROM", "monthly_revenue", "ORDER BY", "month"
+      ],
+      "solution": [
+        "WITH", "monthly_revenue", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "revenue", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", ")", "SELECT", "month,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "month)", "AS", "prev_month,", "ROUND(", "(", "revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "month)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "month)", "*", "100,", "2)", "AS", "growth_pct", "FROM", "monthly_revenue", "ORDER BY", "month"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Revenue CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_monthly", "label": "Calculate Monthly Revenue", "range": [4, 16], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [17, 21], "complexity": 2},
+        {"id": "previous_month", "label": "Get Previous Month Revenue", "range": [22, 27], "complexity": 4},
+        {"id": "calc_growth", "label": "Calculate Growth Percentage", "range": [28, 46], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_084",
+      "title": "Products with Multiple Categories",
+      "tokens": [
+        "SELECT", "product_id,", "COUNT(*)", "AS", "category_count", "FROM", "product_categories", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "solution": [
+        "SELECT", "product_id,", "COUNT(*)", "AS", "category_count", "FROM", "product_categories", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "1"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_products", "label": "Group by Product", "range": [7, 8], "complexity": 2},
+        {"id": "filter_multi_categories", "label": "Find Products with Multiple Categories", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_085",
+      "title": "Employee Salary Percentile by Department",
+      "tokens": [
+        "SELECT", "department,", "name,", "salary,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees", "WHERE", "salary", "IS", "NOT", "NULL"
+      ],
+      "solution": [
+        "SELECT", "department,", "name,", "salary,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees", "WHERE", "salary", "IS", "NOT", "NULL"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 3], "complexity": 2},
+        {"id": "percent_rank", "label": "Calculate Percent Rank", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Department", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_salary", "label": "Order by Salary", "range": [8, 10], "complexity": 2},
+        {"id": "label_pct", "label": "Label as Percent Rank", "range": [11, 12], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [13, 14], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Salaries", "range": [15, 18], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_086",
+      "title": "Customer Order Gap Analysis",
+      "tokens": [
+        "WITH", "customer_orders", "AS", "(", "SELECT", "customer_id,", "order_date,", "LAG(order_date)", "OVER", "(PARTITION BY", "customer_id", "ORDER BY", "order_date)", "AS", "prev_order_date", "FROM", "orders", ")", "SELECT", "customer_id,", "order_date,", "prev_order_date,", "order_date", "-", "prev_order_date", "AS", "days_between_orders", "FROM", "customer_orders", "WHERE", "prev_order_date", "IS", "NOT", "NULL"
+      ],
+      "solution": [
+        "WITH", "customer_orders", "AS", "(", "SELECT", "customer_id,", "order_date,", "LAG(order_date)", "OVER", "(PARTITION BY", "customer_id", "ORDER BY", "order_date)", "AS", "prev_order_date", "FROM", "orders", ")", "SELECT", "customer_id,", "order_date,", "prev_order_date,", "order_date", "-", "prev_order_date", "AS", "days_between_orders", "FROM", "customer_orders", "WHERE", "prev_order_date", "IS", "NOT", "NULL"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Customer Orders CTE", "range": [0, 3], "complexity": 2},
+        {"id": "previous_order", "label": "Get Previous Order Date", "range": [4, 15], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [16, 22], "complexity": 2},
+        {"id": "calc_gap", "label": "Calculate Days Between Orders", "range": [23, 25], "complexity": 3},
+        {"id": "filter_gap", "label": "Filter Customers with Previous Orders", "range": [26, 30], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_087",
+      "title": "Top Selling Products by Month",
+      "tokens": [
+        "WITH", "monthly_product_sales", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "product_id,", "SUM(quantity)", "AS", "total_quantity", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date),", "product_id", ")", "SELECT", "month,", "product_id,", "total_quantity", "FROM", "(", "SELECT", "month,", "product_id,", "total_quantity,", "RANK()", "OVER", "(PARTITION BY", "month", "ORDER BY", "total_quantity", "DESC)", "AS", "rank", "FROM", "monthly_product_sales", ")", "ranked", "WHERE", "rank", "=", "1"
+      ],
+      "solution": [
+        "WITH", "monthly_product_sales", "AS", "(", "SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "product_id,", "SUM(quantity)", "AS", "total_quantity", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date),", "product_id", ")", "SELECT", "month,", "product_id,", "total_quantity", "FROM", "(", "SELECT", "month,", "product_id,", "total_quantity,", "RANK()", "OVER", "(PARTITION BY", "month", "ORDER BY", "total_quantity", "DESC)", "AS", "rank", "FROM", "monthly_product_sales", ")", "ranked", "WHERE", "rank", "=", "1"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Product Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Monthly Product Sales", "range": [4, 18], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [19, 23], "complexity": 2},
+        {"id": "rank_products", "label": "Rank Products by Month", "range": [24, 39], "complexity": 4},
+        {"id": "filter_top", "label": "Filter Top Product per Month", "range": [40, 44], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_088",
+      "title": "Customers with Orders in All Year Quarters",
+      "tokens": [
+        "SELECT", "customer_id", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "COUNT(DISTINCT", "EXTRACT(QUARTER", "FROM", "order_date))", "=", "4"
+      ],
+      "solution": [
+        "SELECT", "customer_id", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "COUNT(DISTINCT", "EXTRACT(QUARTER", "FROM", "order_date))", "=", "4"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer", "range": [0, 1], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "group_customers", "label": "Group by Customer", "range": [4, 5], "complexity": 2},
+        {"id": "count_quarters", "label": "Count Distinct Quarters", "range": [6, 11], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_089",
+      "title": "Product Sales Trend Over Time",
+      "tokens": [
+        "SELECT", "product_id,", "sale_date,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date)", "AS", "cumulative_sales", "FROM", "sales"
+      ],
+      "solution": [
+        "SELECT", "product_id,", "sale_date,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date)", "AS", "cumulative_sales", "FROM", "sales"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "cumulative_sum", "label": "Calculate Cumulative Sales", "range": [3, 4], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Product", "range": [5, 6], "complexity": 2},
+        {"id": "order_by_date", "label": "Order by Date", "range": [7, 9], "complexity": 2},
+        {"id": "label_result", "label": "Label as Cumulative Sales", "range": [10, 11], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [12, 13], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_090",
+      "title": "Orders with Multiple Status Changes",
+      "tokens": [
+        "SELECT", "order_id,", "COUNT(*)", "AS", "status_count", "FROM", "order_status_history", "GROUP BY", "order_id", "HAVING", "COUNT(*)", ">", "3"
+      ],
+      "solution": [
+        "SELECT", "order_id,", "COUNT(*)", "AS", "status_count", "FROM", "order_status_history", "GROUP BY", "order_id", "HAVING", "COUNT(*)", ">", "3"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Order and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_orders", "label": "Group by Order", "range": [7, 8], "complexity": 2},
+        {"id": "filter_many_changes", "label": "Find Orders with Many Status Changes", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_091",
+      "title": "Employees with 20+ Years Tenure",
+      "tokens": [
+        "SELECT", "name,", "hire_date,", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", "AS", "tenure", "FROM", "employees", "WHERE", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", ">=", "20"
+      ],
+      "solution": [
+        "SELECT", "name,", "hire_date,", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", "AS", "tenure", "FROM", "employees", "WHERE", "EXTRACT(YEAR", "FROM", "AGE(CURRENT_DATE,", "hire_date))", ">=", "20"
+      ],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Info", "range": [0, 2], "complexity": 1},
+        {"id": "calculate_tenure", "label": "Calculate Tenure in Years", "range": [3, 8], "complexity": 3},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1},
+        {"id": "filter_long_tenure", "label": "Filter Long Tenure Employees", "range": [11, 17], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_092",
+      "title": "Product Category Popularity by Customer",
+      "tokens": [
+        "SELECT", "customer_id,", "category,", "COUNT(*)", "AS", "purchase_count", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "customer_id,", "category"
+      ],
+      "solution": [
+        "SELECT", "customer_id,", "category,", "COUNT(*)", "AS", "purchase_count", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "customer_id,", "category"
+      ],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer and Category", "range": [0, 5], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Orders", "range": [6, 8], "complexity": 2},
+        {"id": "join_order_items", "label": "Join Order Items", "range": [9, 15], "complexity": 3},
+        {"id": "join_products", "label": "Join Products for Category", "range": [16, 22], "complexity": 3},
+        {"id": "group_results", "label": "Group by Customer and Category", "range": [23, 25], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_093",
+      "title": "Products with Price Increase History",
+      "tokens": [
+        "SELECT", "product_id,", "price,", "effective_date,", "LAG(price)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "effective_date)", "AS", "previous_price,", "price", "-", "LAG(price)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "effective_date)", "AS", "price_change", "FROM", "product_price_history", "WHERE", "price", "IS", "NOT", "NULL"
+      ],
+      "solution": [
+        "SELECT", "product_id,", "price,", "effective_date,", "LAG(price)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "effective_date)", "AS", "previous_price,", "price", "-", "LAG(price)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "effective_date)", "AS", "price_change", "FROM", "product_price_history", "WHERE", "price", "IS", "NOT", "NULL"
+      ],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 3], "complexity": 2},
+        {"id": "previous_price", "label": "Get Previous Price", "range": [4, 11], "complexity": 3},
+        {"id": "calculate_change", "label": "Calculate Price Change", "range": [12, 20], "complexity": 4},
+        {"id": "label_result", "label": "Label as Price Change", "range": [21, 21], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [22, 23], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Prices", "range": [24, 28], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_094",
+      "title": "Customers with Lifetime Value Above Average",
+      "tokens": [
+        "SELECT", "customer_id,", "SUM(total)", "AS", "ltv", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "SUM(total)", ">", "(", "SELECT", "AVG(total)", "FROM", "orders", ")"
+      ],
+      "solution": [
+        "SELECT", "customer_id,", "SUM(total)", "AS", "ltv", "FROM", "orders", "GROUP BY", "customer_id", "HAVING", "SUM(total)", ">", "(", "SELECT", "AVG(total)", "FROM", "orders", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer and Sum", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_customers", "label": "Group by Customer", "range": [7, 8], "complexity": 2},
+        {"id": "compare_to_avg", "label": "Compare to Average LTV", "range": [9, 12], "complexity": 3},
+        {"id": "calculate_avg", "label": "Calculate Average LTV", "range": [13, 17], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_095",
+      "title": "Products with Most Returns",
+      "tokens": [
+        "SELECT", "product_id,", "COUNT(*)", "AS", "return_count", "FROM", "returns", "GROUP BY", "product_id", "ORDER BY", "return_count", "DESC", "LIMIT", "10"
+      ],
+      "solution": [
+        "SELECT", "product_id,", "COUNT(*)", "AS", "return_count", "FROM", "returns", "GROUP BY", "product_id", "ORDER BY", "return_count", "DESC", "LIMIT", "10"
+      ],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_products", "label": "Group by Product", "range": [7, 8], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Return Count", "range": [9, 11], "complexity": 2},
+        {"id": "limit_results", "label": "Get Top 10", "range": [12, 13], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_096",
+      "title": "Daily Sales with Week Over Week Change",
+      "tokens": [
+        "WITH", "daily_revenue", "AS", "(", "SELECT", "sale_date,", "SUM(amount)", "AS", "revenue", "FROM", "sales", "GROUP BY", "sale_date", ")", "SELECT", "sale_date,", "revenue,", "LAG(revenue,", "7)", "OVER", "(ORDER BY", "sale_date)", "AS", "previous_week,", "ROUND(", "(", "revenue", "-", "LAG(revenue,", "7)", "OVER", "(ORDER BY", "sale_date)", ")", "/", "LAG(revenue,", "7)", "OVER", "(ORDER BY", "sale_date)", "*", "100,", "2)", "AS", "wow_change", "FROM", "daily_revenue"
+      ],
+      "solution": [
+        "WITH", "daily_revenue", "AS", "(", "SELECT", "sale_date,", "SUM(amount)", "AS", "revenue", "FROM", "sales", "GROUP BY", "sale_date", ")", "SELECT", "sale_date,", "revenue,", "LAG(revenue,", "7)", "OVER", "(ORDER BY", "sale_date)", "AS", "previous_week,", "ROUND(", "(", "revenue", "-", "LAG(revenue,", "7)", "OVER", "(ORDER BY", "sale_date)", ")", "/", "LAG(revenue,", "7)", "OVER", "(ORDER BY", "sale_date)", "*", "100,", "2)", "AS", "wow_change", "FROM", "daily_revenue"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Daily Revenue CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_daily", "label": "Calculate Daily Revenue", "range": [4, 12], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [13, 17], "complexity": 2},
+        {"id": "previous_week", "label": "Get Previous Week Revenue", "range": [18, 24], "complexity": 4},
+        {"id": "calc_wow", "label": "Calculate Week Over Week Change", "range": [25, 42], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_097",
+      "title": "Customers with All Product Types",
+      "tokens": [
+        "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "customer_id", "HAVING", "COUNT(DISTINCT", "p.type)", "=", "(", "SELECT", "COUNT(DISTINCT", "type)", "FROM", "products", ")"
+      ],
+      "solution": [
+        "SELECT", "customer_id", "FROM", "orders", "o", "JOIN", "order_items", "oi", "ON", "o.id", "=", "oi.order_id", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "customer_id", "HAVING", "COUNT(DISTINCT", "p.type)", "=", "(", "SELECT", "COUNT(DISTINCT", "type)", "FROM", "products", ")"
+      ],
+      "category": "Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer", "range": [0, 1], "complexity": 2},
+        {"id": "join_tables", "label": "Join Orders to Products", "range": [2, 18], "complexity": 3},
+        {"id": "group_customers", "label": "Group by Customer", "range": [19, 20], "complexity": 2},
+        {"id": "count_types", "label": "Count Distinct Product Types", "range": [21, 24], "complexity": 3},
+        {"id": "total_types", "label": "Get Total Product Types", "range": [25, 31], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_098",
+      "title": "Average Time Between Orders",
+      "tokens": [
+        "WITH", "order_intervals", "AS", "(", "SELECT", "customer_id,", "order_date,", "LAG(order_date)", "OVER", "(PARTITION BY", "customer_id", "ORDER BY", "order_date)", "AS", "prev_order_date", "FROM", "orders", ")", "SELECT", "customer_id,", "AVG(order_date", "-", "prev_order_date)", "AS", "avg_days_between", "FROM", "order_intervals", "WHERE", "prev_order_date", "IS", "NOT", "NULL", "GROUP BY", "customer_id"
+      ],
+      "solution": [
+        "WITH", "order_intervals", "AS", "(", "SELECT", "customer_id,", "order_date,", "LAG(order_date)", "OVER", "(PARTITION BY", "customer_id", "ORDER BY", "order_date)", "AS", "prev_order_date", "FROM", "orders", ")", "SELECT", "customer_id,", "AVG(order_date", "-", "prev_order_date)", "AS", "avg_days_between", "FROM", "order_intervals", "WHERE", "prev_order_date", "IS", "NOT", "NULL", "GROUP BY", "customer_id"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Order Intervals CTE", "range": [0, 3], "complexity": 2},
+        {"id": "previous_order", "label": "Get Previous Order Date", "range": [4, 16], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [17, 24], "complexity": 2},
+        {"id": "calc_avg", "label": "Calculate Average Days Between", "range": [25, 27], "complexity": 3},
+        {"id": "filter_prev", "label": "Filter Customers with Previous Orders", "range": [28, 32], "complexity": 2},
+        {"id": "group_customers", "label": "Group by Customer", "range": [33, 34], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_099",
+      "title": "Products Purchased Together Most Often",
+      "tokens": [
+        "SELECT", "a.product_id", "AS", "product_a,", "b.product_id", "AS", "product_b,", "COUNT(*)", "AS", "frequency", "FROM", "order_items", "a", "JOIN", "order_items", "b", "ON", "a.order_id", "=", "b.order_id", "AND", "a.product_id", "<", "b.product_id", "GROUP BY", "a.product_id,", "b.product_id", "ORDER BY", "frequency", "DESC", "LIMIT", "10"
+      ],
+      "solution": [
+        "SELECT", "a.product_id", "AS", "product_a,", "b.product_id", "AS", "product_b,", "COUNT(*)", "AS", "frequency", "FROM", "order_items", "a", "JOIN", "order_items", "b", "ON", "a.order_id", "=", "b.order_id", "AND", "a.product_id", "<", "b.product_id", "GROUP BY", "a.product_id,", "b.product_id", "ORDER BY", "frequency", "DESC", "LIMIT", "10"
+      ],
+      "category": "Self Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product Pairs", "range": [0, 9], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Order Items", "range": [10, 12], "complexity": 2},
+        {"id": "self_join", "label": "Join Order Items to Itself", "range": [13, 16], "complexity": 3},
+        {"id": "match_orders", "label": "Match by Order", "range": [17, 20], "complexity": 3},
+        {"id": "distinct_pairs", "label": "Ensure Distinct Pairs", "range": [21, 23], "complexity": 3},
+        {"id": "group_pairs", "label": "Group by Product Pairs", "range": [24, 26], "complexity": 2},
+        {"id": "sort_and_limit", "label": "Sort by Frequency and Limit", "range": [27, 31], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_100",
+      "title": "Revenue Contribution by Top 10 Customers",
+      "tokens": [
+        "WITH", "customer_revenue", "AS", "(", "SELECT", "customer_id,", "SUM(total)", "AS", "revenue", "FROM", "orders", "GROUP BY", "customer_id", ")", "SELECT", "customer_id,", "revenue,", "revenue", "/", "SUM(revenue)", "OVER", "()", "*", "100", "AS", "percent_contribution", "FROM", "customer_revenue", "WHERE", "customer_id", "IN", "(", "SELECT", "customer_id", "FROM", "customer_revenue", "ORDER BY", "revenue", "DESC", "LIMIT", "10", ")"
+      ],
+      "solution": [
+        "WITH", "customer_revenue", "AS", "(", "SELECT", "customer_id,", "SUM(total)", "AS", "revenue", "FROM", "orders", "GROUP BY", "customer_id", ")", "SELECT", "customer_id,", "revenue,", "revenue", "/", "SUM(revenue)", "OVER", "()", "*", "100", "AS", "percent_contribution", "FROM", "customer_revenue", "WHERE", "customer_id", "IN", "(", "SELECT", "customer_id", "FROM", "customer_revenue", "ORDER BY", "revenue", "DESC", "LIMIT", "10", ")"
+      ],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Customer Revenue CTE", "range": [0, 3], "complexity": 2},
+        {"id": "calculate_revenue", "label": "Calculate Revenue by Customer", "range": [4, 12], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [13, 17], "complexity": 2},
+        {"id": "calc_percentage", "label": "Calculate Percentage Contribution", "range": [18, 24], "complexity": 4},
+        {"id": "filter_top", "label": "Filter Top 10 Customers", "range": [25, 40], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_101",
+      "title": "Customers with No Orders in Current Year",
+      "tokens": ["SELECT", "c.id,", "c.name", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.customer_id", "=", "c.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "EXTRACT(YEAR", "FROM", "CURRENT_DATE)", ")"],
+      "solution": ["SELECT", "c.id,", "c.name", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.customer_id", "=", "c.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "EXTRACT(YEAR", "FROM", "CURRENT_DATE)", ")"],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [3, 5], "complexity": 2},
+        {"id": "not_exists", "label": "Check for Missing Orders", "range": [6, 9], "complexity": 3},
+        {"id": "build_subquery", "label": "Build Order Lookup", "range": [10, 26], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_102",
+      "title": "Running Total with Partition",
+      "tokens": ["SELECT", "product_id,", "sale_date,", "amount,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "CURRENT ROW)", "AS", "running_total", "FROM", "sales"],
+      "solution": ["SELECT", "product_id,", "sale_date,", "amount,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "CURRENT ROW)", "AS", "running_total", "FROM", "sales"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Sales Data", "range": [0, 3], "complexity": 2},
+        {"id": "sum_over", "label": "Define Window Sum", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Product", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_date", "label": "Order by Date", "range": [8, 9], "complexity": 2},
+        {"id": "frame_spec", "label": "Define Cumulative Window", "range": [10, 13], "complexity": 3},
+        {"id": "label_result", "label": "Label Running Total", "range": [14, 14], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [15, 17], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_103",
+      "title": "Products with Sales Above Average",
+      "tokens": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "p.name,", "ps.total_sold", "FROM", "products", "p", "JOIN", "product_sales", "ps", "ON", "p.id", "=", "ps.product_id", "WHERE", "ps.total_sold", ">", "(", "SELECT", "AVG(total_sold)", "FROM", "product_sales", ")"],
+      "solution": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "p.name,", "ps.total_sold", "FROM", "products", "p", "JOIN", "product_sales", "ps", "ON", "p.id", "=", "ps.product_id", "WHERE", "ps.total_sold", ">", "(", "SELECT", "AVG(total_sold)", "FROM", "product_sales", ")"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Sales by Product", "range": [4, 13], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [14, 17], "complexity": 2},
+        {"id": "join_products", "label": "Join Product Names", "range": [18, 25], "complexity": 3},
+        {"id": "compare_to_avg", "label": "Compare to Average", "range": [26, 35], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_104",
+      "title": "Employee Salary Percentile",
+      "tokens": ["SELECT", "name,", "salary,", "department,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees", "WHERE", "salary", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "salary,", "department,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees", "WHERE", "salary", "IS", "NOT", "NULL"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Employee Data", "range": [0, 3], "complexity": 2},
+        {"id": "percent_rank", "label": "Calculate Percent Rank", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Partition by Department", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_salary", "label": "Order by Salary", "range": [8, 10], "complexity": 2},
+        {"id": "label_pct", "label": "Label as Percent Rank", "range": [11, 12], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [13, 14], "complexity": 1},
+        {"id": "filter_nulls", "label": "Exclude Null Salaries", "range": [15, 18], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_105",
+      "title": "Orders with Multiple Item Types",
+      "tokens": ["SELECT", "order_id,", "COUNT(DISTINCT", "product_id)", "AS", "unique_products", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(DISTINCT", "product_id)", ">", "2"],
+      "solution": ["SELECT", "order_id,", "COUNT(DISTINCT", "product_id)", "AS", "unique_products", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(DISTINCT", "product_id)", ">", "2"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Order and Unique Products", "range": [0, 5], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [6, 7], "complexity": 1},
+        {"id": "group_orders", "label": "Group by Order", "range": [8, 9], "complexity": 2},
+        {"id": "filter_multi", "label": "Filter Orders with Multiple Products", "range": [10, 14], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_106",
+      "title": "Yearly Sales Growth Analysis",
+      "tokens": ["WITH", "yearly_sales", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year,", "SUM(total)", "AS", "revenue", "FROM", "orders", "GROUP BY", "EXTRACT(YEAR", "FROM", "order_date)", ")", "SELECT", "year,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "AS", "prev_year,", "ROUND((revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "year)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "*", "100,", "2)", "AS", "growth_pct", "FROM", "yearly_sales"],
+      "solution": ["WITH", "yearly_sales", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year,", "SUM(total)", "AS", "revenue", "FROM", "orders", "GROUP BY", "EXTRACT(YEAR", "FROM", "order_date)", ")", "SELECT", "year,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "AS", "prev_year,", "ROUND((revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "year)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "*", "100,", "2)", "AS", "growth_pct", "FROM", "yearly_sales"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Yearly Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_yearly", "label": "Calculate Yearly Revenue", "range": [4, 18], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [19, 22], "complexity": 2},
+        {"id": "previous_year", "label": "Get Previous Year Revenue", "range": [23, 27], "complexity": 4},
+        {"id": "calc_growth", "label": "Calculate Growth Percentage", "range": [28, 43], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_107",
+      "title": "Products with Category Average Comparison",
+      "tokens": ["SELECT", "p1.name,", "p1.price,", "p1.category", "FROM", "products", "p1", "WHERE", "p1.price", ">", "(", "SELECT", "AVG(p2.price)", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", ")"],
+      "solution": ["SELECT", "p1.name,", "p1.price,", "p1.category", "FROM", "products", "p1", "WHERE", "p1.price", ">", "(", "SELECT", "AVG(p2.price)", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", ")"],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [4, 6], "complexity": 2},
+        {"id": "compare_to_avg", "label": "Compare to Average", "range": [7, 10], "complexity": 3},
+        {"id": "calculate_avg", "label": "Calculate Category Average", "range": [11, 20], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_108",
+      "title": "Employee Hierarchy with Recursive CTE",
+      "tokens": ["WITH", "RECURSIVE", "emp_tree", "AS", "(", "SELECT", "id,", "name,", "manager_id,", "0", "AS", "level", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL", "UNION", "ALL", "SELECT", "e.id,", "e.name,", "e.manager_id,", "et.level", "+", "1", "FROM", "employees", "e", "JOIN", "emp_tree", "et", "ON", "e.manager_id", "=", "et.id", ")", "SELECT", "name,", "level", "FROM", "emp_tree", "ORDER BY", "level,", "name"],
+      "solution": ["WITH", "RECURSIVE", "emp_tree", "AS", "(", "SELECT", "id,", "name,", "manager_id,", "0", "AS", "level", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL", "UNION", "ALL", "SELECT", "e.id,", "e.name,", "e.manager_id,", "et.level", "+", "1", "FROM", "employees", "e", "JOIN", "emp_tree", "et", "ON", "e.manager_id", "=", "et.id", ")", "SELECT", "name,", "level", "FROM", "emp_tree", "ORDER BY", "level,", "name"],
+      "category": "Recursive CTEs",
+      "chunks": [
+        {"id": "recursive_cte", "label": "Define Recursive CTE", "range": [0, 3], "complexity": 3},
+        {"id": "anchor_members", "label": "Select Top-Level Managers", "range": [4, 17], "complexity": 3},
+        {"id": "recursive_step", "label": "Join Employees at Each Level", "range": [18, 35], "complexity": 4},
+        {"id": "query_cte", "label": "Query the Hierarchy", "range": [36, 40], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Level and Name", "range": [41, 43], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_109",
+      "title": "Customer Lifetime Value with Ranking",
+      "tokens": ["SELECT", "c.id,", "c.name,", "SUM(o.total)", "AS", "ltv,", "RANK()", "OVER", "(ORDER BY", "SUM(o.total)", "DESC)", "AS", "ltv_rank", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.id,", "c.name"],
+      "solution": ["SELECT", "c.id,", "c.name,", "SUM(o.total)", "AS", "ltv,", "RANK()", "OVER", "(ORDER BY", "SUM(o.total)", "DESC)", "AS", "ltv_rank", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.id,", "c.name"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer Info", "range": [0, 5], "complexity": 2},
+        {"id": "rank_ltv", "label": "Rank by Lifetime Value", "range": [6, 12], "complexity": 3},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [13, 15], "complexity": 2},
+        {"id": "join_orders", "label": "Join Order Data", "range": [16, 22], "complexity": 3},
+        {"id": "group_customers", "label": "Group by Customer", "range": [23, 25], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_110",
+      "title": "Products with Maximum Order Frequency",
+      "tokens": ["SELECT", "product_id,", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", "HAVING", "COUNT(*)", "=", "(", "SELECT", "MAX(order_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", ")", "max_counts", ")"],
+      "solution": ["SELECT", "product_id,", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", "HAVING", "COUNT(*)", "=", "(", "SELECT", "MAX(order_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", ")", "max_counts", ")"],
+      "category": "Nested Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_products", "label": "Group by Product", "range": [7, 8], "complexity": 2},
+        {"id": "match_max", "label": "Match Maximum Order Count", "range": [9, 12], "complexity": 3},
+        {"id": "max_subquery", "label": "Find Maximum in Subquery", "range": [13, 29], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_111",
+      "title": "Quarterly Active Users Retention",
+      "tokens": ["WITH", "quarterly_users", "AS", "(", "SELECT", "user_id,", "EXTRACT(YEAR", "FROM", "login_date)", "AS", "year,", "EXTRACT(QUARTER", "FROM", "login_date)", "AS", "quarter", "FROM", "user_logins", "GROUP BY", "user_id,", "EXTRACT(YEAR", "FROM", "login_date),", "EXTRACT(QUARTER", "FROM", "login_date)", ")", "SELECT", "year,", "quarter,", "COUNT(DISTINCT", "user_id)", "AS", "active_users", "FROM", "quarterly_users", "GROUP BY", "year,", "quarter", "ORDER BY", "year,", "quarter"],
+      "solution": ["WITH", "quarterly_users", "AS", "(", "SELECT", "user_id,", "EXTRACT(YEAR", "FROM", "login_date)", "AS", "year,", "EXTRACT(QUARTER", "FROM", "login_date)", "AS", "quarter", "FROM", "user_logins", "GROUP BY", "user_id,", "EXTRACT(YEAR", "FROM", "login_date),", "EXTRACT(QUARTER", "FROM", "login_date)", ")", "SELECT", "year,", "quarter,", "COUNT(DISTINCT", "user_id)", "AS", "active_users", "FROM", "quarterly_users", "GROUP BY", "year,", "quarter", "ORDER BY", "year,", "quarter"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Quarterly Users CTE", "range": [0, 3], "complexity": 2},
+        {"id": "extract_quarters", "label": "Extract Year and Quarter", "range": [4, 16], "complexity": 3},
+        {"id": "unique_users", "label": "Get Unique Users per Quarter", "range": [17, 22], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [23, 28], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Year and Quarter", "range": [29, 31], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_112",
+      "title": "Top Category by Revenue",
+      "tokens": ["SELECT", "category,", "SUM(quantity", "*", "price)", "AS", "revenue", "FROM", "order_items", "oi", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "category", "ORDER BY", "revenue", "DESC", "LIMIT", "1"],
+      "solution": ["SELECT", "category,", "SUM(quantity", "*", "price)", "AS", "revenue", "FROM", "order_items", "oi", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "category", "ORDER BY", "revenue", "DESC", "LIMIT", "1"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Category and Revenue", "range": [0, 6], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Order Items", "range": [7, 9], "complexity": 2},
+        {"id": "join_products", "label": "Join Product Data", "range": [10, 16], "complexity": 3},
+        {"id": "group_results", "label": "Group by Category", "range": [17, 18], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Revenue", "range": [19, 21], "complexity": 2},
+        {"id": "limit_results", "label": "Get Top Category", "range": [22, 23], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_113",
+      "title": "Customers with Consecutive Monthly Orders",
+      "tokens": ["WITH", "monthly_orders", "AS", "(", "SELECT", "customer_id,", "DATE_TRUNC('month',", "order_date)", "AS", "order_month", "FROM", "orders", "GROUP BY", "customer_id,", "DATE_TRUNC('month',", "order_date)", ")", "SELECT", "DISTINCT", "mo1.customer_id", "FROM", "monthly_orders", "mo1", "JOIN", "monthly_orders", "mo2", "ON", "mo1.customer_id", "=", "mo2.customer_id", "AND", "mo1.order_month", "=", "mo2.order_month", "-", "INTERVAL", "'1 month'", "JOIN", "monthly_orders", "mo3", "ON", "mo1.customer_id", "=", "mo3.customer_id", "AND", "mo1.order_month", "=", "mo3.order_month", "-", "INTERVAL", "'2 months'"],
+      "solution": ["WITH", "monthly_orders", "AS", "(", "SELECT", "customer_id,", "DATE_TRUNC('month',", "order_date)", "AS", "order_month", "FROM", "orders", "GROUP BY", "customer_id,", "DATE_TRUNC('month',", "order_date)", ")", "SELECT", "DISTINCT", "mo1.customer_id", "FROM", "monthly_orders", "mo1", "JOIN", "monthly_orders", "mo2", "ON", "mo1.customer_id", "=", "mo2.customer_id", "AND", "mo1.order_month", "=", "mo2.order_month", "-", "INTERVAL", "'1 month'", "JOIN", "monthly_orders", "mo3", "ON", "mo1.customer_id", "=", "mo3.customer_id", "AND", "mo1.order_month", "=", "mo3.order_month", "-", "INTERVAL", "'2 months'"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Orders CTE", "range": [0, 3], "complexity": 2},
+        {"id": "distinct_months", "label": "Get Distinct Order Months", "range": [4, 14], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [15, 20], "complexity": 2},
+        {"id": "month_1", "label": "Join for Month 1", "range": [21, 36], "complexity": 4},
+        {"id": "month_2", "label": "Join for Month 2", "range": [37, 53], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_114",
+      "title": "Product Sales Distribution Analysis",
+      "tokens": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_quantity,", "CASE", "WHEN", "SUM(quantity)", ">", "1000", "THEN", "'High Volume'", "WHEN", "SUM(quantity)", "BETWEEN", "100", "AND", "1000", "THEN", "'Medium Volume'", "ELSE", "'Low Volume'", "END", "AS", "volume_category", "FROM", "order_items", "GROUP BY", "product_id"],
+      "solution": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_quantity,", "CASE", "WHEN", "SUM(quantity)", ">", "1000", "THEN", "'High Volume'", "WHEN", "SUM(quantity)", "BETWEEN", "100", "AND", "1000", "THEN", "'Medium Volume'", "ELSE", "'Low Volume'", "END", "AS", "volume_category", "FROM", "order_items", "GROUP BY", "product_id"],
+      "category": "Conditional",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Quantity", "range": [0, 4], "complexity": 2},
+        {"id": "case_high", "label": "Define High Volume", "range": [5, 11], "complexity": 2},
+        {"id": "case_medium", "label": "Define Medium Volume", "range": [12, 19], "complexity": 2},
+        {"id": "case_low", "label": "Define Low Volume", "range": [20, 22], "complexity": 2},
+        {"id": "label_category", "label": "Label as Volume Category", "range": [23, 25], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [26, 27], "complexity": 1},
+        {"id": "group_results", "label": "Group by Product", "range": [28, 29], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_115",
+      "title": "Monthly Customer Acquisition Cost",
+      "tokens": ["WITH", "monthly_customers", "AS", "(", "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_customers", "FROM", "customers", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", ")", "SELECT", "month,", "new_customers,", "SUM(new_customers)", "OVER", "(ORDER BY", "month)", "AS", "cumulative_customers", "FROM", "monthly_customers", "ORDER BY", "month"],
+      "solution": ["WITH", "monthly_customers", "AS", "(", "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_customers", "FROM", "customers", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", ")", "SELECT", "month,", "new_customers,", "SUM(new_customers)", "OVER", "(ORDER BY", "month)", "AS", "cumulative_customers", "FROM", "monthly_customers", "ORDER BY", "month"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Customers CTE", "range": [0, 3], "complexity": 2},
+        {"id": "count_new", "label": "Count New Customers by Month", "range": [4, 16], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [17, 20], "complexity": 2},
+        {"id": "cumulative_sum", "label": "Calculate Cumulative Sum", "range": [21, 26], "complexity": 4},
+        {"id": "sort_results", "label": "Sort by Month", "range": [27, 28], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_116",
+      "title": "Employees with Same Job Title",
+      "tokens": ["SELECT", "e1.name,", "e2.name,", "e1.job_title", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.job_title", "=", "e2.job_title", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.department", "!=", "e2.department"],
+      "solution": ["SELECT", "e1.name,", "e2.name,", "e1.job_title", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.job_title", "=", "e2.job_title", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.department", "!=", "e2.department"],
+      "category": "Self Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Employee Pairs", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Employees", "range": [4, 6], "complexity": 2},
+        {"id": "self_join", "label": "Join Employees to Itself", "range": [7, 10], "complexity": 3},
+        {"id": "match_jobs", "label": "Match Job Title", "range": [11, 14], "complexity": 2},
+        {"id": "distinct_pairs", "label": "Ensure Distinct Pairs", "range": [15, 18], "complexity": 3},
+        {"id": "different_depts", "label": "Filter Different Departments", "range": [19, 22], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_117",
+      "title": "Top Products by Revenue in Each Category",
+      "tokens": ["WITH", "category_revenue", "AS", "(", "SELECT", "p.category,", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category,", "p.name", ")", "SELECT", "category,", "name,", "revenue", "FROM", "(", "SELECT", "category,", "name,", "revenue,", "ROW_NUMBER()", "OVER", "(PARTITION BY", "category", "ORDER BY", "revenue", "DESC)", "AS", "rn", "FROM", "category_revenue", ")", "ranked", "WHERE", "rn", "=", "1"],
+      "solution": ["WITH", "category_revenue", "AS", "(", "SELECT", "p.category,", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category,", "p.name", ")", "SELECT", "category,", "name,", "revenue", "FROM", "(", "SELECT", "category,", "name,", "revenue,", "ROW_NUMBER()", "OVER", "(PARTITION BY", "category", "ORDER BY", "revenue", "DESC)", "AS", "rn", "FROM", "category_revenue", ")", "ranked", "WHERE", "rn", "=", "1"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Category Revenue CTE", "range": [0, 3], "complexity": 2},
+        {"id": "calculate_revenue", "label": "Calculate Revenue by Product", "range": [4, 24], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [25, 29], "complexity": 2},
+        {"id": "rank_products", "label": "Rank Products per Category", "range": [30, 45], "complexity": 4},
+        {"id": "filter_top", "label": "Filter Top Product per Category", "range": [46, 50], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_118",
+      "title": "Products Never Purchased Together",
+      "tokens": ["SELECT", "p1.name,", "p2.name", "FROM", "products", "p1", "CROSS JOIN", "products", "p2", "WHERE", "p1.id", "<", "p2.id", "AND", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "order_items", "oi1", "JOIN", "order_items", "oi2", "ON", "oi1.order_id", "=", "oi2.order_id", "WHERE", "oi1.product_id", "=", "p1.id", "AND", "oi2.product_id", "=", "p2.id", ")"],
+      "solution": ["SELECT", "p1.name,", "p2.name", "FROM", "products", "p1", "CROSS JOIN", "products", "p2", "WHERE", "p1.id", "<", "p2.id", "AND", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "order_items", "oi1", "JOIN", "order_items", "oi2", "ON", "oi1.order_id", "=", "oi2.order_id", "WHERE", "oi1.product_id", "=", "p1.id", "AND", "oi2.product_id", "=", "p2.id", ")"],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product Pairs", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "cross_join", "label": "Create All Product Combinations", "range": [6, 8], "complexity": 3},
+        {"id": "filter_pairs", "label": "Filter Unique Pairs", "range": [9, 12], "complexity": 3},
+        {"id": "not_exists", "label": "Check for No Matches", "range": [13, 16], "complexity": 3},
+        {"id": "build_subquery", "label": "Build Purchase Lookup", "range": [17, 37], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_119",
+      "title": "Monthly Employee Retention Rate",
+      "tokens": ["WITH", "employee_tenure", "AS", "(", "SELECT", "id,", "EXTRACT(YEAR", "FROM", "hire_date)", "AS", "hire_year,", "EXTRACT(MONTH", "FROM", "hire_date)", "AS", "hire_month,", "EXTRACT(YEAR", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_year,", "EXTRACT(MONTH", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_month", "FROM", "employees", ")", "SELECT", "hire_year,", "hire_month,", "COUNT(*)", "AS", "hired,", "SUM(CASE", "WHEN", "term_year", "=", "hire_year", "AND", "term_month", "=", "hire_month", "THEN", "1", "ELSE", "0", "END)", "AS", "retained", "FROM", "employee_tenure", "GROUP BY", "hire_year,", "hire_month", "ORDER BY", "hire_year,", "hire_month"],
+      "solution": ["WITH", "employee_tenure", "AS", "(", "SELECT", "id,", "EXTRACT(YEAR", "FROM", "hire_date)", "AS", "hire_year,", "EXTRACT(MONTH", "FROM", "hire_date)", "AS", "hire_month,", "EXTRACT(YEAR", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_year,", "EXTRACT(MONTH", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_month", "FROM", "employees", ")", "SELECT", "hire_year,", "hire_month,", "COUNT(*)", "AS", "hired,", "SUM(CASE", "WHEN", "term_year", "=", "hire_year", "AND", "term_month", "=", "hire_month", "THEN", "1", "ELSE", "0", "END)", "AS", "retained", "FROM", "employee_tenure", "GROUP BY", "hire_year,", "hire_month", "ORDER BY", "hire_year,", "hire_month"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Employee Tenure CTE", "range": [0, 3], "complexity": 2},
+        {"id": "extract_dates", "label": "Extract Hire and Term Dates", "range": [4, 26], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [27, 32], "complexity": 2},
+        {"id": "count_hired", "label": "Count Total Hired", "range": [33, 34], "complexity": 2},
+        {"id": "case_retained", "label": "Calculate Retained Employees", "range": [35, 46], "complexity": 4},
+        {"id": "group_results", "label": "Group by Year and Month", "range": [47, 49], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_120",
+      "title": "Top 3 Products by Sales with Lead/Lag Analysis",
+      "tokens": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sales", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "product_id,", "total_sales,", "RANK()", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "sales_rank,", "LAG(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "prev_sales,", "LEAD(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "next_sales", "FROM", "product_sales", "WHERE", "total_sales", ">", "0"],
+      "solution": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sales", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "product_id,", "total_sales,", "RANK()", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "sales_rank,", "LAG(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "prev_sales,", "LEAD(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "next_sales", "FROM", "product_sales", "WHERE", "total_sales", ">", "0"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Product Sales", "range": [4, 13], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [14, 17], "complexity": 2},
+        {"id": "rank_sales", "label": "Rank by Sales", "range": [18, 22], "complexity": 3},
+        {"id": "lag_sales", "label": "Get Previous Sales", "range": [23, 28], "complexity": 4},
+        {"id": "lead_sales", "label": "Get Next Sales", "range": [29, 34], "complexity": 4},
+        {"id": "filter_zero", "label": "Exclude Zero Sales", "range": [35, 38], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_121",
+      "title": "Customers with No Orders in Current Year",
+      "tokens": ["SELECT", "c.id,", "c.name", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.customer_id", "=", "c.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "EXTRACT(YEAR", "FROM", "CURRENT_DATE)", ")"],
+      "solution": ["SELECT", "c.id,", "c.name", "FROM", "customers", "c", "WHERE", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.customer_id", "=", "c.id", "AND", "EXTRACT(YEAR", "FROM", "o.order_date)", "=", "EXTRACT(YEAR", "FROM", "CURRENT_DATE)", ")"],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Customer Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [3, 5], "complexity": 2},
+        {"id": "not_exists", "label": "Check for No Orders", "range": [6, 9], "complexity": 3},
+        {"id": "subquery_orders", "label": "Build Order Lookup", "range": [10, 26], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_122",
+      "title": "Running Total with Partition",
+      "tokens": ["SELECT", "product_id,", "sale_date,", "amount,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "CURRENT ROW)", "AS", "running_total", "FROM", "sales"],
+      "solution": ["SELECT", "product_id,", "sale_date,", "amount,", "SUM(amount)", "OVER", "(PARTITION BY", "product_id", "ORDER BY", "sale_date", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "CURRENT ROW)", "AS", "running_total", "FROM", "sales"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Sales Data", "range": [0, 3], "complexity": 2},
+        {"id": "sum_over", "label": "Define Window Sum", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Group by Product", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_date", "label": "Order by Date", "range": [8, 9], "complexity": 2},
+        {"id": "frame_spec", "label": "Define Cumulative Window", "range": [10, 13], "complexity": 3},
+        {"id": "label_result", "label": "Label as Running Total", "range": [14, 14], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [15, 17], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_h_123",
+      "title": "Products with Sales Above Average",
+      "tokens": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "p.name,", "ps.total_sold", "FROM", "products", "p", "JOIN", "product_sales", "ps", "ON", "p.id", "=", "ps.product_id", "WHERE", "ps.total_sold", ">", "(", "SELECT", "AVG(total_sold)", "FROM", "product_sales", ")"],
+      "solution": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "p.name,", "ps.total_sold", "FROM", "products", "p", "JOIN", "product_sales", "ps", "ON", "p.id", "=", "ps.product_id", "WHERE", "ps.total_sold", ">", "(", "SELECT", "AVG(total_sold)", "FROM", "product_sales", ")"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Sales by Product", "range": [4, 13], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [14, 17], "complexity": 2},
+        {"id": "join_products", "label": "Join Product Names", "range": [18, 25], "complexity": 3},
+        {"id": "compare_to_avg", "label": "Compare to Average", "range": [26, 35], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_124",
+      "title": "Employee Salary Percentile",
+      "tokens": ["SELECT", "name,", "salary,", "department,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees", "WHERE", "salary", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "salary,", "department,", "PERCENT_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary)", "AS", "pct_rank", "FROM", "employees", "WHERE", "salary", "IS", "NOT", "NULL"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Data", "range": [0, 3], "complexity": 2},
+        {"id": "percent_rank", "label": "Calculate Percent Rank", "range": [4, 5], "complexity": 3},
+        {"id": "partition_by", "label": "Group by Department", "range": [6, 7], "complexity": 2},
+        {"id": "order_by_salary", "label": "Order by Salary", "range": [8, 10], "complexity": 2},
+        {"id": "label_pct", "label": "Label as Percent Rank", "range": [11, 12], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [13, 14], "complexity": 1},
+        {"id": "filter_nulls", "label": "Exclude Null Salaries", "range": [15, 18], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_125",
+      "title": "Orders with Multiple Item Types",
+      "tokens": ["SELECT", "order_id,", "COUNT(DISTINCT", "product_id)", "AS", "unique_products", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(DISTINCT", "product_id)", ">", "2"],
+      "solution": ["SELECT", "order_id,", "COUNT(DISTINCT", "product_id)", "AS", "unique_products", "FROM", "order_items", "GROUP BY", "order_id", "HAVING", "COUNT(DISTINCT", "product_id)", ">", "2"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Order and Unique Products", "range": [0, 5], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [6, 7], "complexity": 1},
+        {"id": "group_orders", "label": "Group by Order", "range": [8, 9], "complexity": 2},
+        {"id": "filter_multi", "label": "Filter Orders with Multiple Products", "range": [10, 14], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_126",
+      "title": "Yearly Sales Growth Analysis",
+      "tokens": ["WITH", "yearly_sales", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year,", "SUM(total)", "AS", "revenue", "FROM", "orders", "GROUP BY", "EXTRACT(YEAR", "FROM", "order_date)", ")", "SELECT", "year,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "AS", "prev_year,", "ROUND((revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "year)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "*", "100,", "2)", "AS", "growth_pct", "FROM", "yearly_sales"],
+      "solution": ["WITH", "yearly_sales", "AS", "(", "SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year,", "SUM(total)", "AS", "revenue", "FROM", "orders", "GROUP BY", "EXTRACT(YEAR", "FROM", "order_date)", ")", "SELECT", "year,", "revenue,", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "AS", "prev_year,", "ROUND((revenue", "-", "LAG(revenue)", "OVER", "(ORDER BY", "year)", ")", "/", "LAG(revenue)", "OVER", "(ORDER BY", "year)", "*", "100,", "2)", "AS", "growth_pct", "FROM", "yearly_sales"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Yearly Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_yearly", "label": "Calculate Yearly Revenue", "range": [4, 18], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [19, 22], "complexity": 2},
+        {"id": "previous_year", "label": "Get Previous Year Revenue", "range": [23, 27], "complexity": 4},
+        {"id": "calc_growth", "label": "Calculate Growth Percentage", "range": [28, 43], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_127",
+      "title": "Products with Category Average Comparison",
+      "tokens": ["SELECT", "p1.name,", "p1.price,", "p1.category", "FROM", "products", "p1", "WHERE", "p1.price", ">", "(", "SELECT", "AVG(p2.price)", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", ")"],
+      "solution": ["SELECT", "p1.name,", "p1.price,", "p1.category", "FROM", "products", "p1", "WHERE", "p1.price", ">", "(", "SELECT", "AVG(p2.price)", "FROM", "products", "p2", "WHERE", "p2.category", "=", "p1.category", ")"],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [4, 6], "complexity": 2},
+        {"id": "compare_to_avg", "label": "Compare to Average", "range": [7, 10], "complexity": 3},
+        {"id": "calculate_avg", "label": "Calculate Category Average", "range": [11, 20], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_128",
+      "title": "Employee Hierarchy with Recursive CTE",
+      "tokens": ["WITH", "RECURSIVE", "emp_tree", "AS", "(", "SELECT", "id,", "name,", "manager_id,", "0", "AS", "level", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL", "UNION", "ALL", "SELECT", "e.id,", "e.name,", "e.manager_id,", "et.level", "+", "1", "FROM", "employees", "e", "JOIN", "emp_tree", "et", "ON", "e.manager_id", "=", "et.id", ")", "SELECT", "name,", "level", "FROM", "emp_tree", "ORDER BY", "level,", "name"],
+      "solution": ["WITH", "RECURSIVE", "emp_tree", "AS", "(", "SELECT", "id,", "name,", "manager_id,", "0", "AS", "level", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL", "UNION", "ALL", "SELECT", "e.id,", "e.name,", "e.manager_id,", "et.level", "+", "1", "FROM", "employees", "e", "JOIN", "emp_tree", "et", "ON", "e.manager_id", "=", "et.id", ")", "SELECT", "name,", "level", "FROM", "emp_tree", "ORDER BY", "level,", "name"],
+      "category": "Recursive CTEs",
+      "chunks": [
+        {"id": "recursive_cte", "label": "Define Recursive CTE", "range": [0, 3], "complexity": 3},
+        {"id": "anchor_members", "label": "Select Top-Level Managers", "range": [4, 17], "complexity": 3},
+        {"id": "recursive_step", "label": "Join Employees at Each Level", "range": [18, 35], "complexity": 4},
+        {"id": "query_cte", "label": "Query the Hierarchy", "range": [36, 40], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Level and Name", "range": [41, 43], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_129",
+      "title": "Customer Lifetime Value with Ranking",
+      "tokens": ["SELECT", "c.id,", "c.name,", "SUM(o.total)", "AS", "ltv,", "RANK()", "OVER", "(ORDER BY", "SUM(o.total)", "DESC)", "AS", "ltv_rank", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.id,", "c.name"],
+      "solution": ["SELECT", "c.id,", "c.name,", "SUM(o.total)", "AS", "ltv,", "RANK()", "OVER", "(ORDER BY", "SUM(o.total)", "DESC)", "AS", "ltv_rank", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.id,", "c.name"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Customer Info", "range": [0, 5], "complexity": 2},
+        {"id": "rank_ltv", "label": "Rank by Lifetime Value", "range": [6, 12], "complexity": 3},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [13, 15], "complexity": 2},
+        {"id": "join_orders", "label": "Join Orders", "range": [16, 22], "complexity": 3},
+        {"id": "group_customers", "label": "Group by Customer", "range": [23, 25], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_130",
+      "title": "Products with Maximum Order Frequency",
+      "tokens": ["SELECT", "product_id,", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", "HAVING", "COUNT(*)", "=", "(", "SELECT", "MAX(order_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", ")", "max_counts", ")"],
+      "solution": ["SELECT", "product_id,", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", "HAVING", "COUNT(*)", "=", "(", "SELECT", "MAX(order_count)", "FROM", "(", "SELECT", "COUNT(*)", "AS", "order_count", "FROM", "order_items", "GROUP BY", "product_id", ")", "max_counts", ")"],
+      "category": "Nested Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_products", "label": "Group by Product", "range": [7, 8], "complexity": 2},
+        {"id": "match_max", "label": "Match Maximum Order Count", "range": [9, 12], "complexity": 3},
+        {"id": "max_subquery", "label": "Find Maximum in Subquery", "range": [13, 29], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_131",
+      "title": "Quarterly Active Users Retention",
+      "tokens": ["WITH", "quarterly_users", "AS", "(", "SELECT", "user_id,", "EXTRACT(YEAR", "FROM", "login_date)", "AS", "year,", "EXTRACT(QUARTER", "FROM", "login_date)", "AS", "quarter", "FROM", "user_logins", "GROUP BY", "user_id,", "EXTRACT(YEAR", "FROM", "login_date),", "EXTRACT(QUARTER", "FROM", "login_date)", ")", "SELECT", "year,", "quarter,", "COUNT(DISTINCT", "user_id)", "AS", "active_users", "FROM", "quarterly_users", "GROUP BY", "year,", "quarter", "ORDER BY", "year,", "quarter"],
+      "solution": ["WITH", "quarterly_users", "AS", "(", "SELECT", "user_id,", "EXTRACT(YEAR", "FROM", "login_date)", "AS", "year,", "EXTRACT(QUARTER", "FROM", "login_date)", "AS", "quarter", "FROM", "user_logins", "GROUP BY", "user_id,", "EXTRACT(YEAR", "FROM", "login_date),", "EXTRACT(QUARTER", "FROM", "login_date)", ")", "SELECT", "year,", "quarter,", "COUNT(DISTINCT", "user_id)", "AS", "active_users", "FROM", "quarterly_users", "GROUP BY", "year,", "quarter", "ORDER BY", "year,", "quarter"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Quarterly Users CTE", "range": [0, 3], "complexity": 2},
+        {"id": "extract_quarters", "label": "Extract Year and Quarter", "range": [4, 16], "complexity": 3},
+        {"id": "unique_users", "label": "Get Unique Users per Quarter", "range": [17, 22], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [23, 28], "complexity": 2},
+        {"id": "sort_results", "label": "Sort by Year and Quarter", "range": [29, 31], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_132",
+      "title": "Top Category by Revenue",
+      "tokens": ["SELECT", "category,", "SUM(quantity", "*", "price)", "AS", "revenue", "FROM", "order_items", "oi", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "category", "ORDER BY", "revenue", "DESC", "LIMIT", "1"],
+      "solution": ["SELECT", "category,", "SUM(quantity", "*", "price)", "AS", "revenue", "FROM", "order_items", "oi", "JOIN", "products", "p", "ON", "oi.product_id", "=", "p.id", "GROUP BY", "category", "ORDER BY", "revenue", "DESC", "LIMIT", "1"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Category and Revenue", "range": [0, 6], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Order Items", "range": [7, 9], "complexity": 2},
+        {"id": "join_products", "label": "Join Products", "range": [10, 16], "complexity": 3},
+        {"id": "group_results", "label": "Group by Category", "range": [17, 18], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Revenue", "range": [19, 21], "complexity": 2},
+        {"id": "limit_results", "label": "Get Top Category", "range": [22, 23], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_133",
+      "title": "Customers with Consecutive Monthly Orders",
+      "tokens": ["WITH", "monthly_orders", "AS", "(", "SELECT", "customer_id,", "DATE_TRUNC('month',", "order_date)", "AS", "order_month", "FROM", "orders", "GROUP BY", "customer_id,", "DATE_TRUNC('month',", "order_date)", ")", "SELECT", "DISTINCT", "mo1.customer_id", "FROM", "monthly_orders", "mo1", "JOIN", "monthly_orders", "mo2", "ON", "mo1.customer_id", "=", "mo2.customer_id", "AND", "mo1.order_month", "=", "mo2.order_month", "-", "INTERVAL", "'1 month'", "JOIN", "monthly_orders", "mo3", "ON", "mo1.customer_id", "=", "mo3.customer_id", "AND", "mo1.order_month", "=", "mo3.order_month", "-", "INTERVAL", "'2 months'"],
+      "solution": ["WITH", "monthly_orders", "AS", "(", "SELECT", "customer_id,", "DATE_TRUNC('month',", "order_date)", "AS", "order_month", "FROM", "orders", "GROUP BY", "customer_id,", "DATE_TRUNC('month',", "order_date)", ")", "SELECT", "DISTINCT", "mo1.customer_id", "FROM", "monthly_orders", "mo1", "JOIN", "monthly_orders", "mo2", "ON", "mo1.customer_id", "=", "mo2.customer_id", "AND", "mo1.order_month", "=", "mo2.order_month", "-", "INTERVAL", "'1 month'", "JOIN", "monthly_orders", "mo3", "ON", "mo1.customer_id", "=", "mo3.customer_id", "AND", "mo1.order_month", "=", "mo3.order_month", "-", "INTERVAL", "'2 months'"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Orders CTE", "range": [0, 3], "complexity": 2},
+        {"id": "distinct_months", "label": "Get Distinct Order Months", "range": [4, 14], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [15, 20], "complexity": 2},
+        {"id": "month_1", "label": "Join for Month 1", "range": [21, 36], "complexity": 4},
+        {"id": "month_2", "label": "Join for Month 2", "range": [37, 53], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_134",
+      "title": "Product Sales Distribution Analysis",
+      "tokens": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_quantity,", "CASE", "WHEN", "SUM(quantity)", ">", "1000", "THEN", "'High Volume'", "WHEN", "SUM(quantity)", "BETWEEN", "100", "AND", "1000", "THEN", "'Medium Volume'", "ELSE", "'Low Volume'", "END", "AS", "volume_category", "FROM", "order_items", "GROUP BY", "product_id"],
+      "solution": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_quantity,", "CASE", "WHEN", "SUM(quantity)", ">", "1000", "THEN", "'High Volume'", "WHEN", "SUM(quantity)", "BETWEEN", "100", "AND", "1000", "THEN", "'Medium Volume'", "ELSE", "'Low Volume'", "END", "AS", "volume_category", "FROM", "order_items", "GROUP BY", "product_id"],
+      "category": "Conditional",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product and Quantity", "range": [0, 4], "complexity": 2},
+        {"id": "case_high", "label": "Define High Volume", "range": [5, 11], "complexity": 2},
+        {"id": "case_medium", "label": "Define Medium Volume", "range": [12, 19], "complexity": 2},
+        {"id": "case_low", "label": "Define Low Volume", "range": [20, 22], "complexity": 2},
+        {"id": "label_category", "label": "Label as Volume Category", "range": [23, 25], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [26, 27], "complexity": 1},
+        {"id": "group_results", "label": "Group by Product", "range": [28, 29], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_135",
+      "title": "Monthly Customer Acquisition Cost",
+      "tokens": ["WITH", "monthly_customers", "AS", "(", "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_customers", "FROM", "customers", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", ")", "SELECT", "month,", "new_customers,", "SUM(new_customers)", "OVER", "(ORDER BY", "month)", "AS", "cumulative_customers", "FROM", "monthly_customers", "ORDER BY", "month"],
+      "solution": ["WITH", "monthly_customers", "AS", "(", "SELECT", "DATE_TRUNC('month',", "signup_date)", "AS", "month,", "COUNT(*)", "AS", "new_customers", "FROM", "customers", "GROUP BY", "DATE_TRUNC('month',", "signup_date)", ")", "SELECT", "month,", "new_customers,", "SUM(new_customers)", "OVER", "(ORDER BY", "month)", "AS", "cumulative_customers", "FROM", "monthly_customers", "ORDER BY", "month"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Monthly Customers CTE", "range": [0, 3], "complexity": 2},
+        {"id": "count_new", "label": "Count New Customers by Month", "range": [4, 16], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [17, 20], "complexity": 2},
+        {"id": "cumulative_sum", "label": "Calculate Cumulative Sum", "range": [21, 26], "complexity": 4},
+        {"id": "sort_results", "label": "Sort by Month", "range": [27, 28], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_136",
+      "title": "Employees with Same Job Title",
+      "tokens": ["SELECT", "e1.name,", "e2.name,", "e1.job_title", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.job_title", "=", "e2.job_title", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.department", "!=", "e2.department"],
+      "solution": ["SELECT", "e1.name,", "e2.name,", "e1.job_title", "FROM", "employees", "e1", "JOIN", "employees", "e2", "ON", "e1.job_title", "=", "e2.job_title", "AND", "e1.id", "<", "e2.id", "WHERE", "e1.department", "!=", "e2.department"],
+      "category": "Self Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Employee Pairs", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Employees", "range": [4, 6], "complexity": 2},
+        {"id": "self_join", "label": "Join to Itself", "range": [7, 10], "complexity": 3},
+        {"id": "match_jobs", "label": "Match Job Title", "range": [11, 14], "complexity": 2},
+        {"id": "distinct_pairs", "label": "Ensure Distinct Pairs", "range": [15, 18], "complexity": 3},
+        {"id": "different_depts", "label": "Filter Different Departments", "range": [19, 22], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_137",
+      "title": "Top Products by Revenue in Each Category",
+      "tokens": ["WITH", "category_revenue", "AS", "(", "SELECT", "p.category,", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category,", "p.name", ")", "SELECT", "category,", "name,", "revenue", "FROM", "(", "SELECT", "category,", "name,", "revenue,", "ROW_NUMBER()", "OVER", "(PARTITION BY", "category", "ORDER BY", "revenue", "DESC)", "AS", "rn", "FROM", "category_revenue", ")", "ranked", "WHERE", "rn", "=", "1"],
+      "solution": ["WITH", "category_revenue", "AS", "(", "SELECT", "p.category,", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.category,", "p.name", ")", "SELECT", "category,", "name,", "revenue", "FROM", "(", "SELECT", "category,", "name,", "revenue,", "ROW_NUMBER()", "OVER", "(PARTITION BY", "category", "ORDER BY", "revenue", "DESC)", "AS", "rn", "FROM", "category_revenue", ")", "ranked", "WHERE", "rn", "=", "1"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Category Revenue CTE", "range": [0, 3], "complexity": 2},
+        {"id": "calculate_revenue", "label": "Calculate Revenue by Product", "range": [4, 24], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [25, 29], "complexity": 2},
+        {"id": "rank_products", "label": "Rank Products per Category", "range": [30, 45], "complexity": 4},
+        {"id": "filter_top", "label": "Filter Top Product per Category", "range": [46, 50], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_h_138",
+      "title": "Products Never Purchased Together",
+      "tokens": ["SELECT", "p1.name,", "p2.name", "FROM", "products", "p1", "CROSS JOIN", "products", "p2", "WHERE", "p1.id", "<", "p2.id", "AND", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "order_items", "oi1", "JOIN", "order_items", "oi2", "ON", "oi1.order_id", "=", "oi2.order_id", "WHERE", "oi1.product_id", "=", "p1.id", "AND", "oi2.product_id", "=", "p2.id", ")"],
+      "solution": ["SELECT", "p1.name,", "p2.name", "FROM", "products", "p1", "CROSS JOIN", "products", "p2", "WHERE", "p1.id", "<", "p2.id", "AND", "NOT", "EXISTS", "(", "SELECT", "1", "FROM", "order_items", "oi1", "JOIN", "order_items", "oi2", "ON", "oi1.order_id", "=", "oi2.order_id", "WHERE", "oi1.product_id", "=", "p1.id", "AND", "oi2.product_id", "=", "p2.id", ")"],
+      "category": "Correlated Subqueries",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Product Pairs", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "cross_join", "label": "Create All Product Combinations", "range": [6, 8], "complexity": 3},
+        {"id": "filter_pairs", "label": "Filter Unique Pairs", "range": [9, 12], "complexity": 3},
+        {"id": "not_exists", "label": "Check for No Matches", "range": [13, 16], "complexity": 3},
+        {"id": "build_subquery", "label": "Build Purchase Lookup", "range": [17, 37], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_h_139",
+      "title": "Monthly Employee Retention Rate",
+      "tokens": ["WITH", "employee_tenure", "AS", "(", "SELECT", "id,", "EXTRACT(YEAR", "FROM", "hire_date)", "AS", "hire_year,", "EXTRACT(MONTH", "FROM", "hire_date)", "AS", "hire_month,", "EXTRACT(YEAR", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_year,", "EXTRACT(MONTH", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_month", "FROM", "employees", ")", "SELECT", "hire_year,", "hire_month,", "COUNT(*)", "AS", "hired,", "SUM(CASE", "WHEN", "term_year", "=", "hire_year", "AND", "term_month", "=", "hire_month", "THEN", "1", "ELSE", "0", "END)", "AS", "retained", "FROM", "employee_tenure", "GROUP BY", "hire_year,", "hire_month", "ORDER BY", "hire_year,", "hire_month"],
+      "solution": ["WITH", "employee_tenure", "AS", "(", "SELECT", "id,", "EXTRACT(YEAR", "FROM", "hire_date)", "AS", "hire_year,", "EXTRACT(MONTH", "FROM", "hire_date)", "AS", "hire_month,", "EXTRACT(YEAR", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_year,", "EXTRACT(MONTH", "FROM", "COALESCE(termination_date,", "CURRENT_DATE))", "AS", "term_month", "FROM", "employees", ")", "SELECT", "hire_year,", "hire_month,", "COUNT(*)", "AS", "hired,", "SUM(CASE", "WHEN", "term_year", "=", "hire_year", "AND", "term_month", "=", "hire_month", "THEN", "1", "ELSE", "0", "END)", "AS", "retained", "FROM", "employee_tenure", "GROUP BY", "hire_year,", "hire_month", "ORDER BY", "hire_year,", "hire_month"],
+      "category": "CTEs",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Employee Tenure CTE", "range": [0, 3], "complexity": 2},
+        {"id": "extract_dates", "label": "Extract Hire and Term Dates", "range": [4, 26], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [27, 32], "complexity": 2},
+        {"id": "count_hired", "label": "Count Total Hired", "range": [33, 34], "complexity": 2},
+        {"id": "case_retained", "label": "Calculate Retained Employees", "range": [35, 46], "complexity": 4},
+        {"id": "group_results", "label": "Group by Year and Month", "range": [47, 49], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_h_140",
+      "title": "Top 3 Products by Sales with Lead/Lag Analysis",
+      "tokens": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sales", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "product_id,", "total_sales,", "RANK()", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "sales_rank,", "LAG(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "prev_sales,", "LEAD(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "next_sales", "FROM", "product_sales", "WHERE", "total_sales", ">", "0"],
+      "solution": ["WITH", "product_sales", "AS", "(", "SELECT", "product_id,", "SUM(quantity)", "AS", "total_sales", "FROM", "order_items", "GROUP BY", "product_id", ")", "SELECT", "product_id,", "total_sales,", "RANK()", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "sales_rank,", "LAG(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "prev_sales,", "LEAD(total_sales)", "OVER", "(ORDER BY", "total_sales", "DESC)", "AS", "next_sales", "FROM", "product_sales", "WHERE", "total_sales", ">", "0"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "define_cte", "label": "Define Product Sales CTE", "range": [0, 3], "complexity": 2},
+        {"id": "aggregate_sales", "label": "Calculate Product Sales", "range": [4, 13], "complexity": 3},
+        {"id": "query_cte", "label": "Query the CTE", "range": [14, 17], "complexity": 2},
+        {"id": "rank_sales", "label": "Rank by Sales", "range": [18, 22], "complexity": 3},
+        {"id": "lag_sales", "label": "Get Previous Sales", "range": [23, 28], "complexity": 4},
+        {"id": "lead_sales", "label": "Get Next Sales", "range": [29, 34], "complexity": 4},
+        {"id": "filter_zero", "label": "Exclude Zero Sales", "range": [35, 38], "complexity": 2}
+      ]
+    }
+  ]
+}

@@ -45,5 +45,7 @@ flutter:
     - assets/survival_puzzles_easy.json
     - assets/survival_puzzles_medium.json
     - assets/survival_puzzles_hard.json
+    - assets/survival_puzzles_medium1.json
+    - assets/survival_puzzles_hard1.json
 
   uses-material-design: true

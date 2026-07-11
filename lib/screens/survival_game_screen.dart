@@ -78,11 +78,27 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   late SurvivalPuzzle _currentPuzzle;
   late _DiffTheme _theme;
 
+  // ── Flat mode (easy) ───────────────────────────────────────────────────────
   List<String> _bank = [];
   List<String?> _slots = [];
+
+  // ── Chunk mode (medium / hard) ─────────────────────────────────────────────
+  // _chunkIndex  : which chunk the player is currently solving
+  // _chunkSlots  : answer slots for the CURRENT chunk (length = chunk.tokenCount)
+  // _chunkBank   : shuffled tokens for the CURRENT chunk
+  // _completedChunkSlots : tokens already locked-in for completed chunks
+  int _chunkIndex = 0;
+  List<String?> _chunkSlots = [];
+  List<String> _chunkBank = [];
+  List<List<String>> _completedChunkTokens = []; // locked tokens per completed chunk
+
+  bool get _useChunks => widget.difficulty.usesChunks;
+
   bool _submitted = false;
   bool _correct = false;
   bool _gameOver = false;
+
+  int _livesRemaining = 3;
 
   int _score = 0;
   int _streak = 0;
@@ -102,6 +118,8 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   late AnimationController _scorePopCtrl;
   late Animation<double> _scorePopScale;
   late AnimationController _correctFlashCtrl;
+  // Chunk flash shown when a chunk (not full puzzle) is validated correctly
+  late AnimationController _chunkFlashCtrl;
 
   int _totalXpEarned = 0;
   final _progressService = ProgressService();
@@ -109,50 +127,65 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   @override
   void initState() {
     super.initState();
-    _theme = _DiffTheme.of(widget.difficulty);
+    _theme  = _DiffTheme.of(widget.difficulty);
     _engine = SurvivalEngine(widget.puzzles);
     _loadNextPuzzle();
     _initAnimations();
     _startTimer();
   }
 
+  // ── Puzzle loading ─────────────────────────────────────────────────────────
+
   void _loadNextPuzzle() {
-    _currentPuzzle = _engine.next();
-    _bank = List<String>.from(_currentPuzzle.tokens)..shuffle();
-    _slots = List<String?>.filled(_currentPuzzle.solution.length, null);
-    _submitted = false;
-    _correct = false;
-    _puzzleStartTime = _elapsed;
-    _comboMultiplier = 1;
+    _currentPuzzle    = _engine.next();
+    _submitted        = false;
+    _correct          = false;
+    _puzzleStartTime  = _elapsed;
+    _comboMultiplier  = 1;
+
+    if (_useChunks && (_currentPuzzle.chunks?.isNotEmpty ?? false)) {
+      _chunkIndex            = 0;
+      _completedChunkTokens  = [];
+      _loadChunk(0);
+      // _bank / _slots unused in chunk mode
+      _bank  = [];
+      _slots = [];
+    } else {
+      // Easy mode OR puzzle missing chunks → flat behaviour (unchanged)
+      _bank  = List<String>.from(_currentPuzzle.tokens)..shuffle();
+      _slots = List<String?>.filled(_currentPuzzle.solution.length, null);
+      _chunkIndex           = 0;
+      _chunkSlots           = [];
+      _chunkBank            = [];
+      _completedChunkTokens = [];
+    }
   }
 
+  void _loadChunk(int index) {
+    final chunk = _currentPuzzle.chunks![index];
+    _chunkBank  = List<String>.from(_currentPuzzle.tokensForChunk(chunk))..shuffle();
+    _chunkSlots = List<String?>.filled(chunk.tokenCount, null);
+  }
+
+  // ── Animations ─────────────────────────────────────────────────────────────
+
   void _initAnimations() {
-    _shakeCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _shakeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
     _shakeAnim = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _shakeCtrl, curve: Curves.elasticIn),
     );
 
-    _resultCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
+    _resultCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
     _resultFade = CurvedAnimation(parent: _resultCtrl, curve: Curves.easeOut);
 
-    _scorePopCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _scorePopCtrl  = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
     _scorePopScale = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(parent: _scorePopCtrl, curve: Curves.elasticOut),
     );
 
-    _correctFlashCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
+    _correctFlashCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+
+    _chunkFlashCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
   }
 
   void _startTimer() {
@@ -172,10 +205,11 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     _resultCtrl.dispose();
     _scorePopCtrl.dispose();
     _correctFlashCtrl.dispose();
+    _chunkFlashCtrl.dispose();
     super.dispose();
   }
 
-  // ── Token interactions ─────────────────────────────────────────────────────
+  // ── Token interactions — FLAT mode (easy) ──────────────────────────────────
 
   void _placeToken(String token) {
     if (_submitted || _gameOver) return;
@@ -203,17 +237,58 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     if (_submitted || _gameOver) return;
     HapticFeedback.selectionClick();
     setState(() {
-      if (_slots[slotIndex] != null) {
-        _bank.add(_slots[slotIndex]!);
-      }
+      if (_slots[slotIndex] != null) _bank.add(_slots[slotIndex]!);
       _slots[slotIndex] = token;
       _bank.remove(token);
+    });
+  }
+
+  // ── Token interactions — CHUNK mode (medium / hard) ────────────────────────
+
+  void _chunkPlaceToken(String token) {
+    if (_submitted || _gameOver) return;
+    final idx = _chunkSlots.indexOf(null);
+    if (idx == -1) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _chunkSlots[idx] = token;
+      _chunkBank.remove(token);
+    });
+  }
+
+  void _chunkRemoveToken(int slotIndex) {
+    if (_submitted || _gameOver) return;
+    final token = _chunkSlots[slotIndex];
+    if (token == null) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _chunkBank.add(token);
+      _chunkSlots[slotIndex] = null;
+    });
+  }
+
+  void _chunkDropOnSlot(int slotIndex, String token) {
+    if (_submitted || _gameOver) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_chunkSlots[slotIndex] != null) _chunkBank.add(_chunkSlots[slotIndex]!);
+      _chunkSlots[slotIndex] = token;
+      _chunkBank.remove(token);
     });
   }
 
   // ── Validate ──────────────────────────────────────────────────────────────
 
   Future<void> _validate() async {
+    if (_useChunks && (_currentPuzzle.chunks?.isNotEmpty ?? false)) {
+      await _validateChunk();
+    } else {
+      await _validateFlat();
+    }
+  }
+
+  // Flat validation (easy / fallback)
+  Future<void> _validateFlat() async {
     final allFilled = _slots.every((s) => s != null);
     if (!allFilled) {
       _shakeCtrl.forward(from: 0);
@@ -222,19 +297,22 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     }
 
     final placed = _slots.cast<String>();
-    _correct = _listEquals(placed, _currentPuzzle.solution);
+    _correct = _validateChunkTokens(
+      placed:   placed,
+      expected: _currentPuzzle.solution,
+      chunkId:  '',   // flat mode — heuristic detection applies
+    );
 
     if (_correct) {
       HapticFeedback.mediumImpact();
       _correctFlashCtrl.forward(from: 0);
 
       final solveTime = _elapsed - _puzzleStartTime;
-      final points = SurvivalScoring.pointsFor(
-        difficulty: widget.difficulty,
-        solveSeconds: solveTime,
+      final points    = SurvivalScoring.pointsFor(
+        difficulty:    widget.difficulty,
+        solveSeconds:  solveTime,
         currentStreak: _streak,
       );
-
       final actualCombo = SurvivalScoring.streakMultiplier(_streak + 1);
 
       setState(() {
@@ -246,9 +324,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       });
 
       _scorePopCtrl.forward(from: 0);
-
-      final xpForPuzzle = (points / 50).floor().clamp(1, 100);
-      _totalXpEarned += xpForPuzzle;
+      _totalXpEarned += (points / 50).floor().clamp(1, 100);
 
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (mounted && !_gameOver) {
@@ -264,17 +340,136 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     } else {
       HapticFeedback.heavyImpact();
       _shakeCtrl.forward(from: 0);
-
-      _gameOver = true;
-      _ticker.cancel();
-      _stopwatch.stop();
-
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (mounted) _resultCtrl.forward();
-      });
+      _livesRemaining--;
+      if (_livesRemaining <= 0) {
+        _gameOver = true;
+        _ticker.cancel();
+        _stopwatch.stop();
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) _resultCtrl.forward();
+        });
+      } else {
+        // Still has lives — reset current puzzle so player can retry
+        Future.delayed(const Duration(milliseconds: 700), () {
+          if (mounted) {
+            setState(() {
+              _bank  = List<String>.from(_currentPuzzle.tokens)..shuffle();
+              _slots = List<String?>.filled(_currentPuzzle.solution.length, null);
+              _submitted = false;
+              _streak = 0;
+            });
+          }
+        });
+      }
     }
 
     setState(() => _submitted = true);
+  }
+
+  // Chunk validation (medium / hard)
+  Future<void> _validateChunk() async {
+    final allFilled = _chunkSlots.every((s) => s != null);
+    if (!allFilled) {
+      _shakeCtrl.forward(from: 0);
+      HapticFeedback.heavyImpact();
+      return;
+    }
+
+    final chunks  = _currentPuzzle.chunks!;
+    final chunk   = chunks[_chunkIndex];
+    final correct = _validateChunkTokens(
+      placed:   _chunkSlots.cast<String>(),
+      expected: _currentPuzzle.tokensForChunk(chunk),
+      chunkId:  chunk.id,
+    );
+
+    if (!correct) {
+      // Wrong answer → decrement lives
+      HapticFeedback.heavyImpact();
+      _shakeCtrl.forward(from: 0);
+      _livesRemaining--;
+      _correct  = false;
+      if (_livesRemaining <= 0) {
+        _gameOver = true;
+        _ticker.cancel();
+        _stopwatch.stop();
+        setState(() => _submitted = true);
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) _resultCtrl.forward();
+        });
+      } else {
+        // Still has lives — reset current chunk so player can retry
+        setState(() {
+          _submitted = true;
+          _streak = 0;
+        });
+        Future.delayed(const Duration(milliseconds: 700), () {
+          if (mounted) {
+            setState(() {
+              _loadChunk(_chunkIndex);
+              _submitted = false;
+            });
+          }
+        });
+      }
+      return;
+    }
+
+    // Chunk correct ✓
+    HapticFeedback.mediumImpact();
+    _chunkFlashCtrl.forward(from: 0);
+
+    final isLastChunk = _chunkIndex == chunks.length - 1;
+
+    if (isLastChunk) {
+      // All chunks done → full puzzle solved
+      _correct = true;
+
+      final solveTime   = _elapsed - _puzzleStartTime;
+      final points      = SurvivalScoring.pointsFor(
+        difficulty:    widget.difficulty,
+        solveSeconds:  solveTime,
+        currentStreak: _streak,
+      );
+      final actualCombo = SurvivalScoring.streakMultiplier(_streak + 1);
+
+      setState(() {
+        _completedChunkTokens.add(_chunkSlots.cast<String>());
+        _score += points;
+        _streak++;
+        _solved++;
+        if (_streak > _longestStreak) _longestStreak = _streak;
+        _comboMultiplier = (actualCombo * 10).round();
+        _submitted       = true;
+      });
+
+      _scorePopCtrl.forward(from: 0);
+      _totalXpEarned += (points / 50).floor().clamp(1, 100);
+
+      // Flash + move on
+      _correctFlashCtrl.forward(from: 0);
+      Future.delayed(const Duration(milliseconds: 1200), () {
+        if (mounted && !_gameOver) {
+          setState(() {
+            _loadNextPuzzle();
+            _submitted = false;
+            _correct   = false;
+            _resultCtrl.reset();
+            _scorePopCtrl.reset();
+            _correctFlashCtrl.reset();
+            _chunkFlashCtrl.reset();
+          });
+        }
+      });
+    } else {
+      // Advance to next chunk
+      setState(() {
+        _completedChunkTokens.add(_chunkSlots.cast<String>());
+        _chunkIndex++;
+        _loadChunk(_chunkIndex);
+        _chunkFlashCtrl.reset();
+      });
+    }
   }
 
   bool _listEquals(List<String> a, List<String> b) {
@@ -285,24 +480,72 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     return true;
   }
 
+  // ── Smart chunk validator ──────────────────────────────────────────────────
+  //
+  // For SELECT chunks: position 0 (the keyword) must match exactly,
+  // but the remaining column tokens are treated as an unordered set —
+  // so "SELECT name, email" and "SELECT email, name" are both accepted.
+  //
+  // All other clause types (WHERE, GROUP BY, ORDER BY, JOIN, FROM…) stay
+  // strict because order matters for them semantically and educationally.
+
+  bool _validateChunkTokens({
+    required List<String> placed,
+    required List<String> expected,
+    required String chunkId,
+  }) {
+    if (placed.length != expected.length) return false;
+
+    // Only SELECT chunks get the unordered treatment
+    if (!_isColumnChunk(chunkId: chunkId, expected: expected)) {
+      return _listEquals(placed, expected);
+    }
+
+    // First token must match exactly (SELECT or SELECT DISTINCT)
+    if (placed[0] != expected[0]) return false;
+
+    // Remaining column tokens compared as sorted sets — order-independent
+    final placedCols   = placed.sublist(1).toList()..sort();
+    final expectedCols = expected.sublist(1).toList()..sort();
+    return _listEquals(placedCols, expectedCols);
+  }
+
+  // Returns true when this chunk's columns can appear in any order.
+  // Priority:
+  //   1. Must start with SELECT
+  //   2. chunkId starts with 'choose_'  → always flexible (your naming convention)
+  //   3. No SQL clause keywords in remaining tokens → flexible (safety fallback)
+  bool _isColumnChunk({required String chunkId, required List<String> expected}) {
+    if (expected.isEmpty || expected[0] != 'SELECT') return false;
+
+    // Your JSON uses 'choose_' prefix for all column-selection chunks
+    if (chunkId.startsWith('choose_')) return true;
+
+    // Fallback: no structural clause keywords among non-SELECT tokens
+    const clauseKeywords = {
+      'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'FULL',
+      'GROUP', 'HAVING', 'ORDER', 'LIMIT', 'OFFSET', 'UNION',
+      'INTERSECT', 'EXCEPT', 'ON', 'SET', 'RETURNING', 'WINDOW',
+    };
+    final rest = expected.sublist(1);
+    return !rest.any((t) => clauseKeywords.contains(t));
+  }
+
   // ── Game Over ──────────────────────────────────────────────────────────────
 
   Future<void> _endRun() async {
     final result = SurvivalRunResult(
-      difficulty: widget.difficulty,
-      score: _score,
+      difficulty:    widget.difficulty,
+      score:         _score,
       longestStreak: _longestStreak,
-      solved: _solved,
-      timeSec: _elapsed,
-      xpEarned: _totalXpEarned,
-      rank: SurvivalScoring.rankFor(_score),
+      solved:        _solved,
+      timeSec:       _elapsed,
+      xpEarned:      _totalXpEarned,
+      rank:          SurvivalScoring.rankFor(_score),
     );
 
     final isNewBest = await SurvivalService().recordRun(result);
-
-    if (mounted) {
-      Navigator.pop(context, {'isNewBest': isNewBest});
-    }
+    if (mounted) Navigator.pop(context, {'isNewBest': isNewBest});
   }
 
   // ── Build ──────────────────────────────────────────────────────────────────
@@ -351,10 +594,13 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                 const SizedBox(height: 6),
                 _buildStatsBar(),
                 const SizedBox(height: 10),
-                // Answer zone — fixed, doesn't grow
                 _buildAnswerZone(),
-                const SizedBox(height: 10),
-                // Token bank + button fill remaining space, token bank scrolls
+                const SizedBox(height: 8),
+                // Chunk progress bar — only for medium/hard
+                if (_useChunks && (_currentPuzzle.chunks?.isNotEmpty ?? false)) ...[
+                  _buildChunkBar(),
+                  const SizedBox(height: 8),
+                ],
                 Expanded(
                   child: Column(
                     children: [
@@ -389,7 +635,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Icon: replace with Image.asset('assets/icons/skull_icon.png', height: 16)
                 Text(
                   '☠ SURVIVAL',
                   style: TextStyle(
@@ -401,11 +646,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                 ),
                 Text(
                   '${widget.difficulty.label} · $_solved solved',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.white38,
-                    letterSpacing: 1,
-                  ),
+                  style: const TextStyle(fontSize: 11, color: Colors.white38, letterSpacing: 1),
                 ),
               ],
             ),
@@ -441,7 +682,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Replace with: Image.asset('assets/icons/timer_icon.png', width: 14, height: 14)
           Icon(Icons.timer_outlined, size: 14, color: color),
           const SizedBox(width: 6),
           Text(
@@ -477,31 +717,27 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         color: kBgCard.withOpacity(.6),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _theme.primary.withOpacity(.2)),
-        boxShadow: [
-          BoxShadow(
-            color: _theme.glow.withOpacity(.08),
-            blurRadius: 12,
-          ),
-        ],
+        boxShadow: [BoxShadow(color: _theme.glow.withOpacity(.08), blurRadius: 12)],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Replace icons below with Image.asset('assets/icons/star_icon.png', ...)
-          _StatItem(icon: '⭐', label: 'Score', value: '$_score', color: kGold),
+          _StatItem(icon: '⭐', label: 'Score',  value: '$_score',       color: kGold),
           _VertDivider(color: _theme.primary.withOpacity(.2)),
-          _StatItem(icon: '🔥', label: 'Streak', value: '$_streak', color: Colors.orangeAccent),
+          _StatItem(icon: '🔥', label: 'Streak', value: '$_streak',      color: Colors.orangeAccent),
           _VertDivider(color: _theme.primary.withOpacity(.2)),
-          _StatItem(icon: '⚡', label: 'Combo', value: comboDisplay, color: kPurpleLight),
+          _StatItem(icon: '❤️', label: 'Lives',  value: '$_livesRemaining', color: Colors.redAccent),
           _VertDivider(color: _theme.primary.withOpacity(.2)),
-          _StatItem(icon: '📊', label: 'Solved', value: '$_solved', color: Colors.cyan),
+          _StatItem(icon: '📊', label: 'Solved', value: '$_solved',      color: Colors.cyan),
         ],
       ),
     );
   }
 
   // ── Answer zone ────────────────────────────────────────────────────────────
-  // Uses a ConstrainedBox so it never expands unboundedly on Hard mode
+  // Shows:
+  //   • Flat mode  → all slots (unchanged)
+  //   • Chunk mode → completed chunk tokens (locked, green) + current chunk slots
 
   Widget _buildAnswerZone() {
     return AnimatedBuilder(
@@ -521,7 +757,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             color: kBgCard,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: _submitted
+              color: (_submitted && !_useChunks)
                   ? (_correct
                       ? kGreen.withOpacity(.6 + .2 * _correctFlashCtrl.value)
                       : Colors.redAccent.withOpacity(.6))
@@ -530,7 +766,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             ),
             boxShadow: [
               BoxShadow(
-                color: _submitted
+                color: (_submitted && !_useChunks)
                     ? (_correct ? kGreen : Colors.red).withOpacity(.12 + .1 * _correctFlashCtrl.value)
                     : _theme.glow.withOpacity(.08),
                 blurRadius: 18,
@@ -555,12 +791,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                 Expanded(
                   child: Text(
                     _currentPuzzle.title.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Colors.white38,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
-                    ),
+                    style: const TextStyle(fontSize: 10, color: Colors.white38, fontWeight: FontWeight.w700, letterSpacing: 1),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -573,44 +804,33 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                   ),
                   child: Text(
                     _currentPuzzle.category,
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: _theme.primary,
-                      letterSpacing: 0.5,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 9, color: _theme.primary, letterSpacing: 0.5, fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            // ── SQL Forge bar label ───────────────────────────────────────
             Row(
               children: [
-                // Replace with Image.asset('assets/icons/sword_icon.png', width: 12, height: 12)
                 Icon(Icons.auto_fix_high_rounded, size: 12, color: _theme.glow),
                 const SizedBox(width: 6),
                 Text(
                   'FORGE YOUR QUERY',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    color: _theme.glow,
-                    letterSpacing: 1.5,
-                  ),
+                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: _theme.glow, letterSpacing: 1.5),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            // Slot chips — wrapped, clipped inside a max-height box
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 140),
               child: SingleChildScrollView(
-                child: Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: List.generate(_slots.length, (i) => _buildSlot(i)),
-                ),
+                child: _useChunks
+                    ? _buildChunkedForgeSlots()
+                    : Wrap(
+                        spacing: 7,
+                        runSpacing: 7,
+                        children: List.generate(_slots.length, (i) => _buildSlot(i)),
+                      ),
               ),
             ),
           ],
@@ -619,8 +839,72 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     );
   }
 
+  /// In chunk mode: completed chunk tokens (locked green) followed by current slots
+  Widget _buildChunkedForgeSlots() {
+    return Wrap(
+      spacing: 7,
+      runSpacing: 7,
+      children: [
+        // Completed chunks — locked, green tint
+        for (final completedTokens in _completedChunkTokens)
+          for (final token in completedTokens)
+            _lockedTokenChip(token),
+        // Current chunk slots
+        ...List.generate(_chunkSlots.length, (i) => _buildChunkSlot(i)),
+      ],
+    );
+  }
+
+  Widget _lockedTokenChip(String token) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [kGreen.withOpacity(.25), kGreen.withOpacity(.12)]),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: kGreen.withOpacity(.5)),
+      ),
+      child: Text(
+        token,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: kGreen.withOpacity(.9),
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+
+  // ── Chunk progress bar ─────────────────────────────────────────────────────
+
+  Widget _buildChunkBar() {
+    final chunks = _currentPuzzle.chunks!;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 14),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: chunks.asMap().entries.map((e) {
+            final i     = e.key;
+            final chunk = e.value;
+            final isDone    = i < _chunkIndex;
+            final isCurrent = i == _chunkIndex;
+            return _ChunkPill(
+              label:     chunk.label,
+              isDone:    isDone,
+              isCurrent: isCurrent,
+              theme:     _theme,
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // ── Slots — FLAT mode ──────────────────────────────────────────────────────
+
   Widget _buildSlot(int index) {
-    final token = _slots[index];
+    final token   = _slots[index];
     final isEmpty = token == null;
 
     return DragTarget<_TokenDrag>(
@@ -629,8 +913,8 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         final drag = details.data;
         if (drag.fromSlot != null) {
           setState(() {
-            final tmp = _slots[index];
-            _slots[index] = _slots[drag.fromSlot!];
+            final tmp         = _slots[index];
+            _slots[index]     = _slots[drag.fromSlot!];
             _slots[drag.fromSlot!] = tmp;
           });
         } else {
@@ -645,49 +929,103 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             data: token != null ? _TokenDrag(token: token, fromSlot: index) : null,
             feedback: token != null ? _tokenChip(token, dragging: true) : const SizedBox(),
             childWhenDragging: _slotPlaceholder(isEmpty: true, hovered: false),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              constraints: const BoxConstraints(minWidth: 40),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-              decoration: BoxDecoration(
-                gradient: isEmpty
-                    ? null
-                    : (_submitted
-                        ? (_correct
-                            ? LinearGradient(colors: [kGreen.withOpacity(.3), kGreen.withOpacity(.15)])
-                            : LinearGradient(colors: [Colors.red.withOpacity(.3), Colors.red.withOpacity(.15)]))
-                        : const LinearGradient(colors: [Color(0xFF2D2050), Color(0xFF1E163A)])),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isHovered
-                      ? _theme.primary
-                      : isEmpty
-                          ? Colors.white12
-                          : (_submitted
-                              ? (_correct ? kGreen.withOpacity(.6) : Colors.redAccent.withOpacity(.6))
-                              : _theme.tokenBorder.withOpacity(.35)),
-                  width: isHovered ? 1.5 : 1,
-                ),
-                boxShadow: isHovered
-                    ? [BoxShadow(color: _theme.primary.withOpacity(.3), blurRadius: 8)]
-                    : [],
-              ),
-              child: isEmpty
-                  ? Text('  ?  ',
-                      style: TextStyle(fontSize: 13, color: Colors.white24, fontWeight: FontWeight.w500))
-                  : Text(
-                      token,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: _tokenTextColor(token),
-                        letterSpacing: 0.3,
-                      ),
-                    ),
+            child: _slotChip(
+              token:     token,
+              isEmpty:   isEmpty,
+              isHovered: isHovered,
+              submitted: _submitted,
+              correct:   _correct,
             ),
           ),
         );
       },
+    );
+  }
+
+  // ── Slots — CHUNK mode ─────────────────────────────────────────────────────
+
+  Widget _buildChunkSlot(int index) {
+    final token   = _chunkSlots[index];
+    final isEmpty = token == null;
+
+    return DragTarget<_TokenDrag>(
+      onWillAcceptWithDetails: (details) => !_gameOver,
+      onAcceptWithDetails: (details) {
+        final drag = details.data;
+        if (drag.fromSlot != null) {
+          setState(() {
+            final tmp               = _chunkSlots[index];
+            _chunkSlots[index]      = _chunkSlots[drag.fromSlot!];
+            _chunkSlots[drag.fromSlot!] = tmp;
+          });
+        } else {
+          _chunkDropOnSlot(index, drag.token);
+        }
+      },
+      builder: (context, candidates, rejected) {
+        final isHovered = candidates.isNotEmpty;
+        return GestureDetector(
+          onTap: isEmpty ? null : () => _chunkRemoveToken(index),
+          child: Draggable<_TokenDrag>(
+            data: token != null ? _TokenDrag(token: token, fromSlot: index) : null,
+            feedback: token != null ? _tokenChip(token, dragging: true) : const SizedBox(),
+            childWhenDragging: _slotPlaceholder(isEmpty: true, hovered: false),
+            child: _slotChip(
+              token:     token,
+              isEmpty:   isEmpty,
+              isHovered: isHovered,
+              submitted: false, // chunk slots never "submitted" until last chunk
+              correct:   false,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _slotChip({
+    required String? token,
+    required bool isEmpty,
+    required bool isHovered,
+    required bool submitted,
+    required bool correct,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      constraints: const BoxConstraints(minWidth: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        gradient: isEmpty
+            ? null
+            : (submitted
+                ? (correct
+                    ? LinearGradient(colors: [kGreen.withOpacity(.3), kGreen.withOpacity(.15)])
+                    : LinearGradient(colors: [Colors.red.withOpacity(.3), Colors.red.withOpacity(.15)]))
+                : const LinearGradient(colors: [Color(0xFF2D2050), Color(0xFF1E163A)])),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isHovered
+              ? _theme.primary
+              : isEmpty
+                  ? Colors.white12
+                  : (submitted
+                      ? (correct ? kGreen.withOpacity(.6) : Colors.redAccent.withOpacity(.6))
+                      : _theme.tokenBorder.withOpacity(.35)),
+          width: isHovered ? 1.5 : 1,
+        ),
+        boxShadow: isHovered ? [BoxShadow(color: _theme.primary.withOpacity(.3), blurRadius: 8)] : [],
+      ),
+      child: isEmpty
+          ? Text('  ?  ', style: TextStyle(fontSize: 13, color: Colors.white24, fontWeight: FontWeight.w500))
+          : Text(
+              token!,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: _tokenTextColor(token),
+                letterSpacing: 0.3,
+              ),
+            ),
     );
   }
 
@@ -703,11 +1041,12 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     );
   }
 
-  // ── Token bank ────────────────────────────────────────────────────────────
-  // Now uses SingleChildScrollView — the Expanded wrapper makes it fill space
-  // without overflowing. Hard mode with 30+ tokens just scrolls.
+  // ── Token bank ─────────────────────────────────────────────────────────────
+  // Easy → flat _bank; medium/hard → _chunkBank (only current chunk tokens)
 
   Widget _buildTokenBank() {
+    final bank = _useChunks ? _chunkBank : _bank;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
@@ -722,38 +1061,25 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         children: [
           Row(
             children: [
-              // Replace with Image.asset('assets/icons/rune_icon.png', width: 12, height: 12)
               Icon(Icons.blur_on_rounded, size: 12, color: _theme.primary),
               const SizedBox(width: 6),
               Text(
-                'SQL RUNES',    // ← renamed from TOKENS
-                style: TextStyle(
-                  fontSize: 9,
-                  color: _theme.primary,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2,
-                ),
+                'SQL RUNES',
+                style: TextStyle(fontSize: 9, color: _theme.primary, fontWeight: FontWeight.w800, letterSpacing: 2),
               ),
               const Spacer(),
-              if (_bank.isNotEmpty)
-                Text(
-                  '${_bank.length} remaining',
-                  style: const TextStyle(fontSize: 9, color: Colors.white24),
-                ),
+              if (bank.isNotEmpty)
+                Text('${bank.length} remaining', style: const TextStyle(fontSize: 9, color: Colors.white24)),
             ],
           ),
           const SizedBox(height: 10),
-          _bank.isEmpty
+          bank.isEmpty
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Text(
                       '⚔ All runes placed!',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: kGreen.withOpacity(.8),
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: TextStyle(fontSize: 13, color: kGreen.withOpacity(.8), fontWeight: FontWeight.w700),
                     ),
                   ),
                 )
@@ -762,7 +1088,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _bank.map((token) => _buildBankToken(token)).toList(),
+                      children: bank.map((token) => _buildBankToken(token)).toList(),
                     ),
                   ),
                 ),
@@ -774,13 +1100,10 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   Widget _buildBankToken(String token) {
     return Draggable<_TokenDrag>(
       data: _TokenDrag(token: token, fromSlot: null),
-      feedback: Material(
-        color: Colors.transparent,
-        child: _tokenChip(token, dragging: true),
-      ),
+      feedback: Material(color: Colors.transparent, child: _tokenChip(token, dragging: true)),
       childWhenDragging: Opacity(opacity: 0.3, child: _tokenChip(token)),
       child: GestureDetector(
-        onTap: () => _placeToken(token),
+        onTap: () => _useChunks ? _chunkPlaceToken(token) : _placeToken(token),
         child: _tokenChip(token),
       ),
     );
@@ -801,9 +1124,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: dragging
-              ? textColor.withOpacity(.8)
-              : textColor.withOpacity(.25),
+          color: dragging ? textColor.withOpacity(.8) : textColor.withOpacity(.25),
           width: dragging ? 1.5 : 1,
         ),
         boxShadow: dragging
@@ -812,12 +1133,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       ),
       child: Text(
         token,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: textColor,
-          letterSpacing: 0.3,
-        ),
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor, letterSpacing: 0.3),
       ),
     );
   }
@@ -840,7 +1156,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     if (int.tryParse(token.replaceAll(')', '')) != null) return kGold;
     if (RegExp(r'^[A-Z]+\(').hasMatch(token)) return kCyan;
     if (token.startsWith('(')) return kPurpleLight;
-    // JSONB / path operators get accent color
     if (token.contains('::') || token.contains('->') || token.contains('@')) return Colors.orangeAccent;
     return Colors.white;
   }
@@ -848,28 +1163,32 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   // ── Action button ─────────────────────────────────────────────────────────
 
   Widget _buildActionButton() {
-    final allFilled = _slots.every((s) => s != null);
+    final allFilled = _useChunks
+        ? _chunkSlots.every((s) => s != null)
+        : _slots.every((s) => s != null);
+
+    // Label changes in chunk mode to indicate progress
+    String buttonLabel = 'SUBMIT ANSWER';
+    if (_useChunks && (_currentPuzzle.chunks?.isNotEmpty ?? false)) {
+      final chunks      = _currentPuzzle.chunks!;
+      final isLastChunk = _chunkIndex == chunks.length - 1;
+      buttonLabel       = isLastChunk ? 'COMPLETE QUERY' : 'CONFIRM CHUNK';
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: GestureDetector(
-        onTap: (_submitted || _gameOver) ? null : _validate,
+        onTap: _gameOver ? null : _validate,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           height: 54,
           decoration: BoxDecoration(
             gradient: allFilled
-                ? LinearGradient(
-                    colors: [_theme.primary, _theme.glow],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  )
+                ? LinearGradient(colors: [_theme.primary, _theme.glow], begin: Alignment.centerLeft, end: Alignment.centerRight)
                 : null,
             color: allFilled ? null : kBgCard,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: allFilled ? Colors.transparent : Colors.white12,
-            ),
+            border: Border.all(color: allFilled ? Colors.transparent : Colors.white12),
             boxShadow: allFilled
                 ? [BoxShadow(color: _theme.primary.withOpacity(.5), blurRadius: 20, offset: const Offset(0, 8))]
                 : [],
@@ -878,7 +1197,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Replace with Image.asset('assets/icons/check_icon.png', width: 18, height: 18)
               Icon(
                 Icons.check_circle_outline_rounded,
                 size: 18,
@@ -886,7 +1204,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
               ),
               const SizedBox(width: 10),
               Text(
-                'SUBMIT ANSWER',
+                buttonLabel,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -915,9 +1233,12 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildGameOverCard(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                // TRY AGAIN — pops back to difficulty screen
                 GestureDetector(
-                  onTap: _endRun,
+                  onTap: () {
+                    Navigator.pop(context); // back to difficulty screen
+                  },
                   child: Container(
                     width: double.infinity,
                     height: 56,
@@ -928,8 +1249,30 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                     ),
                     alignment: Alignment.center,
                     child: const Text(
-                      'SEE RESULTS',
+                      'TRY AGAIN',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // QUIT — pops twice to home
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context); // difficulty screen
+                    Navigator.pop(context); // home
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(.06),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'QUIT',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white54, letterSpacing: 2),
                     ),
                   ),
                 ),
@@ -942,12 +1285,8 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   }
 
   Widget _buildGameOverCard() {
-    final rank = SurvivalScoring.rankFor(_score);
-    final rankColor = rank == 'S'
-        ? kGold
-        : rank == 'A'
-            ? kPurpleLight
-            : Colors.white;
+    final rank      = SurvivalScoring.rankFor(_score);
+    final rankColor = rank == 'S' ? kGold : rank == 'A' ? kPurpleLight : Colors.white;
 
     return Container(
       width: double.infinity,
@@ -964,37 +1303,28 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Game Over icon — replace with Image.asset('assets/icons/skull_dead.png', width: 72, height: 72)
               Container(
                 width: 72, height: 72,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.redAccent.withOpacity(.3), Colors.red.withOpacity(.1)],
-                  ),
+                  gradient: LinearGradient(colors: [Colors.redAccent.withOpacity(.3), Colors.red.withOpacity(.1)]),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.redAccent.withOpacity(.5)),
                 ),
                 child: const Icon(Icons.close_rounded, size: 36, color: Colors.redAccent),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'GAME OVER',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 4, color: Colors.redAccent),
-              ),
+              const Text('GAME OVER', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 4, color: Colors.redAccent)),
               const SizedBox(height: 6),
-              const Text(
-                'One mistake ends the run',
-                style: TextStyle(fontSize: 13, color: Colors.white54),
-              ),
+              const Text('All 3 lives used up', style: TextStyle(fontSize: 13, color: Colors.white54)),
               const SizedBox(height: 24),
               const Divider(color: Colors.white12),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _ResultStat(label: 'Score',       value: '$_score',          color: kGold),
-                  _ResultStat(label: 'Solved',      value: '$_solved',         color: Colors.cyan),
-                  _ResultStat(label: 'Best Streak', value: '$_longestStreak',  color: Colors.orangeAccent),
+                  _ResultStat(label: 'Score',       value: '$_score',         color: kGold),
+                  _ResultStat(label: 'Solved',      value: '$_solved',        color: Colors.cyan),
+                  _ResultStat(label: 'Best Streak', value: '$_longestStreak', color: Colors.orangeAccent),
                 ],
               ),
               const SizedBox(height: 20),
@@ -1008,10 +1338,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'RANK',
-                      style: TextStyle(fontSize: 12, color: Colors.white38, fontWeight: FontWeight.w700, letterSpacing: 2),
-                    ),
+                    const Text('RANK', style: TextStyle(fontSize: 12, color: Colors.white38, fontWeight: FontWeight.w700, letterSpacing: 2)),
                     Text(
                       rank,
                       style: TextStyle(
@@ -1021,10 +1348,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                         shadows: [Shadow(color: rankColor.withOpacity(.4), blurRadius: 12)],
                       ),
                     ),
-                    Text(
-                      'XP: +$_totalXpEarned',
-                      style: const TextStyle(fontSize: 14, color: kGold, fontWeight: FontWeight.w700),
-                    ),
+                    Text('XP: +$_totalXpEarned', style: const TextStyle(fontSize: 14, color: kGold, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -1040,7 +1364,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Replace with Image.asset('assets/icons/trophy_icon.png', width: 16, height: 16)
                       const Icon(Icons.emoji_events_rounded, color: kGold, size: 16),
                       const SizedBox(width: 8),
                       Flexible(
@@ -1068,10 +1391,8 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: kBgCard,
-        title: const Text('Quit Survival?',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
-        content: const Text('Your run progress will be lost.',
-            style: TextStyle(color: Colors.white54)),
+        title: const Text('Quit Survival?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+        content: const Text('Your run progress will be lost.', style: TextStyle(color: Colors.white54)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1085,6 +1406,70 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             child: const Text('QUIT', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Chunk pill widget ─────────────────────────────────────────────────────────
+
+class _ChunkPill extends StatelessWidget {
+  final String label;
+  final bool isDone;
+  final bool isCurrent;
+  final _DiffTheme theme;
+
+  const _ChunkPill({
+    required this.label,
+    required this.isDone,
+    required this.isCurrent,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color bg;
+    Color border;
+    Color textColor;
+    String prefix;
+
+    if (isDone) {
+      bg        = kGreen.withOpacity(.15);
+      border    = kGreen.withOpacity(.5);
+      textColor = kGreen;
+      prefix    = '✓ ';
+    } else if (isCurrent) {
+      bg        = theme.primary.withOpacity(.18);
+      border    = theme.primary;
+      textColor = Colors.white;
+      prefix    = '▶ ';
+    } else {
+      bg        = Colors.white.withOpacity(.04);
+      border    = Colors.white12;
+      textColor = Colors.white38;
+      prefix    = '🔒 ';
+    }
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: border, width: isCurrent ? 1.5 : 1),
+        boxShadow: isCurrent
+            ? [BoxShadow(color: theme.primary.withOpacity(.3), blurRadius: 8)]
+            : [],
+      ),
+      child: Text(
+        '$prefix$label',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+          color: textColor,
+          letterSpacing: 0.3,
+        ),
       ),
     );
   }
@@ -1119,9 +1504,7 @@ class _VertDivider extends StatelessWidget {
   const _VertDivider({required this.color});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(width: 1, height: 32, color: color);
-  }
+  Widget build(BuildContext context) => Container(width: 1, height: 32, color: color);
 }
 
 class _ResultStat extends StatelessWidget {

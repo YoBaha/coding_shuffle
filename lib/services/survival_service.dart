@@ -37,8 +37,8 @@ extension SurvivalDifficultyExt on SurvivalDifficulty {
   String get assetPath {
     switch (this) {
       case SurvivalDifficulty.easy:   return 'assets/survival_puzzles_easy.json';
-      case SurvivalDifficulty.medium: return 'assets/survival_puzzles_medium.json';
-      case SurvivalDifficulty.hard:   return 'assets/survival_puzzles_hard.json';
+      case SurvivalDifficulty.medium: return 'assets/survival_puzzles_medium1.json';
+      case SurvivalDifficulty.hard:   return 'assets/survival_puzzles_hard1.json';
     }
   }
 
@@ -61,6 +61,37 @@ extension SurvivalDifficultyExt on SurvivalDifficulty {
   }
 
   String get prefsKey => 'survival_best_$name';
+
+  /// Whether this difficulty uses chunk-based gameplay
+  bool get usesChunks => this == SurvivalDifficulty.medium || this == SurvivalDifficulty.hard;
+}
+
+// ── Chunk model ───────────────────────────────────────────────────────────────
+
+class SurvivalChunk {
+  final String id;
+  final String label;
+  final int rangeStart; // inclusive index into solution[]
+  final int rangeEnd;   // inclusive index into solution[]
+  final int complexity; // 1–5
+
+  const SurvivalChunk({
+    required this.id,
+    required this.label,
+    required this.rangeStart,
+    required this.rangeEnd,
+    required this.complexity,
+  });
+
+  factory SurvivalChunk.fromJson(Map<String, dynamic> j) => SurvivalChunk(
+    id:         j['id']         as String,
+    label:      j['label']      as String,
+    rangeStart: (j['range'] as List)[0] as int,
+    rangeEnd:   (j['range'] as List)[1] as int,
+    complexity: j['complexity'] as int? ?? 1,
+  );
+
+  int get tokenCount => rangeEnd - rangeStart + 1;
 }
 
 // ── Puzzle model (survival-specific, lighter than Campaign puzzle) ────────────
@@ -71,6 +102,8 @@ class SurvivalPuzzle {
   final List<String> tokens;
   final List<String> solution;
   final String category;
+  /// Non-null only for medium/hard puzzles that carry chunk metadata.
+  final List<SurvivalChunk>? chunks;
 
   const SurvivalPuzzle({
     required this.id,
@@ -78,15 +111,29 @@ class SurvivalPuzzle {
     required this.tokens,
     required this.solution,
     required this.category,
+    this.chunks,
   });
 
-  factory SurvivalPuzzle.fromJson(Map<String, dynamic> j) => SurvivalPuzzle(
-    id:       j['id'] as String,
-    title:    j['title'] as String,
-    tokens:   List<String>.from(j['tokens']),
-    solution: List<String>.from(j['solution']),
-    category: j['category'] as String? ?? '',
-  );
+  factory SurvivalPuzzle.fromJson(Map<String, dynamic> j) {
+    List<SurvivalChunk>? chunks;
+    if (j['chunks'] != null) {
+      chunks = (j['chunks'] as List)
+          .map((c) => SurvivalChunk.fromJson(c as Map<String, dynamic>))
+          .toList();
+    }
+    return SurvivalPuzzle(
+      id:       j['id']       as String,
+      title:    j['title']    as String,
+      tokens:   List<String>.from(j['tokens']),
+      solution: List<String>.from(j['solution']),
+      category: j['category'] as String? ?? '',
+      chunks:   chunks,
+    );
+  }
+
+  /// Returns the solution tokens that belong to a given chunk.
+  List<String> tokensForChunk(SurvivalChunk chunk) =>
+      solution.sublist(chunk.rangeStart, chunk.rangeEnd + 1);
 }
 
 // ── Personal best (stored locally) ───────────────────────────────────────────
@@ -153,7 +200,6 @@ class SurvivalRunResult {
 class SurvivalScoring {
   /// Speed multiplier: 1.0x–2.0x based on solve time vs 30s window
   static double speedMultiplier(int solveSeconds) {
-    // Full 2× if solved in ≤3s, scales linearly down to 1× at 30s+
     if (solveSeconds <= 3)  return 2.0;
     if (solveSeconds >= 30) return 1.0;
     return 1.0 + (27 - (solveSeconds - 3)) / 27.0;
@@ -161,7 +207,6 @@ class SurvivalScoring {
 
   /// Streak multiplier: 1.0x at streak 0, caps at 5.0x
   static double streakMultiplier(int streak) {
-    // Every 5 correct answers add 0.4×, cap at 5.0×
     return min(5.0, 1.0 + (streak ~/ 5) * 0.4);
   }
 
@@ -179,7 +224,6 @@ class SurvivalScoring {
 
   /// Convert final score + stats into XP
   static int xpFor(SurvivalRunResult result) {
-    // Base: 1 XP per 50 score points, + 2 XP per puzzle, + 1 XP per streak point
     final base = (result.score / 50).floor()
                + result.solved * 2
                + result.longestStreak;
@@ -213,12 +257,10 @@ class SurvivalEngine {
 
   void _shuffle() {
     _deck = List.from(_master)..shuffle(_rng);
-
-    // Prevent the first card of a new cycle being the same as the last played
     if (_lastPuzzleId != null && _deck.isNotEmpty && _deck.first.id == _lastPuzzleId) {
       final swap = _rng.nextInt(_deck.length - 1) + 1;
-      final tmp = _deck[0];
-      _deck[0] = _deck[swap];
+      final tmp  = _deck[0];
+      _deck[0]   = _deck[swap];
       _deck[swap] = tmp;
     }
     _cursor = 0;
@@ -238,16 +280,12 @@ class SurvivalEngine {
 class SurvivalService {
   final _sb = Supabase.instance.client;
 
-  // ── Load puzzles from JSON asset ─────────────────────────────────────────
-
   Future<List<SurvivalPuzzle>> loadPuzzles(SurvivalDifficulty diff) async {
     final raw  = await rootBundle.loadString(diff.assetPath);
     final data = jsonDecode(raw) as Map<String, dynamic>;
     final list = data['puzzles'] as List;
     return list.map((j) => SurvivalPuzzle.fromJson(j as Map<String, dynamic>)).toList();
   }
-
-  // ── Local personal best ───────────────────────────────────────────────────
 
   Future<SurvivalBest?> loadBest(SurvivalDifficulty diff) async {
     final prefs = await SharedPreferences.getInstance();
@@ -261,12 +299,7 @@ class SurvivalService {
     await prefs.setString(diff.prefsKey, jsonEncode(best.toJson()));
   }
 
-  // ── Record completed run (ONE write) ─────────────────────────────────────
-  //
-  // Returns true if this run set a new personal best.
-
   Future<bool> recordRun(SurvivalRunResult result) async {
-    // 1. Update local best
     final prev    = await loadBest(result.difficulty);
     final newBest = prev == null
         ? SurvivalBest(
@@ -279,12 +312,10 @@ class SurvivalService {
     await _saveBest(result.difficulty, newBest);
     final isNewBest = prev == null || result.score > prev.score;
 
-    // 2. Also update local total XP (offline-first)
-    final prefs    = await SharedPreferences.getInstance();
-    final localXp  = prefs.getInt('local_xp') ?? 0;
+    final prefs   = await SharedPreferences.getInstance();
+    final localXp = prefs.getInt('local_xp') ?? 0;
     await prefs.setInt('local_xp', localXp + result.xpEarned);
 
-    // 3. Single Supabase write if logged in
     final user = _sb.auth.currentUser;
     if (user != null) {
       try {

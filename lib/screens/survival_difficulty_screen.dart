@@ -337,7 +337,7 @@ class _DifficultyCardState extends State<_DifficultyCard> {
                     ),
                     // Content — icon prominent on left, text on right
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -356,20 +356,21 @@ class _DifficultyCardState extends State<_DifficultyCard> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   d.title,
                                   style: const TextStyle(
-                                    fontSize: 28,
+                                    fontSize: 24,
                                     fontWeight: FontWeight.w900,
                                     color: Colors.white,
                                     letterSpacing: 2,
                                     shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 4),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
                                     color: Colors.black.withOpacity(.28),
                                     borderRadius: BorderRadius.circular(8),
@@ -385,15 +386,18 @@ class _DifficultyCardState extends State<_DifficultyCard> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  d.description,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white.withOpacity(.80),
-                                    height: 1.4,
+                                const SizedBox(height: 6),
+                                Flexible(
+                                  child: Text(
+                                    d.description,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white.withOpacity(.80),
+                                      height: 1.35,
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 3,
                                 ),
                               ],
                             ),

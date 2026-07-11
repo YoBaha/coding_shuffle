@@ -588,39 +588,53 @@ class _ProfileScreenState extends State<ProfileScreen>
                                         Text(
                                           '${best.score} pts',
                                           style: const TextStyle(
-                                            fontSize: 14,
+                                            fontSize: 13,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.white70,
                                           ),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(.05),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            '🔥 ${best.streak} streak',
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.white38,
+                                        const SizedBox(width: 6),
+                                        Flexible(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(.05),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              '🔥${best.streak}',
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white38,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(.05),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            '${best.solved} solved',
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.white38,
+                                        const SizedBox(width: 4),
+                                        Flexible(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(.05),
+                                              borderRadius: BorderRadius.circular(4),
                                             ),
+                                            child: Text(
+                                              '${best.solved}✓',
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white38,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          _formatTime(best.timeSec),
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white38,
                                           ),
                                         ),
                                       ],
@@ -633,14 +647,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       ),
                                     ),
                             ),
-                            if (best != null)
-                              Text(
-                                _formatTime(best.timeSec),
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white38,
-                                ),
-                              ),
                           ],
                         ),
                       );
