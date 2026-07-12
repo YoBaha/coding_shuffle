@@ -128,6 +128,36 @@ void _openDailyChallenge() {
     _progressService.saveLocalXp(_xp);
   }
 
+  // ── Duel mode picker ────────────────────────────────────────────────────
+
+  void _showDuelSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _DuelModeSheet(
+        dailyCompleted: _dailyCompleted,
+        onTraining: () {
+          Navigator.pop(context);
+          _showTrainSheet();
+        },
+        onSurvival: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const SurvivalDifficultyScreen(),
+            ),
+          );
+        },
+        onDaily: () {
+          Navigator.pop(context);
+          _openDailyChallenge();
+        },
+      ),
+    );
+  }
+
   void _showTrainSheet() {
     if (_levels.isEmpty) return;
     showModalBottomSheet(
@@ -161,7 +191,7 @@ void _openDailyChallenge() {
 
   void _onTabTap(int index) {
     if (index == 1) {
-      _showTrainSheet();
+      _showDuelSheet();
       return;
     }
     setState(() => _tab = index);
@@ -225,6 +255,211 @@ onSurvivalTap: () {
       bottomNavigationBar: _CSDBottomNav(
         currentIndex: _tab,
         onTap: _onTabTap,
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Duel mode picker sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DuelModeSheet extends StatelessWidget {
+  final bool dailyCompleted;
+  final VoidCallback onTraining;
+  final VoidCallback onSurvival;
+  final VoidCallback onDaily;
+
+  const _DuelModeSheet({
+    required this.dailyCompleted,
+    required this.onTraining,
+    required this.onSurvival,
+    required this.onDaily,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF150F28),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: kPurpleMid.withOpacity(.25), width: 1),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20, 16, 20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Container(
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Title
+          Row(
+            children: [
+              Image.asset('assets/images/duel_icon.png', width: 28, height: 28),
+              const SizedBox(width: 10),
+              const Text(
+                'SELECT YOUR MODE',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Divider(color: Colors.white10),
+          const SizedBox(height: 12),
+          // Training
+          _DuelModeCard(
+            icon: 'assets/images/duel_icon.png',
+            title: 'TRAINING',
+            subtitle: 'Practice SQL at your own pace',
+            gradientColors: [const Color(0xFF92400E), const Color(0xFFB45309)],
+            borderColor: const Color(0xFFF59E0B),
+            badge: null,
+            onTap: onTraining,
+          ),
+          const SizedBox(height: 12),
+          // Survival
+          _DuelModeCard(
+            icon: 'assets/images/skull_icon.png',
+            title: 'SURVIVAL',
+            subtitle: 'One mistake ends the run',
+            gradientColors: [const Color(0xFF450A0A), const Color(0xFF991B1B)],
+            borderColor: const Color(0xFFEF4444),
+            badge: null,
+            onTap: onSurvival,
+          ),
+          const SizedBox(height: 12),
+          // Daily Challenge
+          _DuelModeCard(
+            icon: 'assets/images/calendar_icon.png',
+            title: 'DAILY CHALLENGE',
+            subtitle: dailyCompleted ? 'Completed today ✓' : 'New puzzle every day',
+            gradientColors: [const Color(0xFF1E3A5F), const Color(0xFF1D4ED8)],
+            borderColor: const Color(0xFF60A5FA),
+            badge: dailyCompleted ? '✓ DONE' : 'NEW',
+            badgeColor: dailyCompleted ? kGreen : kGold,
+            onTap: onDaily,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Individual mode card inside the duel sheet ───────────────────────────────
+
+class _DuelModeCard extends StatelessWidget {
+  final String icon;
+  final String title;
+  final String subtitle;
+  final List<Color> gradientColors;
+  final Color borderColor;
+  final String? badge;
+  final Color? badgeColor;
+  final VoidCallback onTap;
+
+  const _DuelModeCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.gradientColors,
+    required this.borderColor,
+    required this.badge,
+    this.badgeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor.withOpacity(.5), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: borderColor.withOpacity(.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Image.asset(icon, width: 52, height: 52, fit: BoxFit.contain),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(.65),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (badge != null) ...[
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (badgeColor ?? Colors.white).withOpacity(.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: (badgeColor ?? Colors.white).withOpacity(.4),
+                  ),
+                ),
+                child: Text(
+                  badge!,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: badgeColor ?? Colors.white,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ] else ...[
+              const SizedBox(width: 10),
+              Icon(Icons.chevron_right_rounded, color: Colors.white54, size: 22),
+            ],
+          ],
+        ),
       ),
     );
   }

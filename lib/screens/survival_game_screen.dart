@@ -3,9 +3,43 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:haptic_feedback/haptic_feedback.dart';
+import 'package:just_audio/just_audio.dart';
 import '../theme.dart';
 import '../services/survival_service.dart';
+import '../services/music_service.dart';
 import '../services/progress_service.dart';
+
+// ── Asset paths ───────────────────────────────────────────────────────────────
+
+class _Assets {
+  // Icons
+  static const starIcon      = 'assets/images/star_icon.png';
+  static const fireIcon      = 'assets/images/fire_icon.png';
+  static const clockIcon     = 'assets/images/clock_icon.png';
+  static const statsIcon     = 'assets/images/stats_icon.png';
+  static const runeIcon      = 'assets/images/rune_icon.png';
+  static const checkIcon     = 'assets/images/check_icon.png';
+  static const chainIcon     = 'assets/images/chain_icon.png';
+  static const bookIcon      = 'assets/images/book_icon.png';
+  static const brainIcon     = 'assets/images/brain_icon.png';
+  static const lightningIcon = 'assets/images/lightning_icon.png';
+  static const lockedIcon    = 'assets/images/locked_icon.png';
+  static const skullIcon     = 'assets/images/skull_icon.png';
+
+  // HP bar
+  static const hpFull      = 'assets/images/full_hp_bar.png';
+  static const hpHalf      = 'assets/images/half_hp_bar.png';
+  static const hpLastHit   = 'assets/images/heart_last_hit_bar.png';
+
+  // Action button
+  static const completeQuery  = 'assets/images/complete_query_button.png';
+  static const confirmChunk   = 'assets/images/confirm_chunk_button.png';
+
+  // Sounds
+  static const errorSound     = 'assets/music/error_sound.mp3';
+  static const placementSound = 'assets/music/placement_sound.mp3';
+  static const successSound   = 'assets/music/sucess_sound.mp3';
+}
 
 // ── Difficulty theme data ──────────────────────────────────────────────────────
 
@@ -32,7 +66,7 @@ class _DiffTheme {
           glow: Color(0xFF60A5FA),
           tokenBorder: Color(0xFF3B82F6),
           bgAccent: [Color(0x221D4ED8), Color(0x003B82F6)],
-          moodLabel: '💚 EASY',
+          moodLabel: 'EASY',
         );
       case SurvivalDifficulty.medium:
         return const _DiffTheme(
@@ -40,7 +74,7 @@ class _DiffTheme {
           glow: Color(0xFF4ADE80),
           tokenBorder: Color(0xFF22C55E),
           bgAccent: [Color(0x2215803D), Color(0x0022C55E)],
-          moodLabel: '🟠 MEDIUM',
+          moodLabel: 'MEDIUM',
         );
       case SurvivalDifficulty.hard:
         return const _DiffTheme(
@@ -48,9 +82,48 @@ class _DiffTheme {
           glow: Color(0xFFF87171),
           tokenBorder: Color(0xFFEF4444),
           bgAccent: [Color(0x337F1D1D), Color(0x00EF4444)],
-          moodLabel: '💀 HARD',
+          moodLabel: 'HARD',
         );
     }
+  }
+}
+
+// ── Sound service (lightweight, SFX only) ────────────────────────────────────
+
+class _SfxPlayer {
+  final AudioPlayer _error     = AudioPlayer();
+  final AudioPlayer _placement = AudioPlayer();
+  final AudioPlayer _success   = AudioPlayer();
+  bool _ready = false;
+
+  Future<void> init() async {
+    if (_ready) return;
+    try {
+      await _error.setAsset(_Assets.errorSound);
+      await _placement.setAsset(_Assets.placementSound);
+      await _success.setAsset(_Assets.successSound);
+      _ready = true;
+    } catch (_) {
+      // Assets missing during dev — silently skip
+    }
+  }
+
+  Future<void> playError() async {
+    try { await _error.seek(Duration.zero); _error.play(); } catch (_) {}
+  }
+
+  Future<void> playPlacement() async {
+    try { await _placement.seek(Duration.zero); _placement.play(); } catch (_) {}
+  }
+
+  Future<void> playSuccess() async {
+    try { await _success.seek(Duration.zero); _success.play(); } catch (_) {}
+  }
+
+  void dispose() {
+    _error.dispose();
+    _placement.dispose();
+    _success.dispose();
   }
 }
 
@@ -77,20 +150,19 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   late SurvivalEngine _engine;
   late SurvivalPuzzle _currentPuzzle;
   late _DiffTheme _theme;
+  final _sfx = _SfxPlayer();
+  bool _sfxEnabled   = true;
+  bool _musicEnabled = true;
 
   // ── Flat mode (easy) ───────────────────────────────────────────────────────
   List<String> _bank = [];
   List<String?> _slots = [];
 
   // ── Chunk mode (medium / hard) ─────────────────────────────────────────────
-  // _chunkIndex  : which chunk the player is currently solving
-  // _chunkSlots  : answer slots for the CURRENT chunk (length = chunk.tokenCount)
-  // _chunkBank   : shuffled tokens for the CURRENT chunk
-  // _completedChunkSlots : tokens already locked-in for completed chunks
   int _chunkIndex = 0;
   List<String?> _chunkSlots = [];
   List<String> _chunkBank = [];
-  List<List<String>> _completedChunkTokens = []; // locked tokens per completed chunk
+  List<List<String>> _completedChunkTokens = [];
 
   bool get _useChunks => widget.difficulty.usesChunks;
 
@@ -111,6 +183,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   int _elapsed = 0;
   int _puzzleStartTime = 0;
 
+  // ── Animation controllers ──────────────────────────────────────────────────
   late AnimationController _shakeCtrl;
   late Animation<double> _shakeAnim;
   late AnimationController _resultCtrl;
@@ -118,11 +191,27 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   late AnimationController _scorePopCtrl;
   late Animation<double> _scorePopScale;
   late AnimationController _correctFlashCtrl;
-  // Chunk flash shown when a chunk (not full puzzle) is validated correctly
   late AnimationController _chunkFlashCtrl;
+
+  // HP bar: white flash on damage
+  late AnimationController _hpFlashCtrl;
+  late Animation<double> _hpFlashAnim;
+
+  // HP bar: shake on damage
+  late AnimationController _hpShakeCtrl;
+  late Animation<double> _hpShakeAnim;
+
+  // Screen shake on damage
+  late AnimationController _screenShakeCtrl;
+  late Animation<double> _screenShakeAnim;
 
   int _totalXpEarned = 0;
   final _progressService = ProgressService();
+
+  // ── Scroll controller for chunk auto-scroll ────────────────────────────────
+  final ScrollController _chunkScrollCtrl = ScrollController();
+  // GlobalKey per chunk to track positions
+
 
   @override
   void initState() {
@@ -132,6 +221,8 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     _loadNextPuzzle();
     _initAnimations();
     _startTimer();
+    _sfx.init();
+    MusicService.instance.playSurvival();
   }
 
   // ── Puzzle loading ─────────────────────────────────────────────────────────
@@ -147,11 +238,9 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       _chunkIndex            = 0;
       _completedChunkTokens  = [];
       _loadChunk(0);
-      // _bank / _slots unused in chunk mode
       _bank  = [];
       _slots = [];
     } else {
-      // Easy mode OR puzzle missing chunks → flat behaviour (unchanged)
       _bank  = List<String>.from(_currentPuzzle.tokens)..shuffle();
       _slots = List<String?>.filled(_currentPuzzle.solution.length, null);
       _chunkIndex           = 0;
@@ -184,8 +273,26 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     );
 
     _correctFlashCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _chunkFlashCtrl   = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
 
-    _chunkFlashCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
+    // HP bar flash: 0 → 1 → 0 white overlay
+    _hpFlashCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    _hpFlashAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 70),
+    ]).animate(_hpFlashCtrl);
+
+    // HP bar shake
+    _hpShakeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _hpShakeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _hpShakeCtrl, curve: Curves.elasticIn),
+    );
+
+    // Whole screen shake
+    _screenShakeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    _screenShakeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _screenShakeCtrl, curve: Curves.elasticIn),
+    );
   }
 
   void _startTimer() {
@@ -206,7 +313,41 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     _scorePopCtrl.dispose();
     _correctFlashCtrl.dispose();
     _chunkFlashCtrl.dispose();
+    _hpFlashCtrl.dispose();
+    _hpShakeCtrl.dispose();
+    _screenShakeCtrl.dispose();
+    _chunkScrollCtrl.dispose();
+    _sfx.dispose();
+    MusicService.instance.playHome();
     super.dispose();
+  }
+
+  // ── Damage animation sequence ──────────────────────────────────────────────
+
+  void _triggerDamageEffects() {
+    if (_sfxEnabled) _sfx.playError();
+    _screenShakeCtrl.forward(from: 0);
+    _hpShakeCtrl.forward(from: 0);
+    _hpFlashCtrl.forward(from: 0);
+  }
+
+  // ── Auto-scroll to next chunk ──────────────────────────────────────────────
+  // Each pill is roughly 110px wide (padding + text + margin).
+  // We animate the horizontal scroll controller to bring the target pill into view.
+
+  void _scrollToChunk(int index) {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
+      if (!_chunkScrollCtrl.hasClients) return;
+      const pillWidth = 110.0;
+      final targetOffset = (index * pillWidth)
+          .clamp(0.0, _chunkScrollCtrl.position.maxScrollExtent);
+      _chunkScrollCtrl.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeInOutCubic,
+      );
+    });
   }
 
   // ── Token interactions — FLAT mode (easy) ──────────────────────────────────
@@ -216,6 +357,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     final idx = _slots.indexOf(null);
     if (idx == -1) return;
     HapticFeedback.selectionClick();
+    if (_sfxEnabled) _sfx.playPlacement();
     setState(() {
       _slots[idx] = token;
       _bank.remove(token);
@@ -236,6 +378,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   void _dropOnSlot(int slotIndex, String token) {
     if (_submitted || _gameOver) return;
     HapticFeedback.selectionClick();
+    if (_sfxEnabled) _sfx.playPlacement();
     setState(() {
       if (_slots[slotIndex] != null) _bank.add(_slots[slotIndex]!);
       _slots[slotIndex] = token;
@@ -250,6 +393,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     final idx = _chunkSlots.indexOf(null);
     if (idx == -1) return;
     HapticFeedback.selectionClick();
+    if (_sfxEnabled) _sfx.playPlacement();
     setState(() {
       _chunkSlots[idx] = token;
       _chunkBank.remove(token);
@@ -270,6 +414,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   void _chunkDropOnSlot(int slotIndex, String token) {
     if (_submitted || _gameOver) return;
     HapticFeedback.selectionClick();
+    if (_sfxEnabled) _sfx.playPlacement();
     setState(() {
       if (_chunkSlots[slotIndex] != null) _chunkBank.add(_chunkSlots[slotIndex]!);
       _chunkSlots[slotIndex] = token;
@@ -287,7 +432,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     }
   }
 
-  // Flat validation (easy / fallback)
   Future<void> _validateFlat() async {
     final allFilled = _slots.every((s) => s != null);
     if (!allFilled) {
@@ -300,11 +444,12 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     _correct = _validateChunkTokens(
       placed:   placed,
       expected: _currentPuzzle.solution,
-      chunkId:  '',   // flat mode — heuristic detection applies
+      chunkId:  '',
     );
 
     if (_correct) {
       HapticFeedback.mediumImpact();
+      if (_sfxEnabled) _sfx.playSuccess();
       _correctFlashCtrl.forward(from: 0);
 
       final solveTime = _elapsed - _puzzleStartTime;
@@ -340,6 +485,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     } else {
       HapticFeedback.heavyImpact();
       _shakeCtrl.forward(from: 0);
+      _triggerDamageEffects();
       _livesRemaining--;
       if (_livesRemaining <= 0) {
         _gameOver = true;
@@ -349,7 +495,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
           if (mounted) _resultCtrl.forward();
         });
       } else {
-        // Still has lives — reset current puzzle so player can retry
         Future.delayed(const Duration(milliseconds: 700), () {
           if (mounted) {
             setState(() {
@@ -366,7 +511,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     setState(() => _submitted = true);
   }
 
-  // Chunk validation (medium / hard)
   Future<void> _validateChunk() async {
     final allFilled = _chunkSlots.every((s) => s != null);
     if (!allFilled) {
@@ -384,9 +528,9 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     );
 
     if (!correct) {
-      // Wrong answer → decrement lives
       HapticFeedback.heavyImpact();
       _shakeCtrl.forward(from: 0);
+      _triggerDamageEffects();
       _livesRemaining--;
       _correct  = false;
       if (_livesRemaining <= 0) {
@@ -398,7 +542,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
           if (mounted) _resultCtrl.forward();
         });
       } else {
-        // Still has lives — reset current chunk so player can retry
         setState(() {
           _submitted = true;
           _streak = 0;
@@ -422,7 +565,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     final isLastChunk = _chunkIndex == chunks.length - 1;
 
     if (isLastChunk) {
-      // All chunks done → full puzzle solved
+      if (_sfxEnabled) _sfx.playSuccess();
       _correct = true;
 
       final solveTime   = _elapsed - _puzzleStartTime;
@@ -446,7 +589,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       _scorePopCtrl.forward(from: 0);
       _totalXpEarned += (points / 50).floor().clamp(1, 100);
 
-      // Flash + move on
       _correctFlashCtrl.forward(from: 0);
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (mounted && !_gameOver) {
@@ -462,15 +604,21 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         }
       });
     } else {
-      // Advance to next chunk
+      // Advance to next chunk + play success sound + auto-scroll
+      if (_sfxEnabled) _sfx.playSuccess();
+      final nextChunkIndex = _chunkIndex + 1;
       setState(() {
         _completedChunkTokens.add(_chunkSlots.cast<String>());
         _chunkIndex++;
         _loadChunk(_chunkIndex);
         _chunkFlashCtrl.reset();
       });
+      // Scroll to next chunk title after state update
+      _scrollToChunk(nextChunkIndex);
     }
   }
+
+  // ── Validation helpers ─────────────────────────────────────────────────────
 
   bool _listEquals(List<String> a, List<String> b) {
     if (a.length != b.length) return false;
@@ -480,48 +628,24 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     return true;
   }
 
-  // ── Smart chunk validator ──────────────────────────────────────────────────
-  //
-  // For SELECT chunks: position 0 (the keyword) must match exactly,
-  // but the remaining column tokens are treated as an unordered set —
-  // so "SELECT name, email" and "SELECT email, name" are both accepted.
-  //
-  // All other clause types (WHERE, GROUP BY, ORDER BY, JOIN, FROM…) stay
-  // strict because order matters for them semantically and educationally.
-
   bool _validateChunkTokens({
     required List<String> placed,
     required List<String> expected,
     required String chunkId,
   }) {
     if (placed.length != expected.length) return false;
-
-    // Only SELECT chunks get the unordered treatment
     if (!_isColumnChunk(chunkId: chunkId, expected: expected)) {
       return _listEquals(placed, expected);
     }
-
-    // First token must match exactly (SELECT or SELECT DISTINCT)
     if (placed[0] != expected[0]) return false;
-
-    // Remaining column tokens compared as sorted sets — order-independent
     final placedCols   = placed.sublist(1).toList()..sort();
     final expectedCols = expected.sublist(1).toList()..sort();
     return _listEquals(placedCols, expectedCols);
   }
 
-  // Returns true when this chunk's columns can appear in any order.
-  // Priority:
-  //   1. Must start with SELECT
-  //   2. chunkId starts with 'choose_'  → always flexible (your naming convention)
-  //   3. No SQL clause keywords in remaining tokens → flexible (safety fallback)
   bool _isColumnChunk({required String chunkId, required List<String> expected}) {
     if (expected.isEmpty || expected[0] != 'SELECT') return false;
-
-    // Your JSON uses 'choose_' prefix for all column-selection chunks
     if (chunkId.startsWith('choose_')) return true;
-
-    // Fallback: no structural clause keywords among non-SELECT tokens
     const clauseKeywords = {
       'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'FULL',
       'GROUP', 'HAVING', 'ORDER', 'LIMIT', 'OFFSET', 'UNION',
@@ -548,74 +672,103 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     if (mounted) Navigator.pop(context, {'isNewBest': isNewBest});
   }
 
+  // ── HP bar image helper ────────────────────────────────────────────────────
+
+  String get _hpBarAsset {
+    if (_livesRemaining >= 3) return _Assets.hpFull;
+    if (_livesRemaining == 2) return _Assets.hpHalf;
+    return _Assets.hpLastHit;
+  }
+
   // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Difficulty-tinted background
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF0E0A1F),
-                  _theme.bgAccent[0].withOpacity(.15),
-                  const Color(0xFF0E0A1F),
-                ],
+      body: AnimatedBuilder(
+        animation: _screenShakeAnim,
+        builder: (context, child) {
+          final shake = _screenShakeAnim.value == 0
+              ? 0.0
+              : (_screenShakeAnim.value * 10 % 2 == 0 ? 8.0 : -8.0) *
+                  (1 - _screenShakeAnim.value);
+          return Transform.translate(offset: Offset(shake, 0), child: child);
+        },
+        child: Stack(
+          children: [
+            // Difficulty-tinted background
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF0E0A1F),
+                    _theme.bgAccent[0].withOpacity(.15),
+                    const Color(0xFF0E0A1F),
+                  ],
+                ),
               ),
             ),
-          ),
-          // Subtle top glow matching difficulty
-          Positioned(
-            top: -80, left: -60, right: -60,
-            child: AnimatedBuilder(
-              animation: _correctFlashCtrl,
-              builder: (_, __) => Container(
-                height: 300,
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    colors: [
-                      _theme.primary.withOpacity(.08 + .12 * _correctFlashCtrl.value),
-                      Colors.transparent,
-                    ],
+            // Subtle top glow
+            Positioned(
+              top: -80, left: -60, right: -60,
+              child: AnimatedBuilder(
+                animation: _correctFlashCtrl,
+                builder: (_, __) => Container(
+                  height: 300,
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      colors: [
+                        _theme.primary.withOpacity(.08 + .12 * _correctFlashCtrl.value),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 6),
-                _buildStatsBar(),
-                const SizedBox(height: 10),
-                _buildAnswerZone(),
-                const SizedBox(height: 8),
-                // Chunk progress bar — only for medium/hard
-                if (_useChunks && (_currentPuzzle.chunks?.isNotEmpty ?? false)) ...[
-                  _buildChunkBar(),
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 2),
+                  _buildHpBar(),
+                  const SizedBox(height: 2),
+                  _buildStatsBar(),
                   const SizedBox(height: 8),
-                ],
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: _buildTokenBank()),
-                      const SizedBox(height: 10),
-                      _buildActionButton(),
-                      const SizedBox(height: 16),
-                    ],
+                  // Answer zone + chunk bar share top portion
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      children: [
+                        Expanded(child: _buildAnswerZone()),
+                        if (_useChunks && (_currentPuzzle.chunks?.isNotEmpty ?? false)) ...[
+                          const SizedBox(height: 8),
+                          _buildChunkBar(),
+                        ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  // Token bank + action button get the bigger slice
+                  Expanded(
+                    flex: 5,
+                    child: Column(
+                      children: [
+                        Expanded(child: _buildTokenBank()),
+                        const SizedBox(height: 10),
+                        _buildActionButton(),
+                        const SizedBox(height: 14),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (_submitted && _gameOver) _buildGameOverOverlay(),
-        ],
+            if (_submitted && _gameOver) _buildGameOverOverlay(),
+          ],
+        ),
       ),
     );
   }
@@ -624,7 +777,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 12, 0),
+      padding: const EdgeInsets.fromLTRB(4, 8, 8, 0),
       child: Row(
         children: [
           IconButton(
@@ -635,22 +788,49 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '☠ SURVIVAL',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2,
-                    color: _theme.glow,
-                  ),
+                Row(
+                  children: [
+                    Image.asset(_Assets.skullIcon, width: 22, height: 22),
+                    const SizedBox(width: 5),
+                    Text(
+                      'SURVIVAL',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                        color: _theme.glow,
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
                   '${widget.difficulty.label} · $_solved solved',
-                  style: const TextStyle(fontSize: 11, color: Colors.white38, letterSpacing: 1),
+                  style: const TextStyle(fontSize: 10, color: Colors.white38, letterSpacing: 0.5),
                 ),
               ],
             ),
           ),
+          _AudioToggleButton(
+            tooltip: _musicEnabled ? 'Mute music' : 'Unmute music',
+            icon: _musicEnabled ? Icons.music_note_rounded : Icons.music_off_rounded,
+            active: _musicEnabled,
+            onTap: () {
+              setState(() => _musicEnabled = !_musicEnabled);
+              if (_musicEnabled) {
+                MusicService.instance.playSurvival();
+              } else {
+                MusicService.instance.stop();
+              }
+            },
+          ),
+          const SizedBox(width: 4),
+          _AudioToggleButton(
+            tooltip: _sfxEnabled ? 'Mute SFX' : 'Unmute SFX',
+            icon: _sfxEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+            active: _sfxEnabled,
+            onTap: () => setState(() => _sfxEnabled = !_sfxEnabled),
+          ),
+          const SizedBox(width: 4),
           _buildTimer(),
         ],
       ),
@@ -682,7 +862,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.timer_outlined, size: 14, color: color),
+          Image.asset(_Assets.clockIcon, width: 26, height: 26),
           const SizedBox(width: 6),
           Text(
             _timerLabel,
@@ -704,15 +884,56 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     return '$m:$s';
   }
 
-  // ── Stats Bar ──────────────────────────────────────────────────────────────
+  // ── HP Bar ─────────────────────────────────────────────────────────────────
+
+  Widget _buildHpBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_hpShakeAnim, _hpFlashAnim]),
+        builder: (_, child) {
+          final shake = _hpShakeAnim.value == 0
+              ? 0.0
+              : (_hpShakeAnim.value * 8 % 2 == 0 ? 6.0 : -6.0) *
+                  (1 - _hpShakeAnim.value);
+          return Transform.translate(
+            offset: Offset(shake, 0),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // HP bar image
+                Image.asset(
+                  _hpBarAsset,
+                  height: 62,
+                  fit: BoxFit.contain,
+                ),
+                // White flash overlay
+                if (_hpFlashAnim.value > 0)
+                  Positioned.fill(
+                    child: Opacity(
+                      opacity: _hpFlashAnim.value * 0.75,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ── Stats Bar (Score / Streak / Solved — no lives here, HP bar handles it) ─
 
   Widget _buildStatsBar() {
-    String comboDisplay = '${(_comboMultiplier / 10).toStringAsFixed(1)}x';
-    if (_comboMultiplier == 10 || _comboMultiplier < 10) comboDisplay = '1.0x';
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         color: kBgCard.withOpacity(.6),
         borderRadius: BorderRadius.circular(14),
@@ -722,22 +943,32 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _StatItem(icon: '⭐', label: 'Score',  value: '$_score',       color: kGold),
+          _StatItem(
+            iconAsset: _Assets.starIcon,
+            label: 'Score',
+            value: '$_score',
+            color: kGold,
+          ),
           _VertDivider(color: _theme.primary.withOpacity(.2)),
-          _StatItem(icon: '🔥', label: 'Streak', value: '$_streak',      color: Colors.orangeAccent),
+          _StatItem(
+            iconAsset: _Assets.fireIcon,
+            label: 'Streak',
+            value: '$_streak',
+            color: Colors.orangeAccent,
+          ),
           _VertDivider(color: _theme.primary.withOpacity(.2)),
-          _StatItem(icon: '❤️', label: 'Lives',  value: '$_livesRemaining', color: Colors.redAccent),
-          _VertDivider(color: _theme.primary.withOpacity(.2)),
-          _StatItem(icon: '📊', label: 'Solved', value: '$_solved',      color: Colors.cyan),
+          _StatItem(
+            iconAsset: _Assets.statsIcon,
+            label: 'Solved',
+            value: '$_solved',
+            color: Colors.cyan,
+          ),
         ],
       ),
     );
   }
 
   // ── Answer zone ────────────────────────────────────────────────────────────
-  // Shows:
-  //   • Flat mode  → all slots (unchanged)
-  //   • Chunk mode → completed chunk tokens (locked, green) + current chunk slots
 
   Widget _buildAnswerZone() {
     return AnimatedBuilder(
@@ -753,6 +984,8 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         builder: (_, child) => Container(
           margin: const EdgeInsets.symmetric(horizontal: 14),
           padding: const EdgeInsets.all(14),
+          // Fill the Expanded parent so forge slots can scroll within a fixed space
+          height: double.infinity,
           decoration: BoxDecoration(
             color: kBgCard,
             borderRadius: BorderRadius.circular(20),
@@ -776,25 +1009,33 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
           ),
           child: child,
         ),
-        child: Column(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Puzzle title row
+            // Puzzle title — full, no truncation
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: 6, height: 6,
+                  margin: const EdgeInsets.only(top: 4),
                   decoration: BoxDecoration(color: _theme.primary, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     _currentPuzzle.title.toUpperCase(),
-                    style: const TextStyle(fontSize: 10, color: Colors.white38, fontWeight: FontWeight.w700, letterSpacing: 1),
-                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1,
+                      height: 1.4,
+                    ),
+                    softWrap: true,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
@@ -809,10 +1050,10 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
               children: [
-                Icon(Icons.auto_fix_high_rounded, size: 12, color: _theme.glow),
+                Image.asset(_Assets.lightningIcon, width: 22, height: 22),
                 const SizedBox(width: 6),
                 Text(
                   'FORGE YOUR QUERY',
@@ -821,9 +1062,9 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
               ],
             ),
             const SizedBox(height: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 140),
+            Expanded(
               child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
                 child: _useChunks
                     ? _buildChunkedForgeSlots()
                     : Wrap(
@@ -839,17 +1080,14 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     );
   }
 
-  /// In chunk mode: completed chunk tokens (locked green) followed by current slots
   Widget _buildChunkedForgeSlots() {
     return Wrap(
       spacing: 7,
       runSpacing: 7,
       children: [
-        // Completed chunks — locked, green tint
         for (final completedTokens in _completedChunkTokens)
           for (final token in completedTokens)
             _lockedTokenChip(token),
-        // Current chunk slots
         ...List.generate(_chunkSlots.length, (i) => _buildChunkSlot(i)),
       ],
     );
@@ -882,6 +1120,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14),
       child: SingleChildScrollView(
+        controller: _chunkScrollCtrl,
         scrollDirection: Axis.horizontal,
         child: Row(
           children: chunks.asMap().entries.map((e) {
@@ -974,7 +1213,7 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
               token:     token,
               isEmpty:   isEmpty,
               isHovered: isHovered,
-              submitted: false, // chunk slots never "submitted" until last chunk
+              submitted: false,
               correct:   false,
             ),
           ),
@@ -1042,7 +1281,6 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
   }
 
   // ── Token bank ─────────────────────────────────────────────────────────────
-  // Easy → flat _bank; medium/hard → _chunkBank (only current chunk tokens)
 
   Widget _buildTokenBank() {
     final bank = _useChunks ? _chunkBank : _bank;
@@ -1055,13 +1293,14 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: _theme.primary.withOpacity(.12)),
       ),
+      // Column fills all space given by Expanded parent, scroll area takes remainder
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Row(
             children: [
-              Icon(Icons.blur_on_rounded, size: 12, color: _theme.primary),
+              Image.asset(_Assets.runeIcon, width: 22, height: 22),
               const SizedBox(width: 6),
               Text(
                 'SQL RUNES',
@@ -1073,25 +1312,30 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             ],
           ),
           const SizedBox(height: 10),
-          bank.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      '⚔ All runes placed!',
-                      style: TextStyle(fontSize: 13, color: kGreen.withOpacity(.8), fontWeight: FontWeight.w700),
+          Expanded(
+            child: bank.isEmpty
+                ? Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(_Assets.checkIcon, width: 22, height: 22),
+                        const SizedBox(width: 8),
+                        Text(
+                          'All runes placed!',
+                          style: TextStyle(fontSize: 13, color: kGreen.withOpacity(.8), fontWeight: FontWeight.w700),
+                        ),
+                      ],
                     ),
-                  ),
-                )
-              : Flexible(
-                  child: SingleChildScrollView(
+                  )
+                : SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
                     child: Wrap(
                       spacing: 8,
-                      runSpacing: 8,
+                      runSpacing: 10,
                       children: bank.map((token) => _buildBankToken(token)).toList(),
                     ),
                   ),
-                ),
+          ),
         ],
       ),
     );
@@ -1167,52 +1411,48 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
         ? _chunkSlots.every((s) => s != null)
         : _slots.every((s) => s != null);
 
-    // Label changes in chunk mode to indicate progress
-    String buttonLabel = 'SUBMIT ANSWER';
-    if (_useChunks && (_currentPuzzle.chunks?.isNotEmpty ?? false)) {
-      final chunks      = _currentPuzzle.chunks!;
-      final isLastChunk = _chunkIndex == chunks.length - 1;
-      buttonLabel       = isLastChunk ? 'COMPLETE QUERY' : 'CONFIRM CHUNK';
+    final bool isLastChunkOrFlat = !_useChunks ||
+        !(_currentPuzzle.chunks?.isNotEmpty ?? false) ||
+        _chunkIndex == (_currentPuzzle.chunks!.length - 1);
+
+    // Use custom image for "COMPLETE QUERY" (last chunk or flat mode),
+    // standard styled button for "CONFIRM CHUNK"
+    if (isLastChunkOrFlat) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        child: GestureDetector(
+          onTap: _gameOver ? null : _validate,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: allFilled ? 1.0 : 0.38,
+            child: SizedBox(
+              width: double.infinity,
+              height: 76,
+              child: Image.asset(
+                _Assets.completeQuery,
+                fit: BoxFit.fitHeight,
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
+    // "CONFIRM CHUNK" image button
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: GestureDetector(
         onTap: _gameOver ? null : _validate,
-        child: AnimatedContainer(
+        child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
-          height: 54,
-          decoration: BoxDecoration(
-            gradient: allFilled
-                ? LinearGradient(colors: [_theme.primary, _theme.glow], begin: Alignment.centerLeft, end: Alignment.centerRight)
-                : null,
-            color: allFilled ? null : kBgCard,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: allFilled ? Colors.transparent : Colors.white12),
-            boxShadow: allFilled
-                ? [BoxShadow(color: _theme.primary.withOpacity(.5), blurRadius: 20, offset: const Offset(0, 8))]
-                : [],
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.check_circle_outline_rounded,
-                size: 18,
-                color: allFilled ? Colors.white : Colors.white24,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                buttonLabel,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2,
-                  color: allFilled ? Colors.white : Colors.white24,
-                ),
-              ),
-            ],
+          opacity: allFilled ? 1.0 : 0.38,
+          child: SizedBox(
+            width: double.infinity,
+            height: 76,
+            child: Image.asset(
+              _Assets.confirmChunk,
+              fit: BoxFit.fill,
+            ),
           ),
         ),
       ),
@@ -1234,10 +1474,9 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
               children: [
                 _buildGameOverCard(),
                 const SizedBox(height: 16),
-                // TRY AGAIN — pops back to difficulty screen
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context); // back to difficulty screen
+                    Navigator.pop(context);
                   },
                   child: Container(
                     width: double.infinity,
@@ -1255,11 +1494,10 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                   ),
                 ),
                 const SizedBox(height: 12),
-                // QUIT — pops twice to home
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context); // difficulty screen
-                    Navigator.pop(context); // home
+                    Navigator.pop(context);
+                    Navigator.pop(context);
                   },
                   child: Container(
                     width: double.infinity,
@@ -1304,13 +1542,14 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 72, height: 72,
+                width: 96, height: 96,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [Colors.redAccent.withOpacity(.3), Colors.red.withOpacity(.1)]),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.redAccent.withOpacity(.5)),
                 ),
-                child: const Icon(Icons.close_rounded, size: 36, color: Colors.redAccent),
+                padding: const EdgeInsets.all(12),
+                child: Image.asset(_Assets.skullIcon),
               ),
               const SizedBox(height: 16),
               const Text('GAME OVER', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 4, color: Colors.redAccent)),
@@ -1364,13 +1603,12 @@ class _SurvivalGameScreenState extends State<SurvivalGameScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.emoji_events_rounded, color: kGold, size: 16),
+                      Image.asset(_Assets.starIcon, width: 20, height: 20),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           'Personal Best: ${widget.personalBest!.score} pts',
                           style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w600),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -1431,23 +1669,23 @@ class _ChunkPill extends StatelessWidget {
     Color bg;
     Color border;
     Color textColor;
-    String prefix;
+    Widget prefix;
 
     if (isDone) {
       bg        = kGreen.withOpacity(.15);
       border    = kGreen.withOpacity(.5);
       textColor = kGreen;
-      prefix    = '✓ ';
+      prefix    = const SizedBox.shrink();
     } else if (isCurrent) {
       bg        = theme.primary.withOpacity(.18);
       border    = theme.primary;
       textColor = Colors.white;
-      prefix    = '▶ ';
+      prefix    = const SizedBox.shrink();
     } else {
       bg        = Colors.white.withOpacity(.04);
       border    = Colors.white12;
       textColor = Colors.white38;
-      prefix    = '🔒 ';
+      prefix    = Image.asset(_Assets.lockedIcon, width: 22, height: 22);
     }
 
     return AnimatedContainer(
@@ -1462,14 +1700,21 @@ class _ChunkPill extends StatelessWidget {
             ? [BoxShadow(color: theme.primary.withOpacity(.3), blurRadius: 8)]
             : [],
       ),
-      child: Text(
-        '$prefix$label',
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-          color: textColor,
-          letterSpacing: 0.3,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          prefix,
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+              color: textColor,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1478,21 +1723,33 @@ class _ChunkPill extends StatelessWidget {
 // ── Helper widgets ────────────────────────────────────────────────────────────
 
 class _StatItem extends StatelessWidget {
-  final String icon;
+  final String iconAsset;
   final String label;
   final String value;
   final Color color;
 
-  const _StatItem({required this.icon, required this.label, required this.value, required this.color});
+  const _StatItem({
+    required this.iconAsset,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(icon, style: const TextStyle(fontSize: 15)),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(iconAsset, width: 20, height: 20),
+            const SizedBox(width: 5),
+            Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: color)),
+          ],
+        ),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: color)),
         Text(label, style: const TextStyle(fontSize: 9, color: Colors.white38, fontWeight: FontWeight.w600)),
       ],
     );
@@ -1532,4 +1789,49 @@ class _TokenDrag {
   final String token;
   final int? fromSlot;
   const _TokenDrag({required this.token, this.fromSlot});
+}
+
+// ── Audio toggle button ───────────────────────────────────────────────────────
+
+class _AudioToggleButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final bool active;
+  final VoidCallback onTap;
+
+  const _AudioToggleButton({
+    required this.tooltip,
+    required this.icon,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: active
+                ? Colors.white.withOpacity(.10)
+                : Colors.white.withOpacity(.04),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: active ? Colors.white24 : Colors.white12,
+            ),
+          ),
+          child: Icon(
+            icon,
+            size: 16,
+            color: active ? Colors.white70 : Colors.white24,
+          ),
+        ),
+      ),
+    );
+  }
 }

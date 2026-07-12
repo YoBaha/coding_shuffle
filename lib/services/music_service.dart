@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 //   MusicService.instance.setEnabled(false);
 // ─────────────────────────────────────────────────────────────────────────────
 
-enum MusicContext { home, training }
+enum MusicContext { home, training, survival }
 
 class MusicService {
   MusicService._();
@@ -21,10 +21,10 @@ class MusicService {
   static const _prefKey = 'music_enabled';
 
   static const _homeSongs = [
-    'assets/music/home_song1.mp3',
-    'assets/music/home_song2.mp3',
+    'assets/music/app_song1.mp3',
   ];
-  static const _trainingSong = 'assets/music/chill_mode.mp3';
+  static const _trainingSong   = 'assets/music/chill_mode.mp3';
+  static const _survivalSong   = 'assets/music/app_song1.mp3';
 
   final _player = AudioPlayer();
   bool _enabled = true;
@@ -77,6 +77,18 @@ class MusicService {
     await _player.setLoopMode(LoopMode.one);
     await _player.setVolume(0.5);
     _player.play(); // fire-and-forget, runs in background
+  }
+
+  // ── Play the survival song on loop ─────────────────────────────────────
+  Future<void> playSurvival() async {
+    _currentContext = MusicContext.survival;
+    if (!_enabled) return;
+
+    await _player.stop();
+    await _player.setAsset(_survivalSong);
+    await _player.setLoopMode(LoopMode.one);
+    await _player.setVolume(0.45);
+    _player.play();
   }
 
   // ── Play the training song on loop ──────────────────────────────────────
