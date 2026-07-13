@@ -12,7 +12,8 @@ class DailyGameScreen extends StatefulWidget {
   final DailyPuzzle puzzle;
 
   /// Called when the user successfully completes the challenge.
-  final VoidCallback onCompleted;
+  /// [xpGained] is the XP to award to the player (50 XP for a daily clear).
+  final void Function(int xpGained) onCompleted;
 
   const DailyGameScreen({
     super.key,
@@ -304,7 +305,8 @@ class _DailyGameScreenState extends State<DailyGameScreen>
       HapticFeedback.mediumImpact();
       setState(() => _submitted = true);
       // Notify parent so it can mark completion + update button state.
-      widget.onCompleted();
+      // Daily challenge rewards 50 XP on first correct solve.
+      widget.onCompleted(50);
     }
 
     _resultCtrl.forward();

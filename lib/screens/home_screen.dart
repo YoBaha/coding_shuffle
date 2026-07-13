@@ -183,10 +183,6 @@ void _onSurvivalTap() {
               else ...[
                 _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
                 const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: widget.onSignedOut,
-                  child: const Text('Sign out', style: TextStyle(fontSize: 10, color: Colors.white24)),
-                ),
               ],
               const SizedBox(width: 10),
               _LevelBadge(level: _level, xpProgress: _xpProgress),

@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme.dart';
 import '../services/music_service.dart';
+import 'change_password_screen.dart';
+import 'delete_account_dialog.dart';
+import 'support_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SettingsScreen
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final VoidCallback? onSignedOut;
+  final VoidCallback? onAccountDeleted;
+  const SettingsScreen({super.key, this.onSignedOut, this.onAccountDeleted});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -15,6 +23,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _music = MusicService.instance;
+  final _sb = Supabase.instance.client;
   late bool _musicEnabled;
 
   @override
@@ -28,8 +37,129 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) setState(() => _musicEnabled = value);
   }
 
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1838),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Sign Out',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        content: const Text(
+          'Are you sure you want to sign out? Your progress will still be saved to your account.',
+          style: TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54, fontSize: 14)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _sb.auth.signOut();
+              if (mounted) Navigator.pop(context);
+              widget.onSignedOut?.call();
+            },
+            child: const Text(
+              'Sign Out',
+              style: TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => DeleteAccountDialog(onAccountDeleted: widget.onAccountDeleted),
+    );
+  }
+
+  // ── Assistance actions ────────────────────────────────────────────────────
+
+  void _shareApp() {
+    const shareText =
+        '🎮 Check out Code Shuffle Duel — the app that makes learning SQL addictive! '
+        'Solve puzzles, climb the ranks, and master SQL for free. '
+        'Download it now 👇\n'
+        'https://play.google.com/store/apps/details?id=com.example.code_shuffle';
+    Clipboard.setData(const ClipboardData(text: shareText));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF1A1530),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 18),
+            SizedBox(width: 10),
+            Text(
+              'Copied to clipboard! Ready to share',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _sendSuggestion() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'codingshuffleduel@gmail.com',
+      queryParameters: {
+        'subject': 'Code Shuffle Duel — Feature Suggestion',
+        'body': "Here's what I'd like to add to this app:\n\n",
+      },
+    );
+    if (!await launchUrl(uri)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open email app.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _reportBug() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'codingshuffleduel@gmail.com',
+      queryParameters: {
+        'subject': 'Code Shuffle Duel — Bug Report',
+        'body': "Hello, here's the bug/problem I encountered:\n\n",
+      },
+    );
+    if (!await launchUrl(uri)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open email app.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open link.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = _sb.auth.currentUser != null;
+
     return Scaffold(
       backgroundColor: kBgDark,
       body: SafeArea(
@@ -50,19 +180,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 28),
 
-              // ── Sound & Music section ────────────────────────────────────
+              // ── Sound & Music ────────────────────────────────────────────
               _sectionLabel('SOUND & MUSIC'),
               const SizedBox(height: 10),
-
               _SettingsCard(
                 children: [
                   _ToggleRow(
                     icon: Icons.music_note_rounded,
                     iconColor: kPurpleLight,
                     title: 'Background Music',
-                    subtitle: _musicEnabled
-                        ? 'Music is playing'
-                        : 'Music is off',
+                    subtitle: _musicEnabled ? 'Music is playing' : 'Music is off',
                     value: _musicEnabled,
                     onChanged: _toggleMusic,
                   ),
@@ -71,24 +198,128 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const SizedBox(height: 24),
 
-              // ── About section ─────────────────────────────────────────────
+              // ── Account ───────────────────────────────────────────────────
+              _sectionLabel('ACCOUNT'),
+              const SizedBox(height: 10),
+              _SettingsCard(
+                children: [
+                  _ActionRow(
+                    icon: Icons.lock_reset_rounded,
+                    iconColor: kPurpleLight,
+                    title: 'Change Password',
+                    subtitle: 'Update your login password',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+                    ),
+                  ),
+                  if (isLoggedIn) ...[
+                    _divider(),
+                    _ActionRow(
+                      icon: Icons.logout_rounded,
+                      iconColor: Colors.redAccent,
+                      title: 'Sign Out',
+                      subtitle: 'Log out of your account',
+                      onTap: _showSignOutDialog,
+                    ),
+                    _divider(),
+                    _ActionRow(
+                      icon: Icons.delete_forever_rounded,
+                      iconColor: Colors.redAccent,
+                      title: 'Delete Account',
+                      subtitle: 'Permanently delete your account and all data',
+                      onTap: _showDeleteAccountDialog,
+                    ),
+                  ],
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── Assistance ────────────────────────────────────────────────
+              _sectionLabel('ASSISTANCE'),
+              const SizedBox(height: 10),
+              _SettingsCard(
+                children: [
+                  _ActionRow(
+                    icon: Icons.share_rounded,
+                    iconColor: kPurpleLight,
+                    title: 'Share the App',
+                    subtitle: 'Copy a message to share with friends',
+                    onTap: _shareApp,
+                  ),
+                  _divider(),
+                  _ActionRow(
+                    icon: Icons.lightbulb_outline_rounded,
+                    iconColor: const Color(0xFFFFD166),
+                    title: 'Send a Suggestion',
+                    subtitle: 'Got an idea? We\'d love to hear it',
+                    onTap: _sendSuggestion,
+                  ),
+                  _divider(),
+                  _ActionRow(
+                    icon: Icons.bug_report_outlined,
+                    iconColor: Colors.orangeAccent,
+                    title: 'Report a Bug',
+                    subtitle: 'Something not working? Let us know',
+                    onTap: _reportBug,
+                  ),
+                  _divider(),
+                  _ActionRow(
+                    icon: Icons.favorite_rounded,
+                    iconColor: const Color(0xFFFF6B6B),
+                    title: 'Support Us',
+                    subtitle: 'Watch an ad to support development',
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const SupportScreen()),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── About ─────────────────────────────────────────────────────
               _sectionLabel('ABOUT'),
               const SizedBox(height: 10),
-
               _SettingsCard(
                 children: [
                   _InfoRow(
                     icon: Icons.info_outline_rounded,
                     iconColor: Colors.white38,
                     title: 'Version',
-                    value: '1.0.0',
+                    value: '2.5.6',
                   ),
                   _divider(),
-                  _InfoRow(
-                    icon: Icons.code_rounded,
+                  _ActionRow(
+                    icon: Icons.description_outlined,
                     iconColor: Colors.white38,
-                    title: 'Made with',
-                    value: 'Flutter ❤️',
+                    title: 'Terms of Service',
+                    subtitle: 'Read our terms and conditions',
+                    onTap: () => _launchUrl('https://placeholder.com/terms'),
+                  ),
+                  _divider(),
+                  _ActionRow(
+                    icon: Icons.people_outline_rounded,
+                    iconColor: Colors.white38,
+                    title: 'About Us',
+                    subtitle: 'Learn about the team behind the app',
+                    onTap: () => _launchUrl('https://placeholder.com/about'),
+                  ),
+                  _divider(),
+                  _ActionRow(
+                    icon: Icons.shield_outlined,
+                    iconColor: Colors.white38,
+                    title: 'Privacy Policy',
+                    subtitle: 'How we handle your data',
+                    onTap: () => _launchUrl('https://placeholder.com/privacy'),
+                  ),
+                  _divider(),
+                  _ActionRow(
+                    icon: Icons.map_outlined,
+                    iconColor: Colors.white38,
+                    title: 'Future Updates',
+                    subtitle: 'See what\'s coming next',
+                    onTap: () => _launchUrl('https://placeholder.com/roadmap'),
                   ),
                 ],
               ),
@@ -138,7 +369,7 @@ class _SettingsCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Toggle row (music on/off)
+// Toggle row
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ToggleRow extends StatelessWidget {
@@ -178,22 +409,12 @@ class _ToggleRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text(title,
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: Colors.white38,
-                    fontSize: 12,
-                  ),
-                ),
+                Text(subtitle,
+                    style: const TextStyle(color: Colors.white38, fontSize: 12)),
               ],
             ),
           ),
@@ -206,6 +427,65 @@ class _ToggleRow extends StatelessWidget {
             inactiveTrackColor: Colors.white12,
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tappable action row
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ActionRow extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ActionRow({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: kPurpleMid.withOpacity(.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white24, size: 20),
+          ],
+        ),
       ),
     );
   }
@@ -245,22 +525,12 @@ class _InfoRow extends StatelessWidget {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: Text(title,
+                style: const TextStyle(
+                    color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white38,
-              fontSize: 13,
-            ),
-          ),
+          Text(value,
+              style: const TextStyle(color: Colors.white38, fontSize: 13)),
         ],
       ),
     );

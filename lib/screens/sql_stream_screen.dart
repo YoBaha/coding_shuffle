@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -141,7 +143,10 @@ const double _kFallStep     = 0.0004; // added per query completed
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SqlStreamScreen extends StatefulWidget {
-  const SqlStreamScreen({super.key});
+  /// Called when the run ends with the XP earned this session.
+  final void Function(int xpGained)? onXpGained;
+
+  const SqlStreamScreen({super.key, this.onXpGained});
 
   @override
   State<SqlStreamScreen> createState() => _SqlStreamScreenState();
@@ -183,6 +188,9 @@ class _SqlStreamScreenState extends State<SqlStreamScreen>
 
   // Whether the target is currently on screen
   bool _targetOnScreen = false;
+
+  // Query-complete celebration overlay on the card
+  bool _queryComplete = false;
 
   // Hint highlight: only shown after a delay per slot
   bool   _hintVisible = false;
@@ -297,7 +305,7 @@ class _SqlStreamScreenState extends State<SqlStreamScreen>
   void _startHintTimer() {
     _hintTimer?.cancel();
     _hintVisible = false;
-    _hintTimer = Timer(const Duration(seconds: 3), () {
+    _hintTimer = Timer(const Duration(seconds: 6), () {
       if (mounted) setState(() => _hintVisible = true);
     });
   }
@@ -307,11 +315,6 @@ class _SqlStreamScreenState extends State<SqlStreamScreen>
   // ─────────────────────────────────────────────────────────────────────────────
 
   void _maybeSpawn() {
-    // Don't spawn during the 700 ms transition window after a query completes.
-    // _nextSlot equals solution.length during that window — any access would
-    // throw a RangeError and freeze the game.
-    if (_nextSlot >= _puzzle.solution.length) return;
-
     // Find lanes that have room at the top (head token has already fallen
     // at least _kLaneGap, or lane is empty).
     final openLanes = <int>[];
@@ -403,6 +406,7 @@ class _SqlStreamScreenState extends State<SqlStreamScreen>
       _lastTick       = Duration.zero;
       _laneHead.fillRange(0, _kLanes, -1.0);
     });
+    _lastXpEarned = 0;
     _loadNextPuzzle();
   }
 
@@ -498,15 +502,54 @@ class _SqlStreamScreenState extends State<SqlStreamScreen>
     _sfx.done();
     setState(() {
       _queriesDone++;
-      _score     += 200;
-      _fallSpeed  = min(_kFallMax, _fallSpeed + _kFallStep);
+      _score      += 200;
+      _fallSpeed   = min(_kFallMax, _fallSpeed + _kFallStep);
+      _queryComplete = true;
     });
-    Future.delayed(const Duration(milliseconds: 700), () {
-      if (mounted && !_gameOver) _loadNextPuzzle();
+    // Show the "QUERY COMPLETE" card overlay for 900 ms, then load next puzzle
+    Future.delayed(const Duration(milliseconds: 900), () {
+      if (!mounted || _gameOver) return;
+      setState(() => _queryComplete = false);
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted && !_gameOver) _loadNextPuzzle();
+      });
     });
   }
 
-  void _endGame() => setState(() => _gameOver = true);
+  void _endGame() {
+    setState(() => _gameOver = true);
+    _saveStreamXp();
+  }
+
+  /// Converts the run score → XP, persists locally, syncs to Supabase,
+  /// then notifies the parent shell so the HUD updates immediately.
+  Future<void> _saveStreamXp() async {
+    // XP formula: score / 40 + queriesDone * 3 + bestStreak, clamped 1–999
+    final xpEarned = ((_score / 40).floor() + _queriesDone * 3 + _bestStreak)
+        .clamp(1, 999);
+
+    // ── Local ──
+    final prefs = await SharedPreferences.getInstance();
+    final currentXp = prefs.getInt('local_xp') ?? 0;
+    await prefs.setInt('local_xp', currentXp + xpEarned);
+
+    // ── Supabase (fire-and-forget) ──
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      try {
+        await Supabase.instance.client.rpc('increment_xp', params: {
+          'uid':    user.id,
+          'amount': xpEarned,
+        });
+      } catch (_) { /* offline — local already saved */ }
+    }
+
+    // ── Notify shell ──
+    if (mounted) widget.onXpGained?.call(xpEarned);
+    _lastXpEarned = xpEarned;
+  }
+
+  int _lastXpEarned = 0;
 
   // FIX 3: correct HP bar order
   String get _hpAsset {
@@ -745,73 +788,122 @@ class _SqlStreamScreenState extends State<SqlStreamScreen>
   Widget _buildQueryDisplay() {
     return AnimatedBuilder(
       animation: _pulseCtrl,
-      builder: (_, __) => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0D0B1A).withOpacity(.75),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: const Color(0xFF34D399).withOpacity(.25 + .15 * _pulseCtrl.value),
-            width: 1.5,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Image.asset(_A.lightningIcon, width: 14, height: 14),
-              const SizedBox(width: 5),
-              Expanded(child: Text(
-                _puzzle.title.toUpperCase(),
-                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(.45), letterSpacing: 1.2),
-              )),
-              Text('Q${_queriesDone + 1}', style: const TextStyle(
-                fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF34D399),
-              )),
-            ]),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6, runSpacing: 6,
-              children: List.generate(_puzzle.solution.length, (i) {
-                final caught  = _caught[i];
-                final isNext  = i == _nextSlot;
-                final isDone  = caught != null;
-                final showHint = isNext && _hintVisible;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: isDone
-                        ? _tokenColor(caught!).withOpacity(.12)
-                        : showHint
-                            ? const Color(0xFF34D399).withOpacity(.08 + .06 * _pulseCtrl.value)
-                            : Colors.white.withOpacity(.04),
-                    borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                      color: isDone
-                          ? _tokenColor(caught!).withOpacity(.5)
-                          : showHint
-                              ? const Color(0xFF34D399).withOpacity(.5 + .3 * _pulseCtrl.value)
-                              : Colors.white.withOpacity(.1),
-                      width: showHint ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Text(
-                    isDone ? caught! : '?',
-                    style: TextStyle(
-                      fontSize: 11, fontWeight: FontWeight.w700,
-                      color: isDone
-                          ? _tokenColor(caught!)
-                          : Colors.white24,
-                    ),
-                  ),
-                );
-              }),
+      builder: (_, __) => Stack(
+        children: [
+          // ── Main card ──────────────────────────────────────────────────
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: _queryComplete
+                  ? const Color(0xFF052E16).withOpacity(.9)
+                  : const Color(0xFF0D0B1A).withOpacity(.75),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: _queryComplete
+                    ? const Color(0xFF34D399).withOpacity(.9)
+                    : const Color(0xFF34D399).withOpacity(.25 + .15 * _pulseCtrl.value),
+                width: _queryComplete ? 2 : 1.5,
+              ),
+              boxShadow: _queryComplete
+                  ? [BoxShadow(color: const Color(0xFF34D399).withOpacity(.35), blurRadius: 18, spreadRadius: 2)]
+                  : [],
             ),
-          ],
-        ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Image.asset(_A.lightningIcon, width: 14, height: 14),
+                  const SizedBox(width: 5),
+                  Expanded(child: Text(
+                    _puzzle.title.toUpperCase(),
+                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
+                      color: Colors.white.withOpacity(.45), letterSpacing: 1.2),
+                  )),
+                  Text('Q${_queriesDone}', style: const TextStyle(
+                    fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF34D399),
+                  )),
+                ]),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6, runSpacing: 6,
+                  children: List.generate(_puzzle.solution.length, (i) {
+                    final caught   = _caught[i];
+                    final isNext   = i == _nextSlot;
+                    final isDone   = caught != null;
+                    final showHint = isNext && _hintVisible;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: isDone
+                            ? _tokenColor(caught!).withOpacity(.12)
+                            : showHint
+                                ? const Color(0xFF34D399).withOpacity(.08 + .06 * _pulseCtrl.value)
+                                : Colors.white.withOpacity(.04),
+                        borderRadius: BorderRadius.circular(7),
+                        border: Border.all(
+                          color: isDone
+                              ? _tokenColor(caught!).withOpacity(.5)
+                              : showHint
+                                  ? const Color(0xFF34D399).withOpacity(.5 + .3 * _pulseCtrl.value)
+                                  : Colors.white.withOpacity(.1),
+                          width: showHint ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Text(
+                        isDone ? caught! : '?',
+                        style: TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.w700,
+                          color: isDone ? _tokenColor(caught!) : Colors.white24,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+
+          // ── "QUERY COMPLETE" overlay ──────────────────────────────────
+          if (_queryComplete)
+            Positioned.fill(
+              child: AnimatedOpacity(
+                opacity: _queryComplete ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF052E16).withOpacity(.88),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(_A.checkIcon, width: 28, height: 28),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'QUERY COMPLETE',
+                        style: TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w900,
+                          color: Color(0xFF34D399), letterSpacing: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '+200 pts',
+                        style: TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.w700,
+                          color: const Color(0xFF34D399).withOpacity(.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -925,13 +1017,15 @@ class _SqlStreamScreenState extends State<SqlStreamScreen>
               border: Border.all(color: Colors.white.withOpacity(.08)),
             ),
             child: Column(children: [
-              _iconStatRow(_A.starIcon,  'Score',        '$_score',        const Color(0xFFFFD700)),
+              _iconStatRow(_A.starIcon,      'Score',        '$_score',           const Color(0xFFFFD700)),
               _divider(),
-              _iconStatRow(_A.checkIcon, 'Queries done', '$_queriesDone',  const Color(0xFF4ADE80)),
+              _iconStatRow(_A.checkIcon,     'Queries done', '$_queriesDone',     const Color(0xFF4ADE80)),
               _divider(),
-              _iconStatRow(_A.fireIcon,  'Best streak',  '$_bestStreak',   const Color(0xFFF97316)),
+              _iconStatRow(_A.fireIcon,      'Best streak',  '$_bestStreak',      const Color(0xFFF97316)),
               _divider(),
-              _iconStatRow(_A.chainIcon, 'Lives left',   '$_lives / 3',    const Color(0xFFEC4899)),
+              _iconStatRow(_A.chainIcon,     'Lives left',   '$_lives / 3',       const Color(0xFFEC4899)),
+              _divider(),
+              _iconStatRow(_A.lightningIcon, 'XP earned',    '+$_lastXpEarned',   const Color(0xFFA78BFA)),
             ]),
           ),
           const SizedBox(height: 24),
@@ -1083,7 +1177,13 @@ class _StatChip extends StatelessWidget {
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       Image.asset(icon, width: 14, height: 14),
       const SizedBox(width: 4),
-      Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color)),
+      ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 72),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color)),
+        ),
+      ),
     ]),
   );
 }

@@ -27,9 +27,9 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   final _progressService = ProgressService();
   final _sb = Supabase.instance.client;
   final _music = MusicService.instance;
-final _dailyService = DailyChallengeService();
-bool _dailyCompleted = false;
-DailyPuzzle? _todaysPuzzle;
+  final _dailyService = DailyChallengeService();
+  bool _dailyCompleted = false;
+  DailyPuzzle? _todaysPuzzle;
   List<PuzzleLevel> _levels = [];
   Map<String, PuzzleProgress> _progress = {};
   int _xp = 0;
@@ -82,13 +82,13 @@ DailyPuzzle? _todaysPuzzle;
         username = profile?['username'] as String?;
       } catch (_) {}
     }
-final dailyCompleted = await _dailyService.isCompletedToday();
-DailyPuzzle? todaysPuzzle;
-try {
-  todaysPuzzle = await _dailyService.loadTodaysPuzzle();
-} catch (e, st) {
-  debugPrint('Daily puzzle load failed: \$e\n\$st');
-}
+    final dailyCompleted = await _dailyService.isCompletedToday();
+    DailyPuzzle? todaysPuzzle;
+    try {
+      todaysPuzzle = await _dailyService.loadTodaysPuzzle();
+    } catch (e, st) {
+      debugPrint('Daily puzzle load failed: \$e\n\$st');
+    }
     if (mounted) {
       setState(() {
         _levels = levels;
@@ -102,36 +102,87 @@ try {
       _music.playHome();
     }
   }
-void _openDailyChallenge() {
-  if (_todaysPuzzle == null) {
+
+  // ── Handle sign out ────────────────────────────────────────────────────────
+  
+  void _handleSignOut() {
+    setState(() {
+      _username = null;
+      // Reset to home tab
+      _tab = 0;
+    });
+    // Optionally show a snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Could not load today\'s puzzle. Please restart the app.'),
+        content: Text('Signed out successfully'),
+        backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
     );
-    return;
   }
-  _music.playHome(); // daily uses home_song1
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => DailyGameScreen(
-        puzzle: _todaysPuzzle!,
-        onCompleted: () async {
-          await _dailyService.markCompleted();
-          if (mounted) setState(() => _dailyCompleted = true);
-        },
+
+  // ── Handle account deletion ──────────────────────────────────────────────
+  
+  void _handleAccountDeleted() {
+    setState(() {
+      _username = null;
+      // Reset local progress and XP (they should be cleared after deletion)
+      _progress = {};
+      _xp = 0;
+      _tab = 0;
+    });
+    // Show confirmation
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Account deleted successfully'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
       ),
-    ),
-  );
-}
+    );
+  }
+
+  void _openDailyChallenge() {
+    if (_todaysPuzzle == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not load today\'s puzzle. Please restart the app.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    _music.playHome(); // daily uses home_song1
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DailyGameScreen(
+          puzzle: _todaysPuzzle!,
+          onCompleted: (xpGained) async {
+            await _dailyService.markCompleted();
+            if (mounted) {
+              setState(() => _dailyCompleted = true);
+              _onXpGained(xpGained);
+            }
+          },
+        ),
+      ),
+    );
+  }
+  
   void _onProgressUpdated(Map<String, PuzzleProgress> updated, int xpGained) {
     setState(() {
       _progress = updated;
       _xp += xpGained;
     });
     _progressService.saveLocalProgress(updated);
+    _progressService.saveLocalXp(_xp);
+  }
+
+  /// Universal XP award: bumps the in-memory counter and persists locally.
+  /// Call this whenever a game mode earns XP outside the campaign flow.
+  void _onXpGained(int xpGained) {
+    if (xpGained <= 0) return;
+    setState(() => _xp += xpGained);
     _progressService.saveLocalXp(_xp);
   }
 
@@ -156,7 +207,12 @@ void _openDailyChallenge() {
             MaterialPageRoute(
               builder: (_) => const SurvivalDifficultyScreen(),
             ),
-          ).then((_) => _music.playHome());
+          ).then((_) async {
+            _music.playHome();
+            // Reload XP from SharedPreferences — survival writes it locally
+            final freshXp = await _progressService.loadLocalXp();
+            if (mounted) setState(() => _xp = freshXp);
+          });
         },
         onDaily: () {
           Navigator.pop(context);
@@ -164,10 +220,12 @@ void _openDailyChallenge() {
         },
         onStream: () {
           Navigator.pop(context);
-          _music.playHome(); // sql stream uses home_song1
+          _music.playHome();
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const SqlStreamScreen()),
+            MaterialPageRoute(
+              builder: (_) => SqlStreamScreen(onXpGained: _onXpGained),
+            ),
           );
         },
       ),
@@ -237,34 +295,40 @@ void _openDailyChallenge() {
             username: _username,
             onProgressUpdated: _onProgressUpdated,
             onSynced: (u) => setState(() => _username = u),
-            onSignedOut: () => setState(() => _username = null),
+            onSignedOut: _handleSignOut, // Use the handler
             onTrainingTap: _showTrainSheet,
             onReviewTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ReviewSqlScreen()),
             ),
-              dailyCompleted: _dailyCompleted,        // ← new
-  onDailyTap: _openDailyChallenge,        // ← new
-onSurvivalTap: () {
-    _music.playSurvival();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const SurvivalDifficultyScreen(),
-      ),
-    ).then((_) => _music.playHome());
-  },
-),
-
+            dailyCompleted: _dailyCompleted,
+            onDailyTap: _openDailyChallenge,
+            onSurvivalTap: () {
+              _music.playSurvival();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SurvivalDifficultyScreen(),
+                ),
+              ).then((_) async {
+                _music.playHome();
+                final freshXp = await _progressService.loadLocalXp();
+                if (mounted) setState(() => _xp = freshXp);
+              });
+            },
+          ),
           ProfileScreen(
             progress: _progress,
             xp: _xp,
             levels: _levels,
             username: _username,
             onSynced: (u) => setState(() => _username = u),
-            onSignedOut: () => setState(() => _username = null),
+            onSignedOut: _handleSignOut, // Use the handler
           ),
-          const SettingsScreen(),
+          SettingsScreen(
+            onSignedOut: _handleSignOut, // Pass the sign out handler
+            onAccountDeleted: _handleAccountDeleted, // Add this new callback
+          ),
           const SupportScreen(),
         ],
       ),
@@ -275,7 +339,6 @@ onSurvivalTap: () {
     );
   }
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Duel mode picker sheet
 // ─────────────────────────────────────────────────────────────────────────────
