@@ -20,6 +20,7 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onReviewTap;
   final bool dailyCompleted;
   final VoidCallback onDailyTap;
+  final String? equippedTitleId;
 
   const HomeScreen({
     super.key,
@@ -33,8 +34,9 @@ class HomeScreen extends StatefulWidget {
     required this.onTrainingTap,
     this.onSurvivalTap,
     required this.onReviewTap,
-    required this.dailyCompleted,   // ← new
-    required this.onDailyTap, 
+    required this.dailyCompleted,
+    required this.onDailyTap,
+    this.equippedTitleId,
   });
 
   @override
@@ -181,7 +183,14 @@ void _onSurvivalTap() {
                   child: _HudPill(icon: Icons.cloud_upload_outlined, iconColor: kPurpleLight, label: 'Sync'),
                 )
               else ...[
-                _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
+                    if (widget.equippedTitleId != null)
+                      _TitlePill(displayText: widget.equippedTitleId!),
+                  ],
+                ),
                 const SizedBox(width: 8),
               ],
               const SizedBox(width: 10),
@@ -814,6 +823,32 @@ class _XpProgressBarState extends State<_XpProgressBar>
           },
         ),
       ],
+    );
+  }
+}
+
+class _TitlePill extends StatelessWidget {
+  final String displayText;
+  const _TitlePill({required this.displayText});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: kPurpleMid.withOpacity(.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: kPurpleMid.withOpacity(.3)),
+      ),
+      child: Text(
+        displayText,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: kPurpleLight,
+        ),
+      ),
     );
   }
 }

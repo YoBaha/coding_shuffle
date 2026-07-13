@@ -8,10 +8,6 @@ import 'change_password_screen.dart';
 import 'delete_account_dialog.dart';
 import 'support_screen.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SettingsScreen
-// ─────────────────────────────────────────────────────────────────────────────
-
 class SettingsScreen extends StatefulWidget {
   final VoidCallback? onSignedOut;
   final VoidCallback? onAccountDeleted;
@@ -26,15 +22,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _sb = Supabase.instance.client;
   late bool _musicEnabled;
 
+  // Redeem code
+  final _codeController = TextEditingController();
+  bool _redeemLoading = false;
+
   @override
   void initState() {
     super.initState();
     _musicEnabled = _music.enabled;
   }
 
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
   Future<void> _toggleMusic(bool value) async {
     await _music.setEnabled(value);
     if (mounted) setState(() => _musicEnabled = value);
+  }
+
+  // ── Redeem code ───────────────────────────────────────────────────────────
+
+  Future<void> _redeemCode() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) return;
+
+    setState(() => _redeemLoading = true);
+    await Future.delayed(const Duration(milliseconds: 600)); // feels intentional
+    setState(() => _redeemLoading = false);
+
+    _codeController.clear();
+    _showCodeSnack(valid: false);
+  }
+
+  void _showCodeSnack({required bool valid}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF1A1530),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: Row(
+          children: [
+            Icon(
+              valid ? Icons.check_circle_rounded : Icons.cancel_rounded,
+              color: valid ? Colors.greenAccent : Colors.redAccent,
+              size: 18,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              valid ? 'Code redeemed!' : 'Invalid code. Please try again.',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showSignOutDialog() {
@@ -81,8 +125,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── Assistance actions ────────────────────────────────────────────────────
-
   void _shareApp() {
     const shareText =
         '🎮 Check out Code Shuffle Duel — the app that makes learning SQL addictive! '
@@ -119,11 +161,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
     );
     if (!await launchUrl(uri)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open email app.')),
-        );
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open email app.')),
+      );
     }
   }
 
@@ -137,22 +177,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
     );
     if (!await launchUrl(uri)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open email app.')),
-        );
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open email app.')),
+      );
     }
   }
 
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open link.')),
-        );
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open link.')),
+      );
     }
   }
 
@@ -179,6 +215,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 28),
+
+              // ── Redeem Code ──────────────────────────────────────────────
+              _sectionLabel('REDEEM CODE'),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1838),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: kPurpleMid.withOpacity(.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Have a code? Enter it below to unlock exclusive rewards.',
+                      style: TextStyle(fontSize: 12, color: Colors.white38, height: 1.4),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _codeController,
+                            textCapitalization: TextCapitalization.characters,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              letterSpacing: 2,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'ENTER CODE',
+                              hintStyle: TextStyle(
+                                color: Colors.white.withOpacity(.2),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                letterSpacing: 2,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(.05),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacity(.08),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: kPurpleMid.withOpacity(.5),
+                                ),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.confirmation_number_rounded,
+                                color: kPurpleLight.withOpacity(.6),
+                                size: 18,
+                              ),
+                            ),
+                            onSubmitted: (_) => _redeemCode(),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: _redeemLoading ? null : _redeemCode,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              gradient: _redeemLoading ? null : kButtonGradient,
+                              color: _redeemLoading ? Colors.white.withOpacity(.05) : null,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: _redeemLoading
+                                  ? null
+                                  : [
+                                      BoxShadow(
+                                        color: kPurpleMid.withOpacity(.4),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                            ),
+                            alignment: Alignment.center,
+                            child: _redeemLoading
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white38,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
 
               // ── Sound & Music ────────────────────────────────────────────
               _sectionLabel('SOUND & MUSIC'),
@@ -295,7 +445,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     iconColor: Colors.white38,
                     title: 'Terms of Service',
                     subtitle: 'Read our terms and conditions',
-                    onTap: () => _launchUrl('https://placeholder.com/terms'),
+                    onTap: () => _launchUrl('https://codingshuffleduel.vercel.app/terms'),
                   ),
                   _divider(),
                   _ActionRow(
@@ -303,7 +453,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     iconColor: Colors.white38,
                     title: 'About Us',
                     subtitle: 'Learn about the team behind the app',
-                    onTap: () => _launchUrl('https://placeholder.com/about'),
+                    onTap: () => _launchUrl('https://codingshuffleduel.vercel.app/about'),
                   ),
                   _divider(),
                   _ActionRow(
@@ -311,7 +461,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     iconColor: Colors.white38,
                     title: 'Privacy Policy',
                     subtitle: 'How we handle your data',
-                    onTap: () => _launchUrl('https://placeholder.com/privacy'),
+                    onTap: () => _launchUrl('https://codingshuffleduel.vercel.app/privacy'),
                   ),
                   _divider(),
                   _ActionRow(
@@ -319,7 +469,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     iconColor: Colors.white38,
                     title: 'Future Updates',
                     subtitle: 'See what\'s coming next',
-                    onTap: () => _launchUrl('https://placeholder.com/roadmap'),
+                    onTap: () => _launchUrl('https://codingshuffleduel.vercel.app/roadmap'),
                   ),
                 ],
               ),
@@ -347,9 +497,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Reusable card container
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Reusable card container ───────────────────────────────────────────────────
 
 class _SettingsCard extends StatelessWidget {
   final List<Widget> children;
@@ -368,9 +516,7 @@ class _SettingsCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Toggle row
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Toggle row ────────────────────────────────────────────────────────────────
 
 class _ToggleRow extends StatelessWidget {
   final IconData icon;
@@ -432,9 +578,7 @@ class _ToggleRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tappable action row
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Tappable action row ───────────────────────────────────────────────────────
 
 class _ActionRow extends StatelessWidget {
   final IconData icon;
@@ -491,9 +635,7 @@ class _ActionRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Info row (version, etc.)
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Info row ──────────────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
   final IconData icon;
@@ -529,8 +671,7 @@ class _InfoRow extends StatelessWidget {
                 style: const TextStyle(
                     color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
           ),
-          Text(value,
-              style: const TextStyle(color: Colors.white38, fontSize: 13)),
+          Text(value, style: const TextStyle(color: Colors.white38, fontSize: 13)),
         ],
       ),
     );

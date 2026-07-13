@@ -14,8 +14,12 @@ import 'level_screen.dart';
 import 'support_screen.dart';
 import 'settings_screen.dart';
 import 'package:code_shuffle/services/daily_challenge_service.dart';
+import 'package:code_shuffle/services/survival_service.dart';
 import 'daily_game_screen.dart';
 import 'sql_stream_screen.dart';
+import 'package:code_shuffle/services/titles_service.dart';
+import 'title_unlock_overlay.dart';
+import 'package:code_shuffle/screens/titles_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -28,6 +32,11 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   final _sb = Supabase.instance.client;
   final _music = MusicService.instance;
   final _dailyService = DailyChallengeService();
+  final _titlesService = TitlesService();
+  final _survivalService = SurvivalService();
+  Set<String> _unlockedTitleIds = {};
+  String? _equippedTitleId;
+  Map<SurvivalDifficulty, SurvivalBest?> _survivalBests = {};
   bool _dailyCompleted = false;
   DailyPuzzle? _todaysPuzzle;
   List<PuzzleLevel> _levels = [];
@@ -100,6 +109,41 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
         _loading = false;
       });
       _music.playHome();
+      _equippedTitleId = await _titlesService.loadEquippedId();
+      await _refreshTitles();
+    }
+  }
+
+  Future<void> _refreshTitles() async {
+    final bests = <SurvivalDifficulty, SurvivalBest?>{};
+    for (final d in SurvivalDifficulty.values) {
+      bests[d] = await _survivalService.loadBest(d);
+    }
+    _survivalBests = bests;
+
+    final stats = await _titlesService.buildStats(
+      totalXp:       _xp,
+      progress:      _progress,
+      survivalBests: bests,
+    );
+    final ids = await _titlesService.getUnlockedIds(stats);
+    if (mounted) setState(() => _unlockedTitleIds = ids);
+  }
+
+  Future<void> _checkTitlesAfterEvent(int xpGained) async {
+    final oldStats = await _titlesService.buildStats(
+      totalXp: _xp, progress: _progress, survivalBests: _survivalBests,
+    );
+    _onXpGained(xpGained);
+    final newStats = await _titlesService.buildStats(
+      totalXp: _xp, progress: _progress, survivalBests: _survivalBests,
+    );
+    final newOnes = await _titlesService.checkForNewUnlocks(
+      oldStats: oldStats, newStats: newStats,
+    );
+    await _refreshTitles();
+    if (newOnes.isNotEmpty && mounted) {
+      TitleUnlockOverlay.show(context, titles: newOnes);
     }
   }
 
@@ -159,9 +203,10 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
           puzzle: _todaysPuzzle!,
           onCompleted: (xpGained) async {
             await _dailyService.markCompleted();
+            await _titlesService.incrementDailyChallenges();
             if (mounted) {
               setState(() => _dailyCompleted = true);
-              _onXpGained(xpGained);
+              await _checkTitlesAfterEvent(xpGained);
             }
           },
         ),
@@ -169,13 +214,25 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
     );
   }
   
-  void _onProgressUpdated(Map<String, PuzzleProgress> updated, int xpGained) {
-    setState(() {
-      _progress = updated;
-      _xp += xpGained;
-    });
+  void _onProgressUpdated(Map<String, PuzzleProgress> updated, int xpGained) async {
+    final oldStats = await _titlesService.buildStats(
+      totalXp: _xp, progress: _progress, survivalBests: _survivalBests,
+    );
+
+    setState(() { _progress = updated; _xp += xpGained; });
     _progressService.saveLocalProgress(updated);
     _progressService.saveLocalXp(_xp);
+
+    final newStats = await _titlesService.buildStats(
+      totalXp: _xp, progress: _progress, survivalBests: _survivalBests,
+    );
+    final newOnes = await _titlesService.checkForNewUnlocks(
+      oldStats: oldStats, newStats: newStats,
+    );
+    await _refreshTitles();
+    if (newOnes.isNotEmpty && mounted) {
+      TitleUnlockOverlay.show(context, titles: newOnes);
+    }
   }
 
   /// Universal XP award: bumps the in-memory counter and persists locally.
@@ -212,6 +269,8 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
             // Reload XP from SharedPreferences — survival writes it locally
             final freshXp = await _progressService.loadLocalXp();
             if (mounted) setState(() => _xp = freshXp);
+            await _titlesService.incrementSurvivalRuns();
+            await _refreshTitles();
           });
         },
         onDaily: () {
@@ -303,6 +362,9 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
             ),
             dailyCompleted: _dailyCompleted,
             onDailyTap: _openDailyChallenge,
+            equippedTitleId: (_equippedTitleId != null && _unlockedTitleIds.contains(_equippedTitleId))
+                ? _equippedTitleId
+                : null,
             onSurvivalTap: () {
               _music.playSurvival();
               Navigator.push(
@@ -314,6 +376,8 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
                 _music.playHome();
                 final freshXp = await _progressService.loadLocalXp();
                 if (mounted) setState(() => _xp = freshXp);
+                await _titlesService.incrementSurvivalRuns();
+                await _refreshTitles();
               });
             },
           ),
@@ -323,13 +387,21 @@ class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
             levels: _levels,
             username: _username,
             onSynced: (u) => setState(() => _username = u),
-            onSignedOut: _handleSignOut, // Use the handler
+            onSignedOut: _handleSignOut,
+            unlockedTitleIds: _unlockedTitleIds,
+            equippedTitleId: _equippedTitleId,
+            onTitleEquipped: (id) => setState(() => _equippedTitleId = id),
           ),
           SettingsScreen(
             onSignedOut: _handleSignOut, // Pass the sign out handler
             onAccountDeleted: _handleAccountDeleted, // Add this new callback
           ),
-          const SupportScreen(),
+          SupportScreen(
+            onAdWatched: () async {
+              await _titlesService.incrementAdsWatched();
+              await _checkTitlesAfterEvent(0);
+            },
+          ),
         ],
       ),
       bottomNavigationBar: _CSDBottomNav(

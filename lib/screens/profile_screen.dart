@@ -6,6 +6,8 @@ import '../theme.dart';
 import 'package:code_shuffle/modals/modals.dart';
 import 'package:code_shuffle/services/progress_service.dart';
 import 'package:code_shuffle/services/survival_service.dart';
+import 'package:code_shuffle/services/titles_service.dart';
+import 'package:code_shuffle/screens/titles_screen.dart';
 import 'sync_modal.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -15,6 +17,9 @@ class ProfileScreen extends StatefulWidget {
   final String? username;
   final void Function(String username) onSynced;
   final VoidCallback onSignedOut;
+  final Set<String> unlockedTitleIds;
+  final String? equippedTitleId;
+  final void Function(String? id) onTitleEquipped;
 
   const ProfileScreen({
     super.key,
@@ -24,6 +29,9 @@ class ProfileScreen extends StatefulWidget {
     required this.username,
     required this.onSynced,
     required this.onSignedOut,
+    required this.unlockedTitleIds,
+    required this.equippedTitleId,
+    required this.onTitleEquipped,
   });
 
   @override
@@ -198,6 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   SliverToBoxAdapter(child: _buildHeroSection()),
                   SliverToBoxAdapter(child: _buildStatsSection()),
                   SliverToBoxAdapter(child: _buildSurvivalStatsSection()),
+                  SliverToBoxAdapter(child: _buildTitlesSection()),
                   SliverToBoxAdapter(child: _buildLevelSection()),
                   SliverToBoxAdapter(
                     child: Padding(
@@ -667,6 +676,130 @@ class _ProfileScreenState extends State<ProfileScreen>
       case SurvivalDifficulty.hard:
         return const Color(0xFFEF4444);
     }
+  }
+
+  // ── Titles section ─────────────────────────────────────────────────────────
+
+  Widget _buildTitlesSection() {
+    final titlesService = TitlesService();
+    final equipped = widget.equippedTitleId;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _sectionLabel('TITLES'),
+              const Spacer(),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TitlesScreen(
+                      unlockedIds: widget.unlockedTitleIds,
+                      equippedId:  widget.equippedTitleId,
+                      onEquip:     widget.onTitleEquipped,
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  'VIEW ALL →',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: kPurpleLight,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TitlesScreen(
+                  unlockedIds: widget.unlockedTitleIds,
+                  equippedId:  widget.equippedTitleId,
+                  onEquip:     widget.onTitleEquipped,
+                ),
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kBgCard,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withOpacity(.05)),
+              ),
+              child: Row(
+                children: [
+                  if (equipped != null)
+                    FutureBuilder<List<GameTitle>>(
+                      future: titlesService.loadAllTitles(),
+                      builder: (context, snap) {
+                        if (!snap.hasData) return const SizedBox();
+                        final matches = snap.data!.where((t) => t.id == equipped);
+                        if (matches.isEmpty) return const SizedBox();
+                        final title = matches.first;
+                        return Row(
+                          children: [
+                            Text(title.emoji, style: const TextStyle(fontSize: 28)),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title.label,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 15,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const Text(
+                                  'Currently equipped',
+                                  style: TextStyle(fontSize: 11, color: Colors.white38),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    )
+                  else ...[
+                    const Icon(Icons.military_tech_rounded, color: Colors.white24, size: 28),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${widget.unlockedTitleIds.length} titles unlocked',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const Text(
+                          'Tap to equip a title',
+                          style: TextStyle(fontSize: 11, color: Colors.white38),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const Spacer(),
+                  const Icon(Icons.chevron_right_rounded, color: Colors.white24),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ── Level breakdown ────────────────────────────────────────────────────────

@@ -29,6 +29,7 @@ flutter_launcher_icons:
   android: true
   ios: false
   image_path: "assets/icons/icon_app3.png"
+  adaptive_icon_foreground: "assets/icons/icon_app3.png"
   adaptive_icon_background: "#1A1038"
 
 flutter:
@@ -51,5 +52,6 @@ flutter:
     - assets/survival_puzzles_hard.json
     - assets/survival_puzzles_medium1.json
     - assets/survival_puzzles_hard1.json
+    - assets/titles.json
 
   uses-material-design: true

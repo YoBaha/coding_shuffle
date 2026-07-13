@@ -1,0 +1,164 @@
+{
+  "titles": [
+    {
+      "id": "first_blood",
+      "label": "First Blood",
+      "emoji": "⚔️",
+      "description": "Complete your first puzzle",
+      "condition": { "type": "puzzles_completed", "value": 1 },
+      "rarity": "common"
+    },
+    {
+      "id": "sql_rookie",
+      "label": "SQL Rookie",
+      "emoji": "🌱",
+      "description": "Complete 10 campaign puzzles",
+      "condition": { "type": "puzzles_completed", "value": 10 },
+      "rarity": "common"
+    },
+    {
+      "id": "sql_adept",
+      "label": "SQL Adept",
+      "emoji": "📘",
+      "description": "Complete 25 campaign puzzles",
+      "condition": { "type": "puzzles_completed", "value": 25 },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "sql_master",
+      "label": "SQL Master",
+      "emoji": "🏆",
+      "description": "Complete all campaign puzzles",
+      "condition": { "type": "puzzles_completed", "value": 50 },
+      "rarity": "rare"
+    },
+    {
+      "id": "perfectionist",
+      "label": "Perfectionist",
+      "emoji": "💎",
+      "description": "Earn 3 stars on 10 puzzles",
+      "condition": { "type": "perfect_puzzles", "value": 10 },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "flawless",
+      "label": "Flawless",
+      "emoji": "✨",
+      "description": "Earn 3 stars on 25 puzzles",
+      "condition": { "type": "perfect_puzzles", "value": 25 },
+      "rarity": "rare"
+    },
+    {
+      "id": "survivor",
+      "label": "Survivor",
+      "emoji": "🛡️",
+      "description": "Complete your first Survival run",
+      "condition": { "type": "survival_runs", "value": 1 },
+      "rarity": "common"
+    },
+    {
+      "id": "arena_regular",
+      "label": "Arena Regular",
+      "emoji": "🎯",
+      "description": "Complete 10 Survival runs",
+      "condition": { "type": "survival_runs", "value": 10 },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "battle_hardened",
+      "label": "Battle Hardened",
+      "emoji": "🔥",
+      "description": "Complete 25 Survival runs",
+      "condition": { "type": "survival_runs", "value": 25 },
+      "rarity": "rare"
+    },
+    {
+      "id": "streak_hunter",
+      "label": "Streak Hunter",
+      "emoji": "⚡",
+      "description": "Reach a 10-streak in Survival mode",
+      "condition": { "type": "survival_best_streak", "value": 10 },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "unstoppable",
+      "label": "Unstoppable",
+      "emoji": "🌊",
+      "description": "Reach a 25-streak in Survival mode",
+      "condition": { "type": "survival_best_streak", "value": 25 },
+      "rarity": "epic"
+    },
+    {
+      "id": "daily_devotee",
+      "label": "Daily Devotee",
+      "emoji": "📅",
+      "description": "Complete your first Daily Challenge",
+      "condition": { "type": "daily_challenges", "value": 1 },
+      "rarity": "common"
+    },
+    {
+      "id": "consistent",
+      "label": "Consistent",
+      "emoji": "🗓️",
+      "description": "Complete 7 Daily Challenges",
+      "condition": { "type": "daily_challenges", "value": 7 },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "dedicated",
+      "label": "Dedicated",
+      "emoji": "🏅",
+      "description": "Complete 30 Daily Challenges",
+      "condition": { "type": "daily_challenges", "value": 30 },
+      "rarity": "epic"
+    },
+    {
+      "id": "supporter",
+      "label": "Supporter",
+      "emoji": "💙",
+      "description": "Watch a support ad",
+      "condition": { "type": "ads_watched", "value": 1 },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "patron",
+      "label": "Patron",
+      "emoji": "👑",
+      "description": "Watch 5 support ads",
+      "condition": { "type": "ads_watched", "value": 5 },
+      "rarity": "rare"
+    },
+    {
+      "id": "xp_grinder",
+      "label": "XP Grinder",
+      "emoji": "⚙️",
+      "description": "Earn 500 total XP",
+      "condition": { "type": "total_xp", "value": 500 },
+      "rarity": "uncommon"
+    },
+    {
+      "id": "xp_legend",
+      "label": "XP Legend",
+      "emoji": "🌟",
+      "description": "Earn 2000 total XP",
+      "condition": { "type": "total_xp", "value": 2000 },
+      "rarity": "epic"
+    },
+    {
+      "id": "speedrunner",
+      "label": "Speedrunner",
+      "emoji": "💨",
+      "description": "Solve a puzzle in under 5 seconds",
+      "condition": { "type": "best_time_under", "value": 5 },
+      "rarity": "rare"
+    },
+    {
+      "id": "high_scorer",
+      "label": "High Scorer",
+      "emoji": "🎰",
+      "description": "Reach 10,000 points in a Survival run",
+      "condition": { "type": "survival_best_score", "value": 10000 },
+      "rarity": "rare"
+    }
+  ]
+}

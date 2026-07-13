@@ -1,9 +1,10 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class SupportScreen extends StatefulWidget {
-  const SupportScreen({super.key});
+  final VoidCallback? onAdWatched;
+  const SupportScreen({super.key, this.onAdWatched});
 
   @override
   State<SupportScreen> createState() => _SupportScreenState();
@@ -64,6 +65,7 @@ Future<void> _showAd() async {
     onUserEarnedReward: (ad, reward) {
       if (mounted) setState(() { _adWatched = true; _totalWatched++; });
       _showThankYouSnack();
+      widget.onAdWatched?.call();
     },
   );
 }
