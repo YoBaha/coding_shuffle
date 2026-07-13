@@ -1,0 +1,124 @@
+---
+import Base from '../layouts/Base.astro';
+
+const items = [
+  {
+    badgeClass: 'badge-shipped',
+    label: 'Shipped — MVP v1.0',
+    features: [
+      'Campaign Mode with handcrafted SQL puzzles (Beginner → Intermediate → Advanced)',
+      'Drag & drop token gameplay with instant answer validation',
+      'SQL explanations for every puzzle',
+      'XP, stars, and level progression system',
+      'SQL Stream Mode — rhythm-inspired arcade keyword recognition',
+      'Survival Mode — one mistake ends your run',
+      'Daily Challenge — one shared puzzle per day for all players',
+      'SQL syntax reference review screen',
+      'Fully offline — 100% playable with no internet connection',
+      'Local progress saving with Shared Preferences',
+      'Achievement badges',
+    ],
+  },
+  {
+    badgeClass: 'badge-progress',
+    label: 'In Progress',
+    features: [
+      'UI & UX polish — cleaner layouts, smoother transitions, better visual hierarchy',
+      'Additional SQL puzzle packs across all difficulty tiers',
+      'Bug fixes and performance improvements',
+    ],
+  },
+  {
+    badgeClass: 'badge-planned',
+    label: 'Coming Soon',
+    features: [
+      'User accounts — email/password login with optional Google Sign-In',
+      'Cloud save & cross-device progress sync',
+      'Player profiles — avatar, username, XP, stats dashboard',
+      'Global, weekly, friends, and country leaderboards',
+      'Daily login rewards — XP, coins, and cosmetic items',
+      'Coin economy — earn through gameplay, spend on cosmetics',
+      'Unlockable themes, backgrounds, avatars, and SQL token skins',
+      'Learn Mode — guided lessons for absolute beginners',
+      'Adaptive difficulty — the game detects weak spots and recommends targeted practice',
+      'Player statistics — accuracy, average solve time, most missed keyword, learning heatmap',
+      'Daily Challenge improvements — win streaks, difficulty tiers, shareable results',
+      'iOS version',
+      'PC version',
+    ],
+  },
+  {
+    badgeClass: 'badge-exploring',
+    label: 'Exploring & Long-Term Vision',
+    features: [
+      '1v1 Multiplayer Duel — same puzzle, same shuffle, first to solve wins',
+      'Ranked Mode — Bronze → Silver → Gold → Platinum → Diamond → Master → Grandmaster',
+      'Friend matches — private rooms, invites, and rematches',
+      'Team Battles — 2v2 cooperative puzzle solving',
+      'Tournament Mode — 8 or 16-player brackets with seasonal tournaments',
+      'Battle Pass (cosmetics only, never pay-to-win)',
+      'Seasonal themes — Halloween, Christmas, Cyberpunk, Space, Retro Terminal, and more',
+      'Procedural puzzle generation — unique SQL, Python, and Java challenges every day',
+      'Interactive mini-lessons — explanation, animation, quiz, puzzle, and review per concept',
+      'SQL Playground — write queries and visualize sample output in-app',
+      'Community features — friends list, player profiles, match history, follow players',
+      'Multi-language expansion — Python, JavaScript, Java, C++, Git, Linux, HTML, CSS, Docker, React, Node.js',
+      'Each language sharing the same progression, multiplayer, and game modes',
+    ],
+  },
+];
+---
+<Base title="Roadmap" description="What we have shipped and what we are building next." showBack={true}>
+  <div class="page-header">
+    <div class="hero-badge">
+      <img src="/icons/stats_icon.png" alt="" class="badge-icon" />
+      Future Updates
+    </div>
+    <h1>Roadmap</h1>
+    <p class="meta">This is a living document — priorities may shift based on feedback and development progress.</p>
+  </div>
+
+  <div class="content-card">
+    <p>
+      Coding Shuffle Duel launched as an SQL puzzle game, but our long-term vision is a full
+      gamified programming learning platform — one where you can pick any language and level up
+      through gameplay, competition, and community. Here's where we are and where we're headed.
+    </p>
+
+    <hr class="divider" />
+
+    {items.map(group => (
+      <section class="roadmap-section">
+        <div class={`status-badge ${group.badgeClass}`}>
+          <span class="dot"></span>
+          {group.label}
+        </div>
+        <ul>
+          {group.features.map(f => <li>{f}</li>)}
+        </ul>
+      </section>
+    ))}
+
+    <hr class="divider" />
+
+    <p style="font-size: 0.82rem; color: var(--muted); font-style: italic;">
+      The features listed under "Coming Soon" and "Exploring" represent our current plans and vision.
+      Development priorities may change, and features may be modified, delayed, or removed based on
+      technical constraints, performance considerations, or user feedback.
+    </p>
+
+    <p>
+      Have a feature request or idea? We'd love to hear it —
+      <a href="mailto:codingshuffleduel@gmail.com">codingshuffleduel@gmail.com</a>
+    </p>
+  </div>
+</Base>
+
+<style>
+  .badge-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="About Us" description="Learn about our mission and what we're building." showBack={true}>
+  <div class="page-header">
+    <div class="hero-badge">
+      <img src="/icons/app_icon1.png" alt="" class="badge-icon" />
+      About
+    </div>
+    <h1>About Us</h1>
+    <p class="meta">Last updated: July 2026</p>
+  </div>
+
+  <div class="content-card">
+    <p>
+      We are a small, passionate team on a mission to prove that learning to code doesn't have
+      to be boring. Coding Shuffle Duel is where <strong style="color: var(--text)">learning meets RPG meets arcade</strong> —
+      a gamified experience that makes programming syntax feel less like studying and more like
+      leveling up.
+    </p>
+
+    <hr class="divider" />
+
+    <h2>Our Mission</h2>
+    <p>
+      We believe the best way to learn something is to enjoy doing it. Traditional syntax drills
+      are forgettable. Games are not. Our goal is to build experiences that make programming
+      concepts stick — not through repetition alone, but through fun, challenge, and the
+      satisfaction of getting better.
+    </p>
+    <p>
+      Right now, Coding Shuffle Duel is the perfect entry point for anyone stepping into the
+      world of SQL for the first time. But this is just the beginning.
+    </p>
+
+    <h2>What We're Building</h2>
+    <p>
+      Coding Shuffle Duel is our first game, and it's already packed with content:
+    </p>
+    <ul>
+      <li><img src="/icons/home_icon.png" alt="" class="list-icon" /><strong>Campaign Mode</strong> — handcrafted SQL puzzles from Beginner to Advanced.</li>
+      <li><img src="/icons/check_icon.png" alt="" class="list-icon" /><strong>Drag & Drop Gameplay</strong> — reconstruct shuffled code tokens into correct syntax.</li>
+      <li><img src="/icons/lightning_icon.png" alt="" class="list-icon" /><strong>Instant Feedback</strong> — know immediately if you're right, and learn why.</li>
+      <li><img src="/icons/sql_book_icon.png" alt="" class="list-icon" /><strong>SQL Explanations</strong> — every puzzle comes with a clear breakdown of the concept.</li>
+      <li><img src="/icons/star_icon.png" alt="" class="list-icon" /><strong>XP & Progression</strong> — earn stars, level up, and track your best times.</li>
+      <li><img src="/icons/chain_icon.png" alt="" class="list-icon" /><strong>Fully Offline</strong> — play anywhere, no internet required.</li>
+      <li><img src="/icons/sound_icon.png" alt="" class="list-icon" /><strong>SQL Stream Mode</strong> — a rhythm-inspired arcade mode for rapid keyword recognition.</li>
+      <li><img src="/icons/skull_icon.png" alt="" class="list-icon" /><strong>Survival Mode</strong> — one mistake ends your run; how far can you go?</li>
+      <li><img src="/icons/calendar_icon.png" alt="" class="list-icon" /><strong>Daily Challenge</strong> — one advanced puzzle per day, same for every player.</li>
+    </ul>
+
+    <h2>What's Coming Next</h2>
+    <p>
+      We're just getting started. Our roadmap includes expanding beyond SQL into other
+      programming languages and technologies — Python, JavaScript, Git, Linux, Docker, and more.
+      Each will bring its own game modes, challenges, and learning paths.
+    </p>
+    <p>
+      Longer term, we're building toward multiplayer coding duels, ranked seasons, leaderboards,
+      cloud sync, and procedurally generated puzzles — a full platform where developers of all
+      levels can learn, compete, and grow.
+    </p>
+
+    <h2>Our Values</h2>
+    <ul>
+      <li><img src="/icons/brain_icon.png" alt="" class="list-icon" /><strong>Learning through play</strong> — gamification isn't a gimmick; it's the whole point.</li>
+      <li><img src="/icons/locked_icon.png" alt="" class="list-icon" /><strong>Privacy by design</strong> — offline-first, no tracking, no ads forced on you.</li>
+      <li><img src="/icons/clock_icon.png" alt="" class="list-icon" /><strong>Respect for your time</strong> — every feature earns its place; nothing is filler.</li>
+      <li><img src="/icons/rune_icon.png" alt="" class="list-icon" /><strong>Ship, listen, improve</strong> — we release, we hear you, we get better.</li>
+    </ul>
+
+    <h2>Contact Us</h2>
+    <p>
+      Have feedback, ideas, or just want to say hello? We read every message.
+    </p>
+    <p>
+      <a href="mailto:codingshuffleduel@gmail.com">codingshuffleduel@gmail.com</a>
+    </p>
+  </div>
+</Base>
+
+<style>
+  .badge-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+  .list-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  ul li {
+    display: flex;
+    align-items: center;
+  }
+</style>

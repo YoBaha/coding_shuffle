@@ -1,0 +1,154 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Privacy Policy" description="How Coding Shuffle Duel handles your data." showBack={true}>
+  <div class="page-header">
+    <div class="hero-badge">
+      <img src="/icons/locked_icon.png" alt="" class="badge-icon" />
+      Legal
+    </div>
+    <h1>Privacy Policy</h1>
+    <p class="meta">Effective date: July 1, 2026 · Coding Shuffle Duel</p>
+  </div>
+
+  <div class="content-card">
+    <p>
+      Coding Shuffle Duel is built on a simple principle: <strong style="color: var(--text)">your data belongs to you</strong>.
+      The game is designed to run entirely on your device, with no account required and no data ever
+      leaving your phone unless you explicitly choose otherwise.
+    </p>
+
+    <hr class="divider" />
+
+    <h2>1. Our Core Architecture: Offline-First</h2>
+    <p>
+      Coding Shuffle Duel is a fully offline application. All gameplay, progress, XP, stars, and
+      achievements are stored locally on your device by default. No internet connection is required
+      to play, and no data is transmitted to any server unless you create an optional account.
+    </p>
+    <p>
+      This means the vast majority of players will never have any personal data collected, stored,
+      or processed by us — full stop.
+    </p>
+
+    <h2>2. Optional Accounts & Cloud Sync</h2>
+    <p>
+      If you choose to create an account to sync your progress across devices, we collect only the
+      minimum information necessary:
+    </p>
+    <ul>
+      <li><strong>Email address</strong> — used solely for account authentication and recovery.</li>
+      <li><strong>Username</strong> — a display name of your choosing (does not need to be your real name).</li>
+      <li><strong>Game progress</strong> — XP earned, levels completed, and in-game achievements.</li>
+    </ul>
+    <p>
+      That is the complete list. We collect nothing else. No device identifiers, no location data,
+      no usage analytics, no crash reports, no behavioral tracking — nothing beyond what is listed above.
+    </p>
+
+    <h2>3. What We Do Not Collect</h2>
+    <ul>
+      <li>Real name or any personally identifying information beyond email</li>
+      <li>Location or IP address logs</li>
+      <li>Device model, OS version, or hardware identifiers</li>
+      <li>Browsing or app usage behavior</li>
+      <li>Payment or financial information (the app is free)</li>
+      <li>Any data from users who play without an account</li>
+    </ul>
+
+    <h2>4. Data Security</h2>
+    <p>
+      Account passwords are never stored in plain text — they are hashed using industry-standard
+      cryptographic methods before storage. Your account data is hosted on a reputable cloud
+      infrastructure provider with encryption in transit (TLS) and at rest.
+    </p>
+    <p>
+      Access to the database is strictly limited and no team member has routine access to individual
+      user records.
+    </p>
+
+    <h2>5. Data Sharing & Third Parties</h2>
+    <p>
+      We do not share, sell, rent, trade, or otherwise disclose your data to any third party, ever.
+      There are no advertising networks, analytics providers, data brokers, or any other external
+      services that receive your information.
+    </p>
+    <p>
+      The only third-party involvement is our cloud hosting and database provider, who processes
+      your data solely to store it on our behalf and is contractually prohibited from using it for
+      any other purpose.
+    </p>
+
+    <h2>6. Voluntary Support & Ads</h2>
+    <p>
+      Coding Shuffle Duel is completely free and contains no forced advertisements. We offer an
+      optional "Support Us" section where you can choose to watch ads voluntarily as a way to
+      support the development of the game — similar to a donation. This is entirely opt-in.
+      No data is collected as part of this interaction beyond what our hosting provider already logs.
+    </p>
+
+    <h2>7. Your Data Rights</h2>
+    <ul>
+      <li><strong>Access</strong> — Your progress and account data are always visible to you directly within the app.</li>
+      <li><strong>Deletion (no account)</strong> — Uninstalling the app or clearing app data from your device settings permanently and irreversibly deletes all local data.</li>
+      <li><strong>Deletion (with account)</strong> — You can delete your account and all associated data at any time from the Settings page inside the app. Deletion is immediate and permanent.</li>
+      <li><strong>Portability</strong> — Your in-game progress is yours. We do not lock you in.</li>
+    </ul>
+
+    <h2>8. A Note on Global Compliance</h2>
+    <p>
+      Because Coding Shuffle Duel is offline-first and collects no data from players without
+      accounts, there are no international data transfers, cross-border processing concerns, or
+      jurisdictional complications for the overwhelming majority of users.
+    </p>
+    <p>
+      For the small subset of users who create accounts, data is stored securely on our cloud
+      provider and is subject to the same protections regardless of where you are in the world.
+      Coding Shuffle Duel works the same way for every player, everywhere.
+    </p>
+
+    <h2>9. Children's Privacy</h2>
+    <p>
+      We do not knowingly collect any personal information from children under the age of 13.
+      Since no account is required to play, children can enjoy the full game experience
+      without providing any data whatsoever.
+    </p>
+
+    <h2>10. Changes to This Policy</h2>
+    <p>
+      If we make material changes to this policy, we will update the effective date above and,
+      where possible, notify users with accounts via the app or email. Continued use of the app
+      after any update constitutes acceptance of the revised policy.
+    </p>
+
+    <h2>11. Contact Us</h2>
+    <p>
+      Questions or concerns about this Privacy Policy? We're happy to talk.
+    </p>
+    <p>
+      <a href="mailto:codingshuffleduel@gmail.com">codingshuffleduel@gmail.com</a>
+    </p>
+
+    <hr class="divider" />
+
+    <h2>Your Consent</h2>
+    <p>By using Coding Shuffle Duel, you acknowledge that:</p>
+    <ul>
+      <li>You understand the game runs entirely offline by default, with no data collected.</li>
+      <li>Account creation is optional and only you can initiate it.</li>
+      <li>If you create an account, only your email, username, and game progress are stored.</li>
+      <li>We do not share your data with anyone, for any reason.</li>
+      <li>You are in full control of your data and can delete it at any time.</li>
+      <li>Uninstalling the app without an account permanently deletes all local data.</li>
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .badge-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+</style>

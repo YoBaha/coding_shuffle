@@ -1,0 +1,48 @@
+---
+import Base from '../layouts/Base.astro';
+
+const pages = [
+  { href: '/about',   icon: '/icons/profile_icon.png',  label: 'About Us',       desc: 'Our mission, our story, and what we are building' },
+  { href: '/roadmap', icon: '/icons/stats_icon.png',    label: 'Roadmap',        desc: 'Shipped features and what is coming next' },
+  { href: '/privacy', icon: '/icons/locked_icon.png',   label: 'Privacy Policy', desc: 'Offline-first by design — your data stays yours' },
+  { href: '/terms',   icon: '/icons/book_icon.png',     label: 'Terms of Use',   desc: 'Rules and conditions for using the app' },
+];
+---
+<Base title="Coding Shuffle Duel — Info & Legal">
+  <div class="hero">
+    <div class="hero-badge">
+      <img src="/icons/duel_icon.png" alt="" class="badge-icon" />
+      Where Learning Meets RPG Meets Arcade
+    </div>
+    <h1>Coding<br/>Shuffle Duel</h1>
+    <p class="subtitle">
+      Master programming syntax through drag-and-drop puzzles, arcade challenges, and daily duels.
+      Currently featuring SQL — with much more on the way.
+    </p>
+  </div>
+
+  <nav class="nav-grid">
+    {pages.map(p => (
+      <a href={p.href} class="nav-card">
+        <img src={p.icon} alt="" class="nav-card-icon" />
+        <span class="label">{p.label}</span>
+        <span class="desc">{p.desc}</span>
+        <span class="arrow">VIEW →</span>
+      </a>
+    ))}
+  </nav>
+</Base>
+
+<style>
+  .badge-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+  .nav-card-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+</style>
