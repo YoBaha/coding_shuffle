@@ -1,0 +1,1776 @@
+{
+  "version": "1.0.0",
+  "difficulty": "medium",
+  "language": "SQL",
+  "puzzles": [
+    {
+      "id": "s_m_001",
+      "title": "Find Customer Emails",
+      "tokens": ["SELECT", "name,", "email", "FROM", "customers"],
+      "solution": ["SELECT", "name,", "email", "FROM", "customers"],
+      "category": "SELECT",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Table", "range": [3, 4], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_002",
+      "title": "Filter Expensive Products",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "100"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "100"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "filter_expensive", "label": "🔍 Filter Expensive Products", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_003",
+      "title": "Sort Products by Price",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "DESC"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "DESC"],
+      "category": "Sorting",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "sort_desc", "label": "📊 Sort by Price (High to Low)", "range": [5, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_004",
+      "title": "Join Users and Orders",
+      "tokens": ["SELECT", "u.name,", "o.total", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id"],
+      "solution": ["SELECT", "u.name,", "o.total", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_join_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "📁 Choose Main Table (Users)", "range": [3, 5], "complexity": 2},
+        {"id": "join_orders", "label": "🔗 Join Orders Table", "range": [6, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_005",
+      "title": "Count Employees by Department",
+      "tokens": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_agg_fields", "label": "🎯 Choose Department & Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Employees", "range": [3, 4], "complexity": 1},
+        {"id": "group_by_dept", "label": "📊 Group by Department", "range": [5, 6], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_006",
+      "title": "Departments with >5 Employees",
+      "tokens": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department", "HAVING", "COUNT(*)", ">", "5"],
+      "solution": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department", "HAVING", "COUNT(*)", ">", "5"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_agg_fields", "label": "🎯 Choose Department & Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Employees", "range": [3, 4], "complexity": 1},
+        {"id": "group_by_dept", "label": "📊 Group by Department", "range": [5, 6], "complexity": 2},
+        {"id": "filter_groups", "label": "🔍 Filter Large Departments", "range": [7, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_007",
+      "title": "Users with No Orders",
+      "tokens": ["SELECT", "u.name,", "o.total", "FROM", "users", "u", "LEFT JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "WHERE", "o.id", "IS", "NULL"],
+      "solution": ["SELECT", "u.name,", "o.total", "FROM", "users", "u", "LEFT JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "WHERE", "o.id", "IS", "NULL"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "📁 Choose Main Table", "range": [3, 5], "complexity": 2},
+        {"id": "left_join_orders", "label": "🔗 Include Orders (Left Join)", "range": [6, 12], "complexity": 3},
+        {"id": "filter_no_orders", "label": "🔍 Find Users Without Orders", "range": [13, 16], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_008",
+      "title": "Products Above Average Price",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "(", "SELECT", "AVG(price)", "FROM", "products", ")"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", ">", "(", "SELECT", "AVG(price)", "FROM", "products", ")"],
+      "category": "Subquery",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Products", "range": [2, 3], "complexity": 1},
+        {"id": "compare_avg", "label": "🔍 Compare Price to Average", "range": [4, 7], "complexity": 2},
+        {"id": "calc_average", "label": "📊 Calculate Average Price", "range": [8, 11], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_009",
+      "title": "Filter Active Users",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "status", "IN", "(", "'active'", ",", "'pending'", ")"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "status", "IN", "(", "'active'", ",", "'pending'", ")"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [2, 3], "complexity": 1},
+        {"id": "filter_statuses", "label": "🔍 Filter Active or Pending", "range": [4, 11], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_010",
+      "title": "Find Customers by Name Pattern",
+      "tokens": ["SELECT", "*", "FROM", "customers", "WHERE", "name", "LIKE", "'%Smith%'"],
+      "solution": ["SELECT", "*", "FROM", "customers", "WHERE", "name", "LIKE", "'%Smith%'"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Customers", "range": [2, 3], "complexity": 1},
+        {"id": "filter_pattern", "label": "🔍 Match Name Pattern", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_011",
+      "title": "Unique Cities",
+      "tokens": ["SELECT", "DISTINCT", "city", "FROM", "customers"],
+      "solution": ["SELECT", "DISTINCT", "city", "FROM", "customers"],
+      "category": "SELECT",
+      "chunks": [
+        {"id": "choose_unique", "label": "🎯 Choose Unique Cities", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Customers", "range": [3, 4], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_012",
+      "title": "Count Total Users",
+      "tokens": ["SELECT", "COUNT(*)", "AS", "total_users", "FROM", "users"],
+      "solution": ["SELECT", "COUNT(*)", "AS", "total_users", "FROM", "users"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "count_all", "label": "🎯 Count All Users", "range": [0, 3], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Users Table", "range": [4, 5], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_013",
+      "title": "Total Value by Category",
+      "tokens": ["SELECT", "category,", "SUM(price)", "AS", "total_value", "FROM", "products", "GROUP BY", "category"],
+      "solution": ["SELECT", "category,", "SUM(price)", "AS", "total_value", "FROM", "products", "GROUP BY", "category"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields_agg", "label": "🎯 Choose Category & Sum", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Products", "range": [5, 6], "complexity": 1},
+        {"id": "group_by_category", "label": "📊 Group by Category", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_014",
+      "title": "Orders in Price Range",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "total", "BETWEEN", "100", "AND", "500"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "total", "BETWEEN", "100", "AND", "500"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Orders", "range": [2, 3], "complexity": 1},
+        {"id": "price_range", "label": "🔍 Filter by Price Range", "range": [4, 9], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_015",
+      "title": "Find Managers",
+      "tokens": ["SELECT", "*", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL"],
+      "solution": ["SELECT", "*", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Employees", "range": [2, 3], "complexity": 1},
+        {"id": "filter_managers", "label": "🔍 Find Employees with No Manager", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_016",
+      "title": "Top 10 Products",
+      "tokens": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "10"],
+      "solution": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "10"],
+      "category": "Sorting",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Products", "range": [2, 3], "complexity": 1},
+        {"id": "sort_desc", "label": "📊 Sort by Price", "range": [4, 6], "complexity": 2},
+        {"id": "limit_results", "label": "📋 Get Top 10", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_017",
+      "title": "Order Details with Products",
+      "tokens": ["SELECT", "u.name,", "o.id,", "p.name", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "JOIN", "products", "p", "ON", "o.product_id", "=", "p.id"],
+      "solution": ["SELECT", "u.name,", "o.id,", "p.name", "FROM", "users", "u", "JOIN", "orders", "o", "ON", "u.id", "=", "o.user_id", "JOIN", "products", "p", "ON", "o.product_id", "=", "p.id"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_join_fields", "label": "🎯 Choose Fields", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "📁 Start with Users", "range": [4, 6], "complexity": 2},
+        {"id": "join_orders", "label": "🔗 Join Orders", "range": [7, 13], "complexity": 3},
+        {"id": "join_products", "label": "🔗 Join Products", "range": [14, 20], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_018",
+      "title": "Most Expensive Product",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", "=", "(", "SELECT", "MAX(price)", "FROM", "products", ")"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", "=", "(", "SELECT", "MAX(price)", "FROM", "products", ")"],
+      "category": "Subquery",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Products", "range": [2, 3], "complexity": 1},
+        {"id": "match_max", "label": "🔍 Match the Maximum", "range": [4, 7], "complexity": 2},
+        {"id": "find_max", "label": "📊 Find the Maximum", "range": [8, 11], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_019",
+      "title": "Customers with Orders",
+      "tokens": ["SELECT", "u.name", "FROM", "users", "u", "WHERE", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.user_id", "=", "u.id", ")"],
+      "solution": ["SELECT", "u.name", "FROM", "users", "u", "WHERE", "EXISTS", "(", "SELECT", "1", "FROM", "orders", "o", "WHERE", "o.user_id", "=", "u.id", ")"],
+      "category": "Subquery",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 2},
+        {"id": "choose_main_table", "label": "📁 Start with Users", "range": [2, 4], "complexity": 2},
+        {"id": "look_for_orders", "label": "🔍 Look for Matching Orders", "range": [5, 7], "complexity": 2},
+        {"id": "build_inner_query", "label": "🔧 Build the Lookup Query", "range": [8, 17], "complexity": 4}
+      ]
+    },
+    {
+      "id": "s_m_020",
+      "title": "Product Price Category",
+      "tokens": ["SELECT", "name,", "CASE", "WHEN", "price", ">", "100", "THEN", "'Expensive'", "ELSE", "'Affordable'", "END", "AS", "category", "FROM", "products"],
+      "solution": ["SELECT", "name,", "CASE", "WHEN", "price", ">", "100", "THEN", "'Expensive'", "ELSE", "'Affordable'", "END", "AS", "category", "FROM", "products"],
+      "category": "Conditional",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Products", "range": [14, 15], "complexity": 1},
+        {"id": "build_case", "label": "🔧 Build Classification", "range": [2, 13], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_021",
+      "title": "Student Grade Classification",
+      "tokens": ["SELECT", "name,", "CASE", "WHEN", "score", ">=", "90", "THEN", "'A'", "WHEN", "score", ">=", "80", "THEN", "'B'", "ELSE", "'C'", "END", "AS", "grade", "FROM", "students"],
+      "solution": ["SELECT", "name,", "CASE", "WHEN", "score", ">=", "90", "THEN", "'A'", "WHEN", "score", ">=", "80", "THEN", "'B'", "ELSE", "'C'", "END", "AS", "grade", "FROM", "students"],
+      "category": "Conditional",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Students", "range": [20, 21], "complexity": 1},
+        {"id": "grade_a", "label": "📊 Define 'A' Grade", "range": [2, 8], "complexity": 2},
+        {"id": "grade_b", "label": "📊 Define 'B' Grade", "range": [9, 14], "complexity": 2},
+        {"id": "grade_c", "label": "📊 Define 'C' Grade", "range": [15, 16], "complexity": 2},
+        {"id": "finalize_grade", "label": "📝 Finalize Grade", "range": [17, 19], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_022",
+      "title": "Combine Customers and Leads",
+      "tokens": ["SELECT", "name,", "email", "FROM", "customers", "UNION", "SELECT", "name,", "email", "FROM", "leads"],
+      "solution": ["SELECT", "name,", "email", "FROM", "customers", "UNION", "SELECT", "name,", "email", "FROM", "leads"],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "query_customers", "label": "📋 Query Customers", "range": [0, 4], "complexity": 2},
+        {"id": "union_combine", "label": "🔗 Combine Results", "range": [5, 5], "complexity": 2},
+        {"id": "query_leads", "label": "📋 Query Leads", "range": [6, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_023",
+      "title": "All Orders from Two Years",
+      "tokens": ["SELECT", "product_id", "FROM", "orders_2023", "UNION ALL", "SELECT", "product_id", "FROM", "orders_2024"],
+      "solution": ["SELECT", "product_id", "FROM", "orders_2023", "UNION ALL", "SELECT", "product_id", "FROM", "orders_2024"],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "orders_2023", "label": "📋 2023 Orders", "range": [0, 3], "complexity": 2},
+        {"id": "union_all", "label": "🔗 Combine (Keep Duplicates)", "range": [4, 4], "complexity": 2},
+        {"id": "orders_2024", "label": "📋 2024 Orders", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_024",
+      "title": "Premium Active Users",
+      "tokens": ["SELECT", "user_id", "FROM", "premium_users", "INTERSECT", "SELECT", "user_id", "FROM", "active_users"],
+      "solution": ["SELECT", "user_id", "FROM", "premium_users", "INTERSECT", "SELECT", "user_id", "FROM", "active_users"],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "premium_users", "label": "📋 Premium Users", "range": [0, 3], "complexity": 2},
+        {"id": "intersect", "label": "🔍 Find Common Users", "range": [4, 4], "complexity": 3},
+        {"id": "active_users", "label": "📋 Active Users", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_025",
+      "title": "Users Not Banned",
+      "tokens": ["SELECT", "user_id", "FROM", "all_users", "EXCEPT", "SELECT", "user_id", "FROM", "banned_users"],
+      "solution": ["SELECT", "user_id", "FROM", "all_users", "EXCEPT", "SELECT", "user_id", "FROM", "banned_users"],
+      "category": "Set Operations",
+      "chunks": [
+        {"id": "all_users", "label": "📋 All Users", "range": [0, 3], "complexity": 2},
+        {"id": "except", "label": "🚫 Remove Banned", "range": [4, 4], "complexity": 3},
+        {"id": "banned_users", "label": "📋 Banned Users", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_026",
+      "title": "Monthly User Signups",
+      "tokens": ["SELECT", "DATE_TRUNC('month',", "created_at)", "AS", "month,", "COUNT(*)", "FROM", "users", "GROUP BY", "DATE_TRUNC('month',", "created_at)"],
+      "solution": ["SELECT", "DATE_TRUNC('month',", "created_at)", "AS", "month,", "COUNT(*)", "FROM", "users", "GROUP BY", "DATE_TRUNC('month',", "created_at)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "📅 Group by Month", "range": [0, 4], "complexity": 2},
+        {"id": "count_signups", "label": "📊 Count Signups", "range": [5, 5], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [6, 7], "complexity": 1},
+        {"id": "group_results", "label": "📊 Finish Grouping", "range": [8, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_027",
+      "title": "Weekly Sales Summary",
+      "tokens": ["SELECT", "DATE_TRUNC('week',", "sale_date)", "AS", "week,", "SUM(amount)", "FROM", "sales", "GROUP BY", "DATE_TRUNC('week',", "sale_date)"],
+      "solution": ["SELECT", "DATE_TRUNC('week',", "sale_date)", "AS", "week,", "SUM(amount)", "FROM", "sales", "GROUP BY", "DATE_TRUNC('week',", "sale_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_week", "label": "📅 Group by Week", "range": [0, 4], "complexity": 2},
+        {"id": "sum_sales", "label": "💰 Sum Sales", "range": [5, 5], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Sales", "range": [6, 7], "complexity": 1},
+        {"id": "group_results", "label": "📊 Finish Grouping", "range": [8, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_028",
+      "title": "Annual Order Summary",
+      "tokens": ["SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year,", "COUNT(*)", "FROM", "orders", "GROUP BY", "EXTRACT(YEAR", "FROM", "order_date)"],
+      "solution": ["SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year,", "COUNT(*)", "FROM", "orders", "GROUP BY", "EXTRACT(YEAR", "FROM", "order_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_year", "label": "📅 Group by Year", "range": [0, 5], "complexity": 2},
+        {"id": "count_orders", "label": "📊 Count Orders", "range": [6, 6], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Orders", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "📊 Finish Grouping", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_029",
+      "title": "Calculate Shipping Date",
+      "tokens": ["SELECT", "order_date,", "order_date", "+", "INTERVAL", "'3 days'", "AS", "shipping_date", "FROM", "orders"],
+      "solution": ["SELECT", "order_date,", "order_date", "+", "INTERVAL", "'3 days'", "AS", "shipping_date", "FROM", "orders"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_order_date", "label": "📅 Choose Order Date", "range": [0, 1], "complexity": 1},
+        {"id": "add_days", "label": "➕ Add 3 Days", "range": [2, 5], "complexity": 2},
+        {"id": "label_shipping", "label": "📝 Label as Shipping Date", "range": [6, 7], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Orders", "range": [8, 9], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_030",
+      "title": "Calculate Customer Age",
+      "tokens": ["SELECT", "name,", "AGE(birth_date)", "AS", "age", "FROM", "users"],
+      "solution": ["SELECT", "name,", "AGE(birth_date)", "AS", "age", "FROM", "users"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_name", "label": "🎯 Choose Name", "range": [0, 1], "complexity": 1},
+        {"id": "calculate_age", "label": "📅 Calculate Age", "range": [2, 4], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [5, 6], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_031",
+      "title": "Full Name Concatenation",
+      "tokens": ["SELECT", "CONCAT(first_name,", "' '", ",", "last_name)", "AS", "full_name", "FROM", "users"],
+      "solution": ["SELECT", "CONCAT(first_name,", "' '", ",", "last_name)", "AS", "full_name", "FROM", "users"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "choose_first", "label": "🎯 Choose First Name", "range": [0, 1], "complexity": 1},
+        {"id": "add_space", "label": "➕ Add Space", "range": [2, 2], "complexity": 1},
+        {"id": "add_last", "label": "➕ Add Last Name", "range": [3, 4], "complexity": 1},
+        {"id": "label_full", "label": "📝 Label as Full Name", "range": [5, 6], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [7, 8], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_032",
+      "title": "Uppercase Names",
+      "tokens": ["SELECT", "UPPER(name)", "AS", "uppercase_name", "FROM", "users"],
+      "solution": ["SELECT", "UPPER(name)", "AS", "uppercase_name", "FROM", "users"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "convert_case", "label": "🔠 Convert to Uppercase", "range": [0, 3], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [4, 5], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_033",
+      "title": "Extract Email Domain",
+      "tokens": ["SELECT", "SUBSTRING(email", "FROM", "'@(.+)$')", "AS", "domain", "FROM", "users"],
+      "solution": ["SELECT", "SUBSTRING(email", "FROM", "'@(.+)$')", "AS", "domain", "FROM", "users"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "extract_domain", "label": "🔍 Extract Domain After @", "range": [0, 3], "complexity": 3},
+        {"id": "label_domain", "label": "📝 Label as Domain", "range": [4, 5], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [6, 7], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_034",
+      "title": "Clean Phone Numbers",
+      "tokens": ["SELECT", "REPLACE(phone,", "'-'", ",", "'')", "AS", "clean_phone", "FROM", "customers"],
+      "solution": ["SELECT", "REPLACE(phone,", "'-'", ",", "'')", "AS", "clean_phone", "FROM", "customers"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "replace_hyphens", "label": "🔧 Remove Hyphens", "range": [0, 4], "complexity": 2},
+        {"id": "label_clean", "label": "📝 Label as Clean Number", "range": [5, 6], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Customers", "range": [7, 8], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_035",
+      "title": "Name Length Analysis",
+      "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "users"],
+      "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "users"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "choose_name", "label": "🎯 Choose Name", "range": [0, 1], "complexity": 1},
+        {"id": "calculate_length", "label": "📏 Calculate Length", "range": [2, 4], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [5, 6], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_036",
+      "title": "Contact Information Fallback",
+      "tokens": ["SELECT", "name,", "COALESCE(phone,", "'No Phone')", "AS", "contact", "FROM", "customers"],
+      "solution": ["SELECT", "name,", "COALESCE(phone,", "'No Phone')", "AS", "contact", "FROM", "customers"],
+      "category": "Null Handling",
+      "chunks": [
+        {"id": "choose_name", "label": "🎯 Choose Name", "range": [0, 1], "complexity": 1},
+        {"id": "handle_null", "label": "🔧 Set Fallback if Missing", "range": [2, 5], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Customers", "range": [6, 7], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_037",
+      "title": "Handle Zero Scores",
+      "tokens": ["SELECT", "name,", "NULLIF(score,", "0)", "AS", "score_or_null", "FROM", "students"],
+      "solution": ["SELECT", "name,", "NULLIF(score,", "0)", "AS", "score_or_null", "FROM", "students"],
+      "category": "Null Handling",
+      "chunks": [
+        {"id": "choose_name", "label": "🎯 Choose Name", "range": [0, 1], "complexity": 1},
+        {"id": "convert_zero", "label": "🔧 Convert Zero to NULL", "range": [2, 5], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Students", "range": [6, 7], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_038",
+      "title": "Rank Scores",
+      "tokens": ["SELECT", "name,", "ROW_NUMBER()", "OVER", "(ORDER BY", "score", "DESC)", "AS", "rank", "FROM", "leaderboard"],
+      "solution": ["SELECT", "name,", "ROW_NUMBER()", "OVER", "(ORDER BY", "score", "DESC)", "AS", "rank", "FROM", "leaderboard"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "assign_rank", "label": "🏆 Assign Row Number", "range": [2, 4], "complexity": 3},
+        {"id": "order_scores", "label": "📊 Order by Score", "range": [5, 7], "complexity": 2},
+        {"id": "label_rank", "label": "📝 Label as Rank", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Leaderboard", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_039",
+      "title": "Rank by Department",
+      "tokens": ["SELECT", "department,", "name,", "RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "dept_rank", "FROM", "employees"],
+      "solution": ["SELECT", "department,", "name,", "RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "dept_rank", "FROM", "employees"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "rank_by_group", "label": "🏆 Rank Within Groups", "range": [3, 5], "complexity": 3},
+        {"id": "partition_by", "label": "📊 Group by Department", "range": [6, 6], "complexity": 2},
+        {"id": "order_by_salary", "label": "📊 Order by Salary", "range": [7, 9], "complexity": 2},
+        {"id": "label_rank", "label": "📝 Label as Rank", "range": [10, 11], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Employees", "range": [12, 13], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_040",
+      "title": "Running Total of Orders",
+      "tokens": ["SELECT", "order_date,", "total,", "SUM(total)", "OVER", "(ORDER BY", "order_date)", "AS", "running_total", "FROM", "orders"],
+      "solution": ["SELECT", "order_date,", "total,", "SUM(total)", "OVER", "(ORDER BY", "order_date)", "AS", "running_total", "FROM", "orders"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "sum_total", "label": "💰 Sum Over Time", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_date", "label": "📅 Order by Date", "range": [5, 7], "complexity": 2},
+        {"id": "label_total", "label": "📝 Label as Running Total", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Orders", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_041",
+      "title": "Previous Order Comparison",
+      "tokens": ["SELECT", "order_date,", "total,", "LAG(total)", "OVER", "(ORDER BY", "order_date)", "AS", "prev_total", "FROM", "orders"],
+      "solution": ["SELECT", "order_date,", "total,", "LAG(total)", "OVER", "(ORDER BY", "order_date)", "AS", "prev_total", "FROM", "orders"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "previous_value", "label": "⬅️ Get Previous Value", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_date", "label": "📅 Order by Date", "range": [5, 7], "complexity": 2},
+        {"id": "label_prev", "label": "📝 Label as Previous", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Orders", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_042",
+      "title": "Next Order Comparison",
+      "tokens": ["SELECT", "order_date,", "total,", "LEAD(total)", "OVER", "(ORDER BY", "order_date)", "AS", "next_total", "FROM", "orders"],
+      "solution": ["SELECT", "order_date,", "total,", "LEAD(total)", "OVER", "(ORDER BY", "order_date)", "AS", "next_total", "FROM", "orders"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "next_value", "label": "➡️ Get Next Value", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_date", "label": "📅 Order by Date", "range": [5, 7], "complexity": 2},
+        {"id": "label_next", "label": "📝 Label as Next", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Orders", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_043",
+      "title": "Dense Rank by Department",
+      "tokens": ["SELECT", "department,", "name,", "DENSE_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "dept_dense_rank", "FROM", "employees"],
+      "solution": ["SELECT", "department,", "name,", "DENSE_RANK()", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "dept_dense_rank", "FROM", "employees"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "dense_rank", "label": "🏆 Rank (No Gaps)", "range": [3, 5], "complexity": 3},
+        {"id": "partition_by", "label": "📊 Group by Department", "range": [6, 6], "complexity": 2},
+        {"id": "order_by_salary", "label": "📊 Order by Salary", "range": [7, 9], "complexity": 2},
+        {"id": "label_rank", "label": "📝 Label as Rank", "range": [10, 11], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Employees", "range": [12, 13], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_044",
+      "title": "Score Quartiles",
+      "tokens": ["SELECT", "name,", "score,", "NTILE(4)", "OVER", "(ORDER BY", "score)", "AS", "quartile", "FROM", "leaderboard"],
+      "solution": ["SELECT", "name,", "score,", "NTILE(4)", "OVER", "(ORDER BY", "score)", "AS", "quartile", "FROM", "leaderboard"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "divide_groups", "label": "📊 Split into 4 Groups", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_score", "label": "📊 Order by Score", "range": [5, 7], "complexity": 2},
+        {"id": "label_quartile", "label": "📝 Label as Quartile", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Leaderboard", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_045",
+      "title": "Percentile Rank",
+      "tokens": ["SELECT", "name,", "score,", "PERCENT_RANK()", "OVER", "(ORDER BY", "score)", "AS", "pct_rank", "FROM", "scores"],
+      "solution": ["SELECT", "name,", "score,", "PERCENT_RANK()", "OVER", "(ORDER BY", "score)", "AS", "pct_rank", "FROM", "scores"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "percent_rank", "label": "📊 Calculate Percent Rank", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_score", "label": "📊 Order by Score", "range": [5, 7], "complexity": 2},
+        {"id": "label_pct", "label": "📝 Label as Percentile", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Scores", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_046",
+      "title": "Cumulative Distribution",
+      "tokens": ["SELECT", "name,", "score,", "CUME_DIST()", "OVER", "(ORDER BY", "score)", "AS", "cume_dist", "FROM", "scores"],
+      "solution": ["SELECT", "name,", "score,", "CUME_DIST()", "OVER", "(ORDER BY", "score)", "AS", "cume_dist", "FROM", "scores"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "cume_dist", "label": "📊 Calculate Cume Dist", "range": [3, 4], "complexity": 3},
+        {"id": "order_by_score", "label": "📊 Order by Score", "range": [5, 7], "complexity": 2},
+        {"id": "label_cume", "label": "📝 Label as Cume Dist", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Scores", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_047",
+      "title": "Top Earner per Department",
+      "tokens": ["SELECT", "department,", "name,", "FIRST_VALUE(name)", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "top_earner", "FROM", "employees"],
+      "solution": ["SELECT", "department,", "name,", "FIRST_VALUE(name)", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "DESC)", "AS", "top_earner", "FROM", "employees"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "first_value", "label": "🏆 Get First in Group", "range": [3, 5], "complexity": 3},
+        {"id": "partition_by", "label": "📊 Group by Department", "range": [6, 6], "complexity": 2},
+        {"id": "order_by_salary", "label": "📊 Order by Salary", "range": [7, 9], "complexity": 2},
+        {"id": "label_top", "label": "📝 Label as Top Earner", "range": [10, 11], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Employees", "range": [12, 13], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_048",
+      "title": "Bottom Earner per Department",
+      "tokens": ["SELECT", "department,", "name,", "LAST_VALUE(name)", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "ASC", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "UNBOUNDED FOLLOWING)", "AS", "bottom_earner", "FROM", "employees"],
+      "solution": ["SELECT", "department,", "name,", "LAST_VALUE(name)", "OVER", "(PARTITION BY", "department", "ORDER BY", "salary", "ASC", "ROWS BETWEEN", "UNBOUNDED PRECEDING", "AND", "UNBOUNDED FOLLOWING)", "AS", "bottom_earner", "FROM", "employees"],
+      "category": "Window Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "🎯 Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "last_value", "label": "🏆 Get Last in Group", "range": [3, 5], "complexity": 3},
+        {"id": "partition_by", "label": "📊 Group by Department", "range": [6, 6], "complexity": 2},
+        {"id": "order_by_salary", "label": "📊 Order by Salary", "range": [7, 9], "complexity": 2},
+        {"id": "frame_all", "label": "📋 Include All Rows", "range": [10, 13], "complexity": 3},
+        {"id": "label_bottom", "label": "📝 Label as Bottom Earner", "range": [14, 15], "complexity": 1},
+        {"id": "choose_table", "label": "📁 Choose Employees", "range": [16, 17], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_049",
+      "title": "Find Duplicate Emails",
+      "tokens": ["SELECT", "email,", "COUNT(*)", "FROM", "users", "GROUP BY", "email", "HAVING", "COUNT(*)", ">", "1"],
+      "solution": ["SELECT", "email,", "COUNT(*)", "FROM", "users", "GROUP BY", "email", "HAVING", "COUNT(*)", ">", "1"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_dup_fields", "label": "🎯 Choose Email & Count", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Users", "range": [3, 4], "complexity": 1},
+        {"id": "group_by_email", "label": "📊 Group by Email", "range": [5, 6], "complexity": 2},
+        {"id": "filter_duplicates", "label": "🔍 Find Duplicate Emails", "range": [7, 10], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_050",
+      "title": "Total Revenue by Month",
+      "tokens": ["SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "monthly_revenue", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", "ORDER BY", "month"],
+      "solution": ["SELECT", "DATE_TRUNC('month',", "sale_date)", "AS", "month,", "SUM(amount)", "AS", "monthly_revenue", "FROM", "sales", "GROUP BY", "DATE_TRUNC('month',", "sale_date)", "ORDER BY", "month"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "📅 Group by Month", "range": [0, 4], "complexity": 2},
+        {"id": "sum_revenue", "label": "💰 Sum Revenue", "range": [5, 7], "complexity": 2},
+        {"id": "choose_table", "label": "📁 Choose Sales", "range": [8, 9], "complexity": 1},
+        {"id": "group_results", "label": "📊 Finish Grouping", "range": [10, 12], "complexity": 3},
+        {"id": "sort_results", "label": "📊 Sort by Month", "range": [13, 14], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_051",
+      "title": "Orders with Discount Applied",
+      "tokens": ["SELECT", "id,", "total,", "discount", "FROM", "orders", "WHERE", "discount", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "id,", "total,", "discount", "FROM", "orders", "WHERE", "discount", "IS", "NOT", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Discounts", "range": [6, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_052",
+      "title": "Product Names and Prices",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "price_range", "label": "Filter by Price Range", "range": [5, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_053",
+      "title": "Customers by City with Count",
+      "tokens": ["SELECT", "city,", "COUNT(*)", "AS", "customer_count", "FROM", "customers", "GROUP BY", "city"],
+      "solution": ["SELECT", "city,", "COUNT(*)", "AS", "customer_count", "FROM", "customers", "GROUP BY", "city"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by City", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_054",
+      "title": "High Value Orders",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "total", ">", "1000", "ORDER BY", "total", "DESC"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "total", ">", "1000", "ORDER BY", "total", "DESC"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "filter_expensive", "label": "Filter High Value", "range": [4, 7], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Value", "range": [8, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_055",
+      "title": "Employees by Department and Salary",
+      "tokens": ["SELECT", "department,", "AVG(salary)", "AS", "avg_salary", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "AVG(salary)", "AS", "avg_salary", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Department", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_056",
+      "title": "Recent Orders",
+      "tokens": ["SELECT", "id,", "order_date", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'"],
+      "solution": ["SELECT", "id,", "order_date", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_recent", "label": "Filter Recent Orders", "range": [5, 11], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_057",
+      "title": "Products with Low Stock",
+      "tokens": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<=", "10", "ORDER BY", "stock"],
+      "solution": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<=", "10", "ORDER BY", "stock"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_low_stock", "label": "Filter Low Stock", "range": [5, 8], "complexity": 2},
+        {"id": "sort_ascending", "label": "Sort by Stock", "range": [9, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_058",
+      "title": "Customers with Phone Numbers",
+      "tokens": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Phone", "range": [5, 9], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_059",
+      "title": "Total Employees",
+      "tokens": ["SELECT", "COUNT(*)", "AS", "employee_count", "FROM", "employees"],
+      "solution": ["SELECT", "COUNT(*)", "AS", "employee_count", "FROM", "employees"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "count_all", "label": "Count All Employees", "range": [0, 3], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_060",
+      "title": "Products with Names Containing 'Pro'",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "name", "LIKE", "'%Pro%'"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "name", "LIKE", "'%Pro%'"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "pattern_match", "label": "Match Name Pattern", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_061",
+      "title": "Products by Category and Price",
+      "tokens": ["SELECT", "category,", "MAX(price)", "AS", "max_price", "FROM", "products", "GROUP BY", "category"],
+      "solution": ["SELECT", "category,", "MAX(price)", "AS", "max_price", "FROM", "products", "GROUP BY", "category"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Category", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_062",
+      "title": "Orders and Customers",
+      "tokens": ["SELECT", "o.id,", "c.name", "FROM", "orders", "o", "JOIN", "customers", "c", "ON", "o.customer_id", "=", "c.id"],
+      "solution": ["SELECT", "o.id,", "c.name", "FROM", "orders", "o", "JOIN", "customers", "c", "ON", "o.customer_id", "=", "c.id"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Orders", "range": [3, 5], "complexity": 2},
+        {"id": "join_customers", "label": "Join Customer Data", "range": [6, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_063",
+      "title": "Products with No Category",
+      "tokens": ["SELECT", "name", "FROM", "products", "WHERE", "category", "IS", "NULL"],
+      "solution": ["SELECT", "name", "FROM", "products", "WHERE", "category", "IS", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "filter_null", "label": "Find Missing Categories", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_064",
+      "title": "Top 5 Customers by Orders",
+      "tokens": ["SELECT", "customer_id,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "customer_id", "ORDER BY", "order_count", "DESC", "LIMIT", "5"],
+      "solution": ["SELECT", "customer_id,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "customer_id", "ORDER BY", "order_count", "DESC", "LIMIT", "5"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Customer", "range": [7, 8], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Order Count", "range": [9, 11], "complexity": 2},
+        {"id": "limit_results", "label": "Get Top 5", "range": [12, 13], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_065",
+      "title": "Employees with Salaries Above 50000",
+      "tokens": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "50000"],
+      "solution": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "50000"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_high_salary", "label": "Filter High Salary", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_066",
+      "title": "Order Count by Month",
+      "tokens": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month,", "COUNT(*)", "FROM", "orders", "GROUP BY", "EXTRACT(MONTH", "FROM", "order_date)"],
+      "solution": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month,", "COUNT(*)", "FROM", "orders", "GROUP BY", "EXTRACT(MONTH", "FROM", "order_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "Extract Month", "range": [0, 5], "complexity": 2},
+        {"id": "count_orders", "label": "Count Orders", "range": [6, 6], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "Group by Month", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_067",
+      "title": "Product Names and Descriptions",
+      "tokens": ["SELECT", "name,", "description", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "description", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Description", "range": [5, 9], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_068",
+      "title": "Average Price by Category",
+      "tokens": ["SELECT", "category,", "ROUND(AVG(price),", "2)", "AS", "avg_price", "FROM", "products", "GROUP BY", "category"],
+      "solution": ["SELECT", "category,", "ROUND(AVG(price),", "2)", "AS", "avg_price", "FROM", "products", "GROUP BY", "category"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 5], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [6, 7], "complexity": 1},
+        {"id": "group_results", "label": "Group by Category", "range": [8, 9], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_069",
+      "title": "Users by Year of Birth",
+      "tokens": ["SELECT", "EXTRACT(YEAR", "FROM", "birth_date)", "AS", "birth_year,", "COUNT(*)", "FROM", "users", "GROUP BY", "EXTRACT(YEAR", "FROM", "birth_date)"],
+      "solution": ["SELECT", "EXTRACT(YEAR", "FROM", "birth_date)", "AS", "birth_year,", "COUNT(*)", "FROM", "users", "GROUP BY", "EXTRACT(YEAR", "FROM", "birth_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_year", "label": "Extract Year", "range": [0, 5], "complexity": 2},
+        {"id": "count_users", "label": "Count Users", "range": [6, 6], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "Group by Year", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_070",
+      "title": "Products with Prices Over 100 and In Stock",
+      "tokens": ["SELECT", "name,", "price,", "stock", "FROM", "products", "WHERE", "price", ">", "100", "AND", "stock", ">", "0"],
+      "solution": ["SELECT", "name,", "price,", "stock", "FROM", "products", "WHERE", "price", ">", "100", "AND", "stock", ">", "0"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_conditions", "label": "Filter Multiple Conditions", "range": [6, 13], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_071",
+      "title": "Order Total with Tax",
+      "tokens": ["SELECT", "id,", "total,", "total", "*", "1.1", "AS", "with_tax", "FROM", "orders"],
+      "solution": ["SELECT", "id,", "total,", "total", "*", "1.1", "AS", "with_tax", "FROM", "orders"],
+      "category": "Expressions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "calculate_tax", "label": "Calculate Tax Amount", "range": [3, 6], "complexity": 2},
+        {"id": "label_result", "label": "Label as With Tax", "range": [7, 7], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [8, 9], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_072",
+      "title": "Product Discount Price",
+      "tokens": ["SELECT", "name,", "price,", "price", "*", "0.9", "AS", "discount_price", "FROM", "products"],
+      "solution": ["SELECT", "name,", "price,", "price", "*", "0.9", "AS", "discount_price", "FROM", "products"],
+      "category": "Expressions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "calculate_discount", "label": "Apply 10% Discount", "range": [3, 6], "complexity": 2},
+        {"id": "label_result", "label": "Label as Discount Price", "range": [7, 7], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [8, 9], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_073",
+      "title": "Sales by Quarter",
+      "tokens": ["SELECT", "EXTRACT(QUARTER", "FROM", "sale_date)", "AS", "quarter,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(QUARTER", "FROM", "sale_date)"],
+      "solution": ["SELECT", "EXTRACT(QUARTER", "FROM", "sale_date)", "AS", "quarter,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(QUARTER", "FROM", "sale_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_quarter", "label": "Extract Quarter", "range": [0, 5], "complexity": 2},
+        {"id": "sum_sales", "label": "Sum Sales", "range": [6, 8], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1},
+        {"id": "group_results", "label": "Group by Quarter", "range": [11, 14], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_074",
+      "title": "Products with Price Above Average",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "(", "SELECT", "AVG(price)", "FROM", "products", ")"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "(", "SELECT", "AVG(price)", "FROM", "products", ")"],
+      "category": "Subquery",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "compare_to_avg", "label": "Compare to Average", "range": [5, 8], "complexity": 2},
+        {"id": "calculate_avg", "label": "Calculate Average", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_075",
+      "title": "Users with Long Names",
+      "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "users", "WHERE", "LENGTH(name)", ">", "10"],
+      "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "users", "WHERE", "LENGTH(name)", ">", "10"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "filter_length", "label": "Filter by Name Length", "range": [7, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_076",
+      "title": "Email Domain Count",
+      "tokens": ["SELECT", "SUBSTRING(email", "FROM", "'@(.+)$')", "AS", "domain,", "COUNT(*)", "FROM", "users", "GROUP BY", "SUBSTRING(email", "FROM", "'@(.+)$')"],
+      "solution": ["SELECT", "SUBSTRING(email", "FROM", "'@(.+)$')", "AS", "domain,", "COUNT(*)", "FROM", "users", "GROUP BY", "SUBSTRING(email", "FROM", "'@(.+)$')"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "extract_domain", "label": "Extract Domain", "range": [0, 4], "complexity": 3},
+        {"id": "count_domains", "label": "Count by Domain", "range": [5, 6], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "Group by Domain", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_077",
+      "title": "Orders with Discounts",
+      "tokens": ["SELECT", "id,", "total,", "discount,", "total", "-", "discount", "AS", "net_total", "FROM", "orders", "WHERE", "discount", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "id,", "total,", "discount,", "total", "-", "discount", "AS", "net_total", "FROM", "orders", "WHERE", "discount", "IS", "NOT", "NULL"],
+      "category": "Expressions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "calculate_net", "label": "Subtract Discount", "range": [4, 7], "complexity": 2},
+        {"id": "label_result", "label": "Label as Net Total", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Orders with Discount", "range": [11, 15], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_078",
+      "title": "Products with Long Descriptions",
+      "tokens": ["SELECT", "name,", "LENGTH(description)", "AS", "desc_length", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL", "ORDER BY", "desc_length", "DESC"],
+      "solution": ["SELECT", "name,", "LENGTH(description)", "AS", "desc_length", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL", "ORDER BY", "desc_length", "DESC"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Descriptions", "range": [7, 11], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Length", "range": [12, 14], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_079",
+      "title": "First Name and Last Name",
+      "tokens": ["SELECT", "first_name,", "last_name,", "CONCAT(first_name,", "' '", ",", "last_name)", "AS", "full_name", "FROM", "users"],
+      "solution": ["SELECT", "first_name,", "last_name,", "CONCAT(first_name,", "' '", ",", "last_name)", "AS", "full_name", "FROM", "users"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "concat_names", "label": "Concatenate Names", "range": [3, 6], "complexity": 2},
+        {"id": "label_result", "label": "Label as Full Name", "range": [7, 8], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_080",
+      "title": "Employees with Unique Departments",
+      "tokens": ["SELECT", "DISTINCT", "department", "FROM", "employees"],
+      "solution": ["SELECT", "DISTINCT", "department", "FROM", "employees"],
+      "category": "SELECT",
+      "chunks": [
+        {"id": "choose_unique", "label": "Choose Unique Departments", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_081",
+      "title": "Total Sales by Year",
+      "tokens": ["SELECT", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(YEAR", "FROM", "sale_date)", "ORDER BY", "year"],
+      "solution": ["SELECT", "EXTRACT(YEAR", "FROM", "sale_date)", "AS", "year,", "SUM(amount)", "AS", "total_sales", "FROM", "sales", "GROUP BY", "EXTRACT(YEAR", "FROM", "sale_date)", "ORDER BY", "year"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_year", "label": "Extract Year", "range": [0, 5], "complexity": 2},
+        {"id": "sum_sales", "label": "Sum Sales", "range": [6, 8], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1},
+        {"id": "group_results", "label": "Group by Year", "range": [11, 14], "complexity": 3},
+        {"id": "sort_results", "label": "Sort by Year", "range": [15, 16], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_082",
+      "title": "Category Product Count",
+      "tokens": ["SELECT", "category,", "COUNT(*)", "AS", "product_count", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+      "solution": ["SELECT", "category,", "COUNT(*)", "AS", "product_count", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Category", "range": [7, 8], "complexity": 2},
+        {"id": "filter_groups", "label": "Filter Categories with Many Products", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_083",
+      "title": "Products by Name Length",
+      "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "len", "FROM", "products", "ORDER BY", "len"],
+      "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "len", "FROM", "products", "ORDER BY", "len"],
+      "category": "String Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "sort_ascending", "label": "Sort by Name Length", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_084",
+      "title": "Active Customers",
+      "tokens": ["SELECT", "name,", "email", "FROM", "customers", "WHERE", "active", "=", "true"],
+      "solution": ["SELECT", "name,", "email", "FROM", "customers", "WHERE", "active", "=", "true"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_active", "label": "Filter Active Customers", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_085",
+      "title": "Products with High Stock and Low Price",
+      "tokens": ["SELECT", "name,", "price,", "stock", "FROM", "products", "WHERE", "stock", ">", "50", "AND", "price", "<", "100"],
+      "solution": ["SELECT", "name,", "price,", "stock", "FROM", "products", "WHERE", "stock", ">", "50", "AND", "price", "<", "100"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_conditions", "label": "Filter Multiple Conditions", "range": [6, 13], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_086",
+      "title": "Order Value After Discount",
+      "tokens": ["SELECT", "id,", "total,", "discount,", "total", "-", "COALESCE(discount,", "0)", "AS", "final_total", "FROM", "orders"],
+      "solution": ["SELECT", "id,", "total,", "discount,", "total", "-", "COALESCE(discount,", "0)", "AS", "final_total", "FROM", "orders"],
+      "category": "Expressions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "handle_nulls", "label": "Handle Null Discounts", "range": [4, 7], "complexity": 3},
+        {"id": "label_result", "label": "Label as Final Total", "range": [8, 9], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [10, 11], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_087",
+      "title": "Employees by Hire Year",
+      "tokens": ["SELECT", "EXTRACT(YEAR", "FROM", "hire_date)", "AS", "hire_year,", "COUNT(*)", "FROM", "employees", "GROUP BY", "EXTRACT(YEAR", "FROM", "hire_date)", "ORDER BY", "hire_year"],
+      "solution": ["SELECT", "EXTRACT(YEAR", "FROM", "hire_date)", "AS", "hire_year,", "COUNT(*)", "FROM", "employees", "GROUP BY", "EXTRACT(YEAR", "FROM", "hire_date)", "ORDER BY", "hire_year"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_year", "label": "Extract Year", "range": [0, 5], "complexity": 2},
+        {"id": "count_employees", "label": "Count Employees", "range": [6, 6], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "Group by Year", "range": [9, 12], "complexity": 3},
+        {"id": "sort_results", "label": "Sort by Year", "range": [13, 14], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_088",
+      "title": "Customers with No Email",
+      "tokens": ["SELECT", "name", "FROM", "customers", "WHERE", "email", "IS", "NULL"],
+      "solution": ["SELECT", "name", "FROM", "customers", "WHERE", "email", "IS", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "filter_null", "label": "Find Missing Emails", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_089",
+      "title": "Average Order Value",
+      "tokens": ["SELECT", "AVG(total)", "AS", "avg_order_value", "FROM", "orders"],
+      "solution": ["SELECT", "AVG(total)", "AS", "avg_order_value", "FROM", "orders"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "calculate_avg", "label": "Calculate Average", "range": [0, 3], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_090",
+      "title": "Products with Price Between 20 and 30",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "20", "AND", "30"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "20", "AND", "30"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "price_range", "label": "Filter Price Range", "range": [5, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_091",
+      "title": "Customer Order Counts",
+      "tokens": ["SELECT", "c.name,", "COUNT(o.id)", "AS", "order_count", "FROM", "customers", "c", "LEFT JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.name"],
+      "solution": ["SELECT", "c.name,", "COUNT(o.id)", "AS", "order_count", "FROM", "customers", "c", "LEFT JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.name"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [5, 7], "complexity": 2},
+        {"id": "left_join_orders", "label": "Include Orders (Even Missing)", "range": [8, 14], "complexity": 3},
+        {"id": "group_results", "label": "Group by Customer", "range": [15, 16], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_092",
+      "title": "Products and Order Count",
+      "tokens": ["SELECT", "p.name,", "COUNT(oi.id)", "AS", "order_count", "FROM", "products", "p", "LEFT JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"],
+      "solution": ["SELECT", "p.name,", "COUNT(oi.id)", "AS", "order_count", "FROM", "products", "p", "LEFT JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [5, 7], "complexity": 2},
+        {"id": "left_join_items", "label": "Include Order Items (Even Missing)", "range": [8, 14], "complexity": 3},
+        {"id": "group_results", "label": "Group by Product", "range": [15, 16], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_093",
+      "title": "Total Revenue by Product",
+      "tokens": ["SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"],
+      "solution": ["SELECT", "p.name,", "SUM(oi.quantity", "*", "oi.price)", "AS", "revenue", "FROM", "products", "p", "JOIN", "order_items", "oi", "ON", "p.id", "=", "oi.product_id", "GROUP BY", "p.name"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 6], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [7, 9], "complexity": 2},
+        {"id": "join_items", "label": "Join Order Items", "range": [10, 16], "complexity": 3},
+        {"id": "group_results", "label": "Group by Product", "range": [17, 18], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_094",
+      "title": "Customer Lifetime Value",
+      "tokens": ["SELECT", "c.name,", "SUM(o.total)", "AS", "ltv", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.name", "ORDER BY", "ltv", "DESC"],
+      "solution": ["SELECT", "c.name,", "SUM(o.total)", "AS", "ltv", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "GROUP BY", "c.name", "ORDER BY", "ltv", "DESC"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [5, 7], "complexity": 2},
+        {"id": "join_orders", "label": "Join Orders", "range": [8, 14], "complexity": 3},
+        {"id": "group_results", "label": "Group by Customer", "range": [15, 16], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Value", "range": [17, 19], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_095",
+      "title": "Employees with Average Department Salary",
+      "tokens": ["SELECT", "department,", "AVG(salary)", "AS", "dept_avg", "FROM", "employees", "GROUP BY", "department", "HAVING", "AVG(salary)", ">", "60000"],
+      "solution": ["SELECT", "department,", "AVG(salary)", "AS", "dept_avg", "FROM", "employees", "GROUP BY", "department", "HAVING", "AVG(salary)", ">", "60000"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Department", "range": [7, 8], "complexity": 2},
+        {"id": "filter_groups", "label": "Filter High Salary Departments", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_096",
+      "title": "Products without Categories",
+      "tokens": ["SELECT", "name", "FROM", "products", "WHERE", "category_id", "IS", "NULL"],
+      "solution": ["SELECT", "name", "FROM", "products", "WHERE", "category_id", "IS", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "filter_null", "label": "Find Missing Category", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_097",
+      "title": "Orders in Last Month",
+      "tokens": ["SELECT", "id,", "order_date", "FROM", "orders", "WHERE", "order_date", ">=", "DATE_TRUNC('month',", "CURRENT_DATE)", "-", "INTERVAL", "'1 month'"],
+      "solution": ["SELECT", "id,", "order_date", "FROM", "orders", "WHERE", "order_date", ">=", "DATE_TRUNC('month',", "CURRENT_DATE)", "-", "INTERVAL", "'1 month'"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_last_month", "label": "Filter Last Month", "range": [5, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_098",
+      "title": "Minimum Price by Category",
+      "tokens": ["SELECT", "category,", "MIN(price)", "AS", "min_price", "FROM", "products", "GROUP BY", "category"],
+      "solution": ["SELECT", "category,", "MIN(price)", "AS", "min_price", "FROM", "products", "GROUP BY", "category"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Category", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_099",
+      "title": "Recent Product Reviews",
+      "tokens": ["SELECT", "product_id,", "rating,", "review_date", "FROM", "reviews", "WHERE", "review_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'"],
+      "solution": ["SELECT", "product_id,", "rating,", "review_date", "FROM", "reviews", "WHERE", "review_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_recent", "label": "Filter Recent Reviews", "range": [6, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_100",
+      "title": "Products with No Reviews",
+      "tokens": ["SELECT", "p.name", "FROM", "products", "p", "LEFT JOIN", "reviews", "r", "ON", "p.id", "=", "r.product_id", "WHERE", "r.id", "IS", "NULL"],
+      "solution": ["SELECT", "p.name", "FROM", "products", "p", "LEFT JOIN", "reviews", "r", "ON", "p.id", "=", "r.product_id", "WHERE", "r.id", "IS", "NULL"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [2, 4], "complexity": 2},
+        {"id": "left_join_reviews", "label": "Include Reviews (Even Missing)", "range": [5, 11], "complexity": 3},
+        {"id": "find_missing", "label": "Find Products Without Reviews", "range": [12, 15], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_101",
+      "title": "Customers with Recent Orders",
+      "tokens": ["SELECT", "DISTINCT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'"],
+      "solution": ["SELECT", "DISTINCT", "customer_id", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'30 days'"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_unique", "label": "Select Unique Customers", "range": [0, 2], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_dates", "label": "Filter by Recent Date", "range": [5, 11], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_102",
+      "title": "Average Review Score",
+      "tokens": ["SELECT", "product_id,", "AVG(rating)", "AS", "avg_rating", "FROM", "reviews", "GROUP BY", "product_id"],
+      "solution": ["SELECT", "product_id,", "AVG(rating)", "AS", "avg_rating", "FROM", "reviews", "GROUP BY", "product_id"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Average", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Product", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_103",
+      "title": "Products with Category Names",
+      "tokens": ["SELECT", "p.name,", "c.name", "AS", "category_name", "FROM", "products", "p", "JOIN", "categories", "c", "ON", "p.category_id", "=", "c.id"],
+      "solution": ["SELECT", "p.name,", "c.name", "AS", "category_name", "FROM", "products", "p", "JOIN", "categories", "c", "ON", "p.category_id", "=", "c.id"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Category", "range": [0, 4], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [5, 7], "complexity": 2},
+        {"id": "join_categories", "label": "Join Category Names", "range": [8, 14], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_104",
+      "title": "Orders with Total Above 500",
+      "tokens": ["SELECT", "id,", "customer_id,", "total", "FROM", "orders", "WHERE", "total", ">", "500", "ORDER BY", "total", "DESC"],
+      "solution": ["SELECT", "id,", "customer_id,", "total", "FROM", "orders", "WHERE", "total", ">", "500", "ORDER BY", "total", "DESC"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Order Info", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_high_value", "label": "Filter High Value Orders", "range": [6, 9], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Total", "range": [10, 12], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_105",
+      "title": "Total Quantity Sold by Product",
+      "tokens": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_quantity", "FROM", "order_items", "GROUP BY", "product_id"],
+      "solution": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_quantity", "FROM", "order_items", "GROUP BY", "product_id"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Sum", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Product", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_106",
+      "title": "Customers with Gmail Addresses",
+      "tokens": ["SELECT", "name,", "email", "FROM", "customers", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "solution": ["SELECT", "name,", "email", "FROM", "customers", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer Info", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "pattern_match", "label": "Filter Gmail Addresses", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_107",
+      "title": "Top 3 Selling Products",
+      "tokens": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "GROUP BY", "product_id", "ORDER BY", "total_sold", "DESC", "LIMIT", "3"],
+      "solution": ["SELECT", "product_id,", "SUM(quantity)", "AS", "total_sold", "FROM", "order_items", "GROUP BY", "product_id", "ORDER BY", "total_sold", "DESC", "LIMIT", "3"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product and Sum", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Product", "range": [7, 8], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Quantity Sold", "range": [9, 11], "complexity": 2},
+        {"id": "limit_results", "label": "Get Top 3", "range": [12, 13], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_108",
+      "title": "Order Status Distribution",
+      "tokens": ["SELECT", "status,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "status", "ORDER BY", "order_count", "DESC"],
+      "solution": ["SELECT", "status,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "status", "ORDER BY", "order_count", "DESC"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Status and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Status", "range": [7, 8], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Order Count", "range": [9, 11], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_109",
+      "title": "Customers with No Email Address",
+      "tokens": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "email", "IS", "NULL"],
+      "solution": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "email", "IS", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer Info", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_null", "label": "Find Missing Emails", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_110",
+      "title": "Products by Category and Price",
+      "tokens": ["SELECT", "category,", "name,", "price", "FROM", "products", "ORDER BY", "category,", "price", "DESC"],
+      "solution": ["SELECT", "category,", "name,", "price", "FROM", "products", "ORDER BY", "category,", "price", "DESC"],
+      "category": "Sorting",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product Info", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "sort_multi", "label": "Sort by Category then Price", "range": [6, 9], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_111",
+      "title": "Monthly Orders Summary",
+      "tokens": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month,", "COUNT(*)", "AS", "orders_count", "FROM", "orders", "GROUP BY", "EXTRACT(MONTH", "FROM", "order_date)", "ORDER BY", "month"],
+      "solution": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month,", "COUNT(*)", "AS", "orders_count", "FROM", "orders", "GROUP BY", "EXTRACT(MONTH", "FROM", "order_date)", "ORDER BY", "month"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "Extract Month", "range": [0, 5], "complexity": 2},
+        {"id": "count_orders", "label": "Count Orders", "range": [6, 8], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1},
+        {"id": "group_results", "label": "Group by Month", "range": [11, 14], "complexity": 3},
+        {"id": "sort_results", "label": "Sort by Month", "range": [15, 16], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_112",
+      "title": "Employee Department Counts",
+      "tokens": ["SELECT", "department,", "COUNT(*)", "AS", "employee_count", "FROM", "employees", "GROUP BY", "department", "ORDER BY", "employee_count", "DESC"],
+      "solution": ["SELECT", "department,", "COUNT(*)", "AS", "employee_count", "FROM", "employees", "GROUP BY", "department", "ORDER BY", "employee_count", "DESC"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Department and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Department", "range": [7, 8], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Employee Count", "range": [9, 11], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_113",
+      "title": "Low Stock Products Report",
+      "tokens": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<", "10", "ORDER BY", "stock"],
+      "solution": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<", "10", "ORDER BY", "stock"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product Info", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_low_stock", "label": "Filter Low Stock Items", "range": [5, 8], "complexity": 2},
+        {"id": "sort_ascending", "label": "Sort by Stock Amount", "range": [9, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_114",
+      "title": "Customer Order History",
+      "tokens": ["SELECT", "c.name,", "o.order_date,", "o.total", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "ORDER BY", "c.name,", "o.order_date"],
+      "solution": ["SELECT", "c.name,", "o.order_date,", "o.total", "FROM", "customers", "c", "JOIN", "orders", "o", "ON", "c.id", "=", "o.customer_id", "ORDER BY", "c.name,", "o.order_date"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Customer and Order Info", "range": [0, 3], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Customers", "range": [4, 6], "complexity": 2},
+        {"id": "join_orders", "label": "Join Order Data", "range": [7, 13], "complexity": 3},
+        {"id": "sort_multi", "label": "Sort by Customer and Date", "range": [14, 16], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_115",
+      "title": "Order Profit Calculation",
+      "tokens": ["SELECT", "id,", "total,", "total", "*", "0.8", "AS", "profit", "FROM", "orders"],
+      "solution": ["SELECT", "id,", "total,", "total", "*", "0.8", "AS", "profit", "FROM", "orders"],
+      "category": "Expressions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Order Info", "range": [0, 2], "complexity": 1},
+        {"id": "calculate_profit", "label": "Calculate 80% of Total", "range": [3, 6], "complexity": 2},
+        {"id": "label_result", "label": "Label as Profit", "range": [7, 7], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [8, 9], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_116",
+      "title": "Employees by Hire Quarter",
+      "tokens": ["SELECT", "EXTRACT(QUARTER", "FROM", "hire_date)", "AS", "hire_quarter,", "COUNT(*)", "FROM", "employees", "GROUP BY", "EXTRACT(QUARTER", "FROM", "hire_date)"],
+      "solution": ["SELECT", "EXTRACT(QUARTER", "FROM", "hire_date)", "AS", "hire_quarter,", "COUNT(*)", "FROM", "employees", "GROUP BY", "EXTRACT(QUARTER", "FROM", "hire_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_quarter", "label": "Extract Quarter", "range": [0, 5], "complexity": 2},
+        {"id": "count_employees", "label": "Count Employees", "range": [6, 6], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "Group by Quarter", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_117",
+      "title": "Product Inventory Value",
+      "tokens": ["SELECT", "name,", "price,", "stock,", "price", "*", "stock", "AS", "inventory_value", "FROM", "products"],
+      "solution": ["SELECT", "name,", "price,", "stock,", "price", "*", "stock", "AS", "inventory_value", "FROM", "products"],
+      "category": "Expressions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product Info", "range": [0, 3], "complexity": 1},
+        {"id": "calculate_value", "label": "Multiply Price by Stock", "range": [4, 7], "complexity": 2},
+        {"id": "label_result", "label": "Label as Inventory Value", "range": [8, 8], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [9, 10], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_118",
+      "title": "Cities with Most Customers",
+      "tokens": ["SELECT", "city,", "COUNT(*)", "AS", "customer_count", "FROM", "customers", "GROUP BY", "city", "HAVING", "COUNT(*)", ">", "5", "ORDER BY", "customer_count", "DESC"],
+      "solution": ["SELECT", "city,", "COUNT(*)", "AS", "customer_count", "FROM", "customers", "GROUP BY", "city", "HAVING", "COUNT(*)", ">", "5", "ORDER BY", "customer_count", "DESC"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select City and Count", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by City", "range": [7, 8], "complexity": 2},
+        {"id": "filter_groups", "label": "Filter Large Cities", "range": [9, 12], "complexity": 3},
+        {"id": "sort_descending", "label": "Sort by Customer Count", "range": [13, 15], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_119",
+      "title": "Products with Specific Category Names",
+      "tokens": ["SELECT", "p.name,", "p.price", "FROM", "products", "p", "JOIN", "categories", "c", "ON", "p.category_id", "=", "c.id", "WHERE", "c.name", "IN", "(", "'Electronics'", ",", "'Books'", ")"],
+      "solution": ["SELECT", "p.name,", "p.price", "FROM", "products", "p", "JOIN", "categories", "c", "ON", "p.category_id", "=", "c.id", "WHERE", "c.name", "IN", "(", "'Electronics'", ",", "'Books'", ")"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product Info", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Products", "range": [3, 5], "complexity": 2},
+        {"id": "join_categories", "label": "Join Category Names", "range": [6, 12], "complexity": 3},
+        {"id": "filter_categories", "label": "Filter Specific Categories", "range": [13, 19], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_120",
+      "title": "Recent Product Reviews Summary",
+      "tokens": ["SELECT", "product_id,", "COUNT(*)", "AS", "review_count,", "AVG(rating)", "AS", "avg_rating", "FROM", "reviews", "WHERE", "review_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "2"],
+      "solution": ["SELECT", "product_id,", "COUNT(*)", "AS", "review_count,", "AVG(rating)", "AS", "avg_rating", "FROM", "reviews", "WHERE", "review_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'", "GROUP BY", "product_id", "HAVING", "COUNT(*)", ">", "2"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Select Product, Count, and Average", "range": [0, 7], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [8, 9], "complexity": 1},
+        {"id": "filter_dates", "label": "Filter Recent Reviews", "range": [10, 16], "complexity": 3},
+        {"id": "group_results", "label": "Group by Product", "range": [17, 18], "complexity": 2},
+        {"id": "filter_groups", "label": "Filter Products with Many Reviews", "range": [19, 22], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_121",
+      "title": "Orders with Discount Applied",
+      "tokens": ["SELECT", "id,", "total,", "discount", "FROM", "orders", "WHERE", "discount", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "id,", "total,", "discount", "FROM", "orders", "WHERE", "discount", "IS", "NOT", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Discounts", "range": [6, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_122",
+      "title": "Product Names and Prices",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "price_range", "label": "Filter by Price Range", "range": [5, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_123",
+      "title": "Customers by City with Count",
+      "tokens": ["SELECT", "city,", "COUNT(*)", "AS", "customer_count", "FROM", "customers", "GROUP BY", "city"],
+      "solution": ["SELECT", "city,", "COUNT(*)", "AS", "customer_count", "FROM", "customers", "GROUP BY", "city"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by City", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_124",
+      "title": "High Value Orders",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "total", ">", "1000", "ORDER BY", "total", "DESC"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "total", ">", "1000", "ORDER BY", "total", "DESC"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "filter_expensive", "label": "Filter High Value", "range": [4, 7], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Value", "range": [8, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_125",
+      "title": "Employees by Department and Salary",
+      "tokens": ["SELECT", "department,", "AVG(salary)", "AS", "avg_salary", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "AVG(salary)", "AS", "avg_salary", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Department", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_126",
+      "title": "Recent Orders",
+      "tokens": ["SELECT", "id,", "order_date", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'"],
+      "solution": ["SELECT", "id,", "order_date", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_recent", "label": "Filter Recent Orders", "range": [5, 11], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_127",
+      "title": "Products with Low Stock",
+      "tokens": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<=", "10", "ORDER BY", "stock"],
+      "solution": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", "<=", "10", "ORDER BY", "stock"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_low_stock", "label": "Filter Low Stock", "range": [5, 8], "complexity": 2},
+        {"id": "sort_ascending", "label": "Sort by Stock", "range": [9, 10], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_128",
+      "title": "Customers with Phone Numbers",
+      "tokens": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Phone", "range": [5, 9], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_129",
+      "title": "Total Employees",
+      "tokens": ["SELECT", "COUNT(*)", "AS", "employee_count", "FROM", "employees"],
+      "solution": ["SELECT", "COUNT(*)", "AS", "employee_count", "FROM", "employees"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "count_all", "label": "Count All Employees", "range": [0, 3], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1}
+      ]
+    },
+    {
+      "id": "s_m_130",
+      "title": "Products with Names Containing 'Pro'",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "name", "LIKE", "'%Pro%'"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "name", "LIKE", "'%Pro%'"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "pattern_match", "label": "Match Name Pattern", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_131",
+      "title": "Products by Category and Price",
+      "tokens": ["SELECT", "category,", "MAX(price)", "AS", "max_price", "FROM", "products", "GROUP BY", "category"],
+      "solution": ["SELECT", "category,", "MAX(price)", "AS", "max_price", "FROM", "products", "GROUP BY", "category"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Category", "range": [7, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_132",
+      "title": "Orders and Customers",
+      "tokens": ["SELECT", "o.id,", "c.name", "FROM", "orders", "o", "JOIN", "customers", "c", "ON", "o.customer_id", "=", "c.id"],
+      "solution": ["SELECT", "o.id,", "c.name", "FROM", "orders", "o", "JOIN", "customers", "c", "ON", "o.customer_id", "=", "c.id"],
+      "category": "Joins",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 2},
+        {"id": "choose_main_table", "label": "Start with Orders", "range": [3, 5], "complexity": 2},
+        {"id": "join_customers", "label": "Join Customer Data", "range": [6, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_133",
+      "title": "Products with No Category",
+      "tokens": ["SELECT", "name", "FROM", "products", "WHERE", "category", "IS", "NULL"],
+      "solution": ["SELECT", "name", "FROM", "products", "WHERE", "category", "IS", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 1], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [2, 3], "complexity": 1},
+        {"id": "filter_null", "label": "Find Missing Categories", "range": [4, 7], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_134",
+      "title": "Top 5 Customers by Orders",
+      "tokens": ["SELECT", "customer_id,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "customer_id", "ORDER BY", "order_count", "DESC", "LIMIT", "5"],
+      "solution": ["SELECT", "customer_id,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "customer_id", "ORDER BY", "order_count", "DESC", "LIMIT", "5"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 4], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [5, 6], "complexity": 1},
+        {"id": "group_results", "label": "Group by Customer", "range": [7, 8], "complexity": 2},
+        {"id": "sort_descending", "label": "Sort by Order Count", "range": [9, 11], "complexity": 2},
+        {"id": "limit_results", "label": "Get Top 5", "range": [12, 13], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_135",
+      "title": "Employees with Salaries Above 50000",
+      "tokens": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "50000"],
+      "solution": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "50000"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_high_salary", "label": "Filter High Salary", "range": [5, 8], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_136",
+      "title": "Order Count by Month",
+      "tokens": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month,", "COUNT(*)", "FROM", "orders", "GROUP BY", "EXTRACT(MONTH", "FROM", "order_date)"],
+      "solution": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month,", "COUNT(*)", "FROM", "orders", "GROUP BY", "EXTRACT(MONTH", "FROM", "order_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_month", "label": "Extract Month", "range": [0, 5], "complexity": 2},
+        {"id": "count_orders", "label": "Count Orders", "range": [6, 6], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "Group by Month", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_137",
+      "title": "Product Names and Descriptions",
+      "tokens": ["SELECT", "name,", "description", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "description", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 2], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [3, 4], "complexity": 1},
+        {"id": "filter_not_null", "label": "Filter Non-Null Description", "range": [5, 9], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_138",
+      "title": "Average Price by Category",
+      "tokens": ["SELECT", "category,", "ROUND(AVG(price),", "2)", "AS", "avg_price", "FROM", "products", "GROUP BY", "category"],
+      "solution": ["SELECT", "category,", "ROUND(AVG(price),", "2)", "AS", "avg_price", "FROM", "products", "GROUP BY", "category"],
+      "category": "Aggregation",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 5], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [6, 7], "complexity": 1},
+        {"id": "group_results", "label": "Group by Category", "range": [8, 9], "complexity": 2}
+      ]
+    },
+    {
+      "id": "s_m_139",
+      "title": "Users by Year of Birth",
+      "tokens": ["SELECT", "EXTRACT(YEAR", "FROM", "birth_date)", "AS", "birth_year,", "COUNT(*)", "FROM", "users", "GROUP BY", "EXTRACT(YEAR", "FROM", "birth_date)"],
+      "solution": ["SELECT", "EXTRACT(YEAR", "FROM", "birth_date)", "AS", "birth_year,", "COUNT(*)", "FROM", "users", "GROUP BY", "EXTRACT(YEAR", "FROM", "birth_date)"],
+      "category": "Date Functions",
+      "chunks": [
+        {"id": "choose_year", "label": "Extract Year", "range": [0, 5], "complexity": 2},
+        {"id": "count_users", "label": "Count Users", "range": [6, 6], "complexity": 2},
+        {"id": "choose_table", "label": "Choose Table", "range": [7, 8], "complexity": 1},
+        {"id": "group_results", "label": "Group by Year", "range": [9, 12], "complexity": 3}
+      ]
+    },
+    {
+      "id": "s_m_140",
+      "title": "Products with Prices Over 100 and In Stock",
+      "tokens": ["SELECT", "name,", "price,", "stock", "FROM", "products", "WHERE", "price", ">", "100", "AND", "stock", ">", "0"],
+      "solution": ["SELECT", "name,", "price,", "stock", "FROM", "products", "WHERE", "price", ">", "100", "AND", "stock", ">", "0"],
+      "category": "Filtering",
+      "chunks": [
+        {"id": "choose_fields", "label": "Choose Fields", "range": [0, 3], "complexity": 1},
+        {"id": "choose_table", "label": "Choose Table", "range": [4, 5], "complexity": 1},
+        {"id": "filter_conditions", "label": "Filter Multiple Conditions", "range": [6, 13], "complexity": 3}
+      ]
+    }
+  ]
+}

@@ -1,46 +1,72 @@
 import 'dart:convert';
 import 'package:code_shuffle/screens/review_sql_screen.dart';
+import 'package:code_shuffle/screens/survival_difficulty_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
 import 'package:code_shuffle/modals/modals.dart';
 import 'package:code_shuffle/services/progress_service.dart';
+import 'package:code_shuffle/services/music_service.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'level_screen.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MainShell — tab host with custom bottom nav
-// ─────────────────────────────────────────────────────────────────────────────
+import 'support_screen.dart';
+import 'settings_screen.dart';
+import 'package:code_shuffle/services/daily_challenge_service.dart';
+import 'daily_game_screen.dart';
+import 'sql_stream_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
-
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   final _progressService = ProgressService();
   final _sb = Supabase.instance.client;
-
-  // ── Shared state (lifted up so tabs stay in sync) ──────────────────────────
+  final _music = MusicService.instance;
+final _dailyService = DailyChallengeService();
+bool _dailyCompleted = false;
+DailyPuzzle? _todaysPuzzle;
   List<PuzzleLevel> _levels = [];
   Map<String, PuzzleProgress> _progress = {};
   int _xp = 0;
   String? _username;
   bool _loading = true;
-
-  int _tab = 0; // 0=home, 1=train(action), 2=profile, 3=settings
+  int _tab = 0; // 0=home, 1=train(action), 2=profile, 3=settings, 4=support
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _init();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _music.stop();
+    } else if (state == AppLifecycleState.resumed) {
+      // Resume whichever context was active before pause
+      if (_music.currentContext == MusicContext.survival) {
+        _music.playSurvival();
+      } else {
+        _music.playHome();
+      }
+    }
+  }
+
   Future<void> _init() async {
+    await _music.init();
+
     final raw = await rootBundle.loadString('assets/sql_puzzles.json');
     final data = jsonDecode(raw);
     final levels =
@@ -56,18 +82,50 @@ class _MainShellState extends State<MainShell> {
         username = profile?['username'] as String?;
       } catch (_) {}
     }
-
+final dailyCompleted = await _dailyService.isCompletedToday();
+DailyPuzzle? todaysPuzzle;
+try {
+  todaysPuzzle = await _dailyService.loadTodaysPuzzle();
+} catch (e, st) {
+  debugPrint('Daily puzzle load failed: \$e\n\$st');
+}
     if (mounted) {
       setState(() {
         _levels = levels;
         _progress = progress;
         _xp = xp;
         _username = username;
+        _dailyCompleted = dailyCompleted;
+        _todaysPuzzle = todaysPuzzle;
         _loading = false;
       });
+      _music.playHome();
     }
   }
-
+void _openDailyChallenge() {
+  if (_todaysPuzzle == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not load today\'s puzzle. Please restart the app.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    return;
+  }
+  _music.playHome(); // daily uses home_song1
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => DailyGameScreen(
+        puzzle: _todaysPuzzle!,
+        onCompleted: () async {
+          await _dailyService.markCompleted();
+          if (mounted) setState(() => _dailyCompleted = true);
+        },
+      ),
+    ),
+  );
+}
   void _onProgressUpdated(Map<String, PuzzleProgress> updated, int xpGained) {
     setState(() {
       _progress = updated;
@@ -77,7 +135,45 @@ class _MainShellState extends State<MainShell> {
     _progressService.saveLocalXp(_xp);
   }
 
-  // ── Train: show level picker sheet instead of navigating directly ──────────
+  // ── Duel mode picker ────────────────────────────────────────────────────
+
+  void _showDuelSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _DuelModeSheet(
+        dailyCompleted: _dailyCompleted,
+        onTraining: () {
+          Navigator.pop(context);
+          _showTrainSheet();
+        },
+        onSurvival: () {
+          Navigator.pop(context);
+          _music.playSurvival();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const SurvivalDifficultyScreen(),
+            ),
+          ).then((_) => _music.playHome());
+        },
+        onDaily: () {
+          Navigator.pop(context);
+          _openDailyChallenge();
+        },
+        onStream: () {
+          Navigator.pop(context);
+          _music.playHome(); // sql stream uses home_song1
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SqlStreamScreen()),
+          );
+        },
+      ),
+    );
+  }
+
   void _showTrainSheet() {
     if (_levels.isEmpty) return;
     showModalBottomSheet(
@@ -88,40 +184,30 @@ class _MainShellState extends State<MainShell> {
         levels: _levels,
         progress: _progress,
         onLevelSelected: (level) {
-          Navigator.pop(context); // close sheet first
+          Navigator.pop(context);
           _openLevel(level);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => LevelScreen(
-                level: level,
-                progress: _progress,
-                onProgressUpdated: _onProgressUpdated,
-              ),
-            ),
-          );
         },
       ),
     );
   }
-// ── Navigate to a level screen (used by Home cards and the Train sheet) ────
-void _openLevel(PuzzleLevel level) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => LevelScreen(
-        level: level,
-        progress: _progress,
-        onProgressUpdated: _onProgressUpdated,
+
+  void _openLevel(PuzzleLevel level) {
+    _music.playHome(); // training uses home_song1
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LevelScreen(
+          level: level,
+          progress: _progress,
+          onProgressUpdated: _onProgressUpdated,
+        ),
       ),
-    ),
-  );
-}
-  // ── Tab press handler ──────────────────────────────────────────────────────
+    ).then((_) => _music.playHome());
+  }
+
   void _onTabTap(int index) {
     if (index == 1) {
-      // Train is an action button, not a persistent tab
-      _showTrainSheet();
+      _showDuelSheet();
       return;
     }
     setState(() => _tab = index);
@@ -136,33 +222,40 @@ void _openLevel(PuzzleLevel level) {
       );
     }
 
-    // Map tab index → screen (train=1 is an action, skip it in IndexedStack)
-    // Tab mapping: 0→home, 2→profile, 3→settings
-    // IndexedStack uses: 0→home, 1→profile, 2→settings
-    final stackIndex = _tab == 0 ? 0 : _tab == 2 ? 1 : 2;
+    final stackIndex = _tab == 0 ? 0 : _tab == 2 ? 1 : _tab == 3 ? 2 : 3;
 
     return Scaffold(
       backgroundColor: kBgDark,
-      extendBody: true, // content goes under the nav bar cutout area
+      extendBody: true,
       body: IndexedStack(
         index: stackIndex,
         children: [
-          // 0 — Home
-HomeScreen(
-  levels: _levels,
-  progress: _progress,
-  xp: _xp,
-  username: _username,
-  onProgressUpdated: _onProgressUpdated,
-  onSynced: (u) => setState(() => _username = u),
-  onSignedOut: () => setState(() => _username = null),
-  onTrainingTap: _showTrainSheet,   // ← replaces onLevelTap
-onReviewTap: () => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const ReviewSqlScreen()),
-  ),
+          HomeScreen(
+            levels: _levels,
+            progress: _progress,
+            xp: _xp,
+            username: _username,
+            onProgressUpdated: _onProgressUpdated,
+            onSynced: (u) => setState(() => _username = u),
+            onSignedOut: () => setState(() => _username = null),
+            onTrainingTap: _showTrainSheet,
+            onReviewTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReviewSqlScreen()),
+            ),
+              dailyCompleted: _dailyCompleted,        // ← new
+  onDailyTap: _openDailyChallenge,        // ← new
+onSurvivalTap: () {
+    _music.playSurvival();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SurvivalDifficultyScreen(),
+      ),
+    ).then((_) => _music.playHome());
+  },
 ),
-          // 1 — Profile
+
           ProfileScreen(
             progress: _progress,
             xp: _xp,
@@ -171,8 +264,8 @@ onReviewTap: () => Navigator.push(
             onSynced: (u) => setState(() => _username = u),
             onSignedOut: () => setState(() => _username = null),
           ),
-          // 2 — Settings (placeholder)
-          _SettingsPlaceholder(),
+          const SettingsScreen(),
+          const SupportScreen(),
         ],
       ),
       bottomNavigationBar: _CSDBottomNav(
@@ -184,7 +277,226 @@ onReviewTap: () => Navigator.push(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Train bottom sheet — level picker
+// Duel mode picker sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DuelModeSheet extends StatelessWidget {
+  final bool dailyCompleted;
+  final VoidCallback onTraining;
+  final VoidCallback onSurvival;
+  final VoidCallback onDaily;
+  final VoidCallback onStream;
+
+  const _DuelModeSheet({
+    required this.dailyCompleted,
+    required this.onTraining,
+    required this.onSurvival,
+    required this.onDaily,
+    required this.onStream,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF150F28),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: kPurpleMid.withOpacity(.25), width: 1),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20, 16, 20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Container(
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Title
+          Row(
+            children: [
+              Image.asset('assets/images/duel_icon.png', width: 28, height: 28),
+              const SizedBox(width: 10),
+              const Text(
+                'SELECT YOUR MODE',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Divider(color: Colors.white10),
+          const SizedBox(height: 12),
+          // Training
+          _DuelModeCard(
+            icon: 'assets/images/duel_icon.png',
+            title: 'TRAINING',
+            subtitle: 'Practice SQL at your own pace',
+            gradientColors: [const Color(0xFF92400E), const Color(0xFFB45309)],
+            borderColor: const Color(0xFFF59E0B),
+            badge: null,
+            onTap: onTraining,
+          ),
+          const SizedBox(height: 12),
+          // Survival
+          _DuelModeCard(
+            icon: 'assets/images/skull_icon.png',
+            title: 'SURVIVAL',
+            subtitle: 'One mistake ends the run',
+            gradientColors: [const Color(0xFF450A0A), const Color(0xFF991B1B)],
+            borderColor: const Color(0xFFEF4444),
+            badge: null,
+            onTap: onSurvival,
+          ),
+          const SizedBox(height: 12),
+          // Daily Challenge
+          _DuelModeCard(
+            icon: 'assets/images/calendar_icon.png',
+            title: 'DAILY CHALLENGE',
+            subtitle: dailyCompleted ? 'Completed today ✓' : 'New puzzle every day',
+            gradientColors: [const Color(0xFF1E3A5F), const Color(0xFF1D4ED8)],
+            borderColor: const Color(0xFF60A5FA),
+            badge: dailyCompleted ? '✓ DONE' : 'NEW',
+            badgeColor: dailyCompleted ? kGreen : kGold,
+            onTap: onDaily,
+          ),
+          const SizedBox(height: 12),
+          // SQL Stream
+          _DuelModeCard(
+            icon: 'assets/images/duel_icon.png',
+            title: 'SQL STREAM',
+            subtitle: 'Catch tokens. Build the query. Beat the flow.',
+            gradientColors: [const Color(0xFF0F3D2E), const Color(0xFF065F46)],
+            borderColor: const Color(0xFF34D399),
+            badge: 'NEW',
+            badgeColor: const Color(0xFF34D399),
+            onTap: onStream,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Individual mode card inside the duel sheet ───────────────────────────────
+
+class _DuelModeCard extends StatelessWidget {
+  final String icon;
+  final String title;
+  final String subtitle;
+  final List<Color> gradientColors;
+  final Color borderColor;
+  final String? badge;
+  final Color? badgeColor;
+  final VoidCallback onTap;
+
+  const _DuelModeCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.gradientColors,
+    required this.borderColor,
+    required this.badge,
+    this.badgeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor.withOpacity(.5), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: borderColor.withOpacity(.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Image.asset(icon, width: 52, height: 52, fit: BoxFit.contain),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(.65),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (badge != null) ...[
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (badgeColor ?? Colors.white).withOpacity(.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: (badgeColor ?? Colors.white).withOpacity(.4),
+                  ),
+                ),
+                child: Text(
+                  badge!,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: badgeColor ?? Colors.white,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ] else ...[
+              const SizedBox(width: 10),
+              Icon(Icons.chevron_right_rounded, color: Colors.white54, size: 22),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Train bottom sheet
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _TrainSheet extends StatelessWidget {
@@ -218,11 +530,9 @@ class _TrainSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: 40, height: 4,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   color: Colors.white24,
@@ -230,8 +540,6 @@ class _TrainSheet extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Title
             Row(
               children: [
                 Container(
@@ -247,26 +555,17 @@ class _TrainSheet extends StatelessWidget {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'TRAIN',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      'Choose your difficulty',
-                      style: TextStyle(fontSize: 12, color: Colors.white54),
-                    ),
+                    Text('TRAIN',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w900,
+                            letterSpacing: 2, color: Colors.white)),
+                    Text('Choose your difficulty',
+                        style: TextStyle(fontSize: 12, color: Colors.white54)),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 20),
-
-            // Level cards
             ...levels.map((level) => _LevelPickerCard(
                   level: level,
                   completed: _completedFor(level),
@@ -287,20 +586,15 @@ class _LevelPickerCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _LevelPickerCard({
-    required this.level,
-    required this.completed,
-    required this.stars,
-    required this.onTap,
+    required this.level, required this.completed,
+    required this.stars, required this.onTap,
   });
 
   IconData get _icon {
     switch (level.id) {
-      case 'beginner':
-        return Icons.local_fire_department_rounded;
-      case 'intermediate':
-        return Icons.bolt_rounded;
-      default:
-        return Icons.military_tech_rounded;
+      case 'beginner': return Icons.local_fire_department_rounded;
+      case 'intermediate': return Icons.bolt_rounded;
+      default: return Icons.military_tech_rounded;
     }
   }
 
@@ -322,18 +616,11 @@ class _LevelPickerCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           child: Row(
             children: [
-              // Gradient accent bar
-              Container(
-                width: 4,
-                height: 76,
-                decoration:
-                    BoxDecoration(gradient: levelGradient(level.id)),
-              ),
+              Container(width: 4, height: 76,
+                  decoration: BoxDecoration(gradient: levelGradient(level.id))),
               const SizedBox(width: 16),
-              // Icon
               Container(
-                width: 44,
-                height: 44,
+                width: 44, height: 44,
                 decoration: BoxDecoration(
                   gradient: levelGradient(level.id),
                   borderRadius: BorderRadius.circular(12),
@@ -341,38 +628,25 @@ class _LevelPickerCard extends StatelessWidget {
                 child: Icon(_icon, color: Colors.white, size: 22),
               ),
               const SizedBox(width: 14),
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      level.label.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    Text(level.label.toUpperCase(),
+                        style: const TextStyle(fontSize: 14,
+                            fontWeight: FontWeight.w800, letterSpacing: 1.2)),
                     const SizedBox(height: 4),
-                    Text(
-                      '$completed / ${level.puzzles.length} done · $stars/$maxStars ★',
-                      style: const TextStyle(
-                          fontSize: 11, color: Colors.white38),
-                    ),
+                    Text('$completed / ${level.puzzles.length} done · $stars/$maxStars ★',
+                        style: const TextStyle(fontSize: 11, color: Colors.white38)),
                     const SizedBox(height: 6),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(2),
                       child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 3,
+                        value: progress, minHeight: 3,
                         backgroundColor: Colors.white10,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          level.id == 'beginner'
-                              ? kGreen
-                              : level.id == 'intermediate'
-                                  ? kBlue
-                                  : kAdvPurple,
+                          level.id == 'beginner' ? kGreen
+                              : level.id == 'intermediate' ? kBlue : kAdvPurple,
                         ),
                       ),
                     ),
@@ -381,8 +655,7 @@ class _LevelPickerCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.play_arrow_rounded,
-                  color: kPurpleLight, size: 26),
+              const Icon(Icons.play_arrow_rounded, color: kPurpleLight, size: 26),
               const SizedBox(width: 14),
             ],
           ),
@@ -391,73 +664,28 @@ class _LevelPickerCard extends StatelessWidget {
     );
   }
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Settings placeholder
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SettingsPlaceholder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(gradient: kBgGradient),
-      child: const SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.settings_rounded, size: 52, color: Colors.white12),
-              SizedBox(height: 16),
-              Text(
-                'SETTINGS',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 3,
-                  color: Colors.white24,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Coming soon',
-                style: TextStyle(fontSize: 12, color: Colors.white24),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Custom bottom nav bar — Marvel Snap–style with raised center arc
+// Custom bottom nav bar
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CSDBottomNav extends StatelessWidget {
   final int currentIndex;
   final void Function(int) onTap;
-
-  const _CSDBottomNav({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _CSDBottomNav({required this.currentIndex, required this.onTap});
 
   static const double _navHeight = 68;
-  static const double _arcRadius = 36; // half-width of center notch arc
-  static const double _arcHeight = 22; // how high the arc rises
+  static const double _arcRadius = 36;
+  static const double _arcHeight = 22;
 
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-
     return SizedBox(
       height: _navHeight + bottomPadding,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.topCenter,
         children: [
-          // ── Painted bar background ──────────────────────────────────────
           Positioned.fill(
             child: CustomPaint(
               painter: _NavBarPainter(
@@ -467,13 +695,8 @@ class _CSDBottomNav extends StatelessWidget {
               ),
             ),
           ),
-
-          // ── Nav items row ───────────────────────────────────────────────
           Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
+            left: 0, right: 0, top: 0, bottom: 0,
             child: Padding(
               padding: EdgeInsets.only(bottom: bottomPadding),
               child: Row(
@@ -481,21 +704,26 @@ class _CSDBottomNav extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _NavItem(
-                    icon: Icons.home_rounded,
+                    assetPath: 'assets/images/home_icon.png',
                     label: 'Home',
                     active: currentIndex == 0,
                     onTap: () => onTap(0),
                   ),
-                  // Left spacer for center button
+                  _NavItem(
+                    assetPath: 'assets/images/support_icon.png',
+                    label: 'Support',
+                    active: currentIndex == 4,
+                    onTap: () => onTap(4),
+                  ),
                   const SizedBox(width: 72),
                   _NavItem(
-                    icon: Icons.person_rounded,
+                    assetPath: 'assets/images/profile_icon.png',
                     label: 'Profile',
                     active: currentIndex == 2,
                     onTap: () => onTap(2),
                   ),
                   _NavItem(
-                    icon: Icons.settings_rounded,
+                    assetPath: 'assets/images/settings_icon.png',
                     label: 'Settings',
                     active: currentIndex == 3,
                     onTap: () => onTap(3),
@@ -504,49 +732,49 @@ class _CSDBottomNav extends StatelessWidget {
               ),
             ),
           ),
-
-          // ── Center raised TRAIN button ──────────────────────────────────
-          Positioned(
-            top: -(_arcHeight + 4),
-            child: GestureDetector(
-              onTap: () => onTap(1),
-              child: Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  gradient: kButtonGradient,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: kPurpleMid.withOpacity(.55),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                    BoxShadow(
-                      color: kPurpleLight.withOpacity(.2),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                  border: Border.all(color: kPurpleLight.withOpacity(.3), width: 1.5),
-                ),
-                child: const Icon(
-                  Icons.fitness_center_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-            ),
+          // ── Center duel button ──
+// ── Center duel button ──
+Positioned(
+  top: -(_arcHeight + 4),
+  child: GestureDetector(
+    onTap: () => onTap(1),
+    child: Container(
+      width: 68, height: 68,          // slightly larger circle
+      decoration: BoxDecoration(
+        gradient: kButtonGradient,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: kPurpleMid.withOpacity(.55),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
+          BoxShadow(
+            color: kPurpleLight.withOpacity(.2),
+            blurRadius: 8,
+            spreadRadius: 2,
+          ),
+        ],
+        border: Border.all(
+          color: kPurpleLight.withOpacity(.3),
+          width: 1.5,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),   // icon breathes inside the circle
+        child: Image.asset(
+          'assets/images/duel_icon.png',
+          fit: BoxFit.contain,              // never clips, never overflows
+        ),
+      ),
+    ),
+  ),
+),
         ],
       ),
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CustomPainter — draws the nav bar shape with upward arc for center button
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _NavBarPainter extends CustomPainter {
   final double arcRadius;
@@ -577,36 +805,17 @@ class _NavBarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    final path = Path();
-
-    // Start top-left
-    path.moveTo(0, topY);
-
-    // Line to where arc begins (left side of the notch)
     final arcLeft = cx - arcRadius;
     final arcRight = cx + arcRadius;
-
-    path.lineTo(arcLeft - 12, topY);
-
-    // Smooth cubic bezier up into the arc
-    path.cubicTo(
-      arcLeft - 4, topY,         // cp1
-      arcLeft, topY - arcHeight, // cp2
-      cx, topY - arcHeight,      // peak
-    );
-    path.cubicTo(
-      arcRight, topY - arcHeight, // cp1
-      arcRight + 4, topY,         // cp2
-      arcRight + 12, topY,        // end
-    );
-
-    // Continue to right edge
-    path.lineTo(size.width, topY);
-
-    // Bottom edge (include system bottom padding)
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
+    final path = Path()
+      ..moveTo(0, topY)
+      ..lineTo(arcLeft - 12, topY)
+      ..cubicTo(arcLeft - 4, topY, arcLeft, topY - arcHeight, cx, topY - arcHeight)
+      ..cubicTo(arcRight, topY - arcHeight, arcRight + 4, topY, arcRight + 12, topY)
+      ..lineTo(size.width, topY)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
 
     canvas.drawPath(path, paint);
     canvas.drawPath(path, borderPaint);
@@ -618,19 +827,14 @@ class _NavBarPainter extends CustomPainter {
       old.arcHeight != arcHeight ||
       old.bottomPadding != bottomPadding;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Individual nav item
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _NavItem extends StatelessWidget {
-  final IconData icon;
+  final String assetPath;
   final String label;
   final bool active;
   final VoidCallback onTap;
 
   const _NavItem({
-    required this.icon,
+    required this.assetPath,
     required this.label,
     required this.active,
     required this.onTap,
@@ -642,7 +846,7 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 64,
+        width: 68,                          // wider tap target
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -650,19 +854,27 @@ class _NavItem extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
-              width: 36,
-              height: 36,
+              width: 52, height: 52,        // ← bigger icon area
               decoration: BoxDecoration(
-                color: active ? kPurpleMid.withOpacity(.18) : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
+                color: active ? kPurpleMid.withOpacity(.15) : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: active
+                    ? Border.all(color: kPurpleLight.withOpacity(.25), width: 1)
+                    : null,
               ),
-              child: Icon(
-                icon,
-                size: 22,
-                color: active ? kPurpleLight : Colors.white38,
+              child: Padding(
+                padding: const EdgeInsets.all(4),   // minimal padding, more icon
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: active ? 1.0 : 0.5,
+                  child: Image.asset(
+                    assetPath,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: TextStyle(

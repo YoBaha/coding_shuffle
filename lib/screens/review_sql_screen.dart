@@ -20,7 +20,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
   static const _sections = [
     _SqlSection(
       id: 'what',
-      emoji: '🧠',
+      icon: 'assets/images/brain_icon.png',
       title: 'What is SQL?',
       color: Color(0xFF9B6DFF),
       lessons: [
@@ -55,7 +55,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
     ),
     _SqlSection(
       id: 'select',
-      emoji: '📋',
+      icon: 'assets/images/sql_book_icon.png',
       title: 'SELECT & FROM',
       color: Color(0xFF4DA6FF),
       lessons: [
@@ -107,7 +107,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
     ),
     _SqlSection(
       id: 'where',
-      emoji: '🔍',
+      icon: 'assets/images/lightning_icon.png',
       title: 'WHERE — Filtering',
       color: Color(0xFF3DFF8F),
       lessons: [
@@ -170,7 +170,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
     ),
     _SqlSection(
       id: 'sort',
-      emoji: '↕️',
+      icon: 'assets/images/stats_icon.png',
       title: 'ORDER BY & LIMIT',
       color: Color(0xFFFFD060),
       lessons: [
@@ -199,7 +199,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
     ),
     _SqlSection(
       id: 'aggregate',
-      emoji: '📊',
+      icon: 'assets/images/star_icon.png',
       title: 'Aggregate Functions',
       color: Color(0xFFFF6B6B),
       lessons: [
@@ -250,7 +250,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
     ),
     _SqlSection(
       id: 'joins',
-      emoji: '🔗',
+      icon: 'assets/images/chain_icon.png',
       title: 'JOINs',
       color: Color(0xFFFF9F43),
       lessons: [
@@ -299,7 +299,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
     ),
     _SqlSection(
       id: 'subquery',
-      emoji: '🪆',
+      icon: 'assets/images/rune_icon.png',
       title: 'Subqueries',
       color: Color(0xFFE056FD),
       lessons: [
@@ -424,7 +424,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white.withOpacity(.08)),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white70, size: 16),
+              child: Image.asset('assets/images/rune_icon.png', width: 16, height: 16),
             ),
           ),
           const SizedBox(width: 14),
@@ -490,7 +490,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(s.emoji, style: const TextStyle(fontSize: 13)),
+                  Image.asset(s.icon, width: 16, height: 16),
                   const SizedBox(width: 5),
                   Text(
                     s.title,
@@ -532,7 +532,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
           ),
           child: Row(
             children: [
-              Text(section.emoji, style: const TextStyle(fontSize: 30)),
+              Image.asset(section.icon, width: 40, height: 40),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -693,7 +693,7 @@ class _ReviewSqlScreenState extends State<ReviewSqlScreen>
         // Result label
         Row(
           children: [
-            const Icon(Icons.arrow_forward_rounded, size: 12, color: Colors.white24),
+            Image.asset('assets/images/check_icon.png', width: 12, height: 12),
             const SizedBox(width: 6),
             Expanded(
               child: Text(
@@ -863,12 +863,12 @@ class _RichBody extends StatelessWidget {
 
 class _SqlSection {
   final String id;
-  final String emoji;
+  final String icon;
   final String title;
   final Color color;
   final List<_Lesson> lessons;
   const _SqlSection({
-    required this.id, required this.emoji, required this.title,
+    required this.id, required this.icon, required this.title,
     required this.color, required this.lessons,
   });
 }

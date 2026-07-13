@@ -1,9 +1,11 @@
 import 'dart:math' as math;
+import 'package:code_shuffle/screens/survival_difficulty_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
 import 'package:code_shuffle/modals/modals.dart';
 import 'sync_modal.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final List<PuzzleLevel> levels;
@@ -16,6 +18,8 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback onTrainingTap;
   final VoidCallback? onSurvivalTap;
   final VoidCallback onReviewTap;
+  final bool dailyCompleted;
+  final VoidCallback onDailyTap;
 
   const HomeScreen({
     super.key,
@@ -29,6 +33,8 @@ class HomeScreen extends StatefulWidget {
     required this.onTrainingTap,
     this.onSurvivalTap,
     required this.onReviewTap,
+    required this.dailyCompleted,   // ← new
+    required this.onDailyTap, 
   });
 
   @override
@@ -47,12 +53,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int get _level => (widget.xp / 100).floor() + 1;
   double get _xpProgress => (widget.xp % 100) / 100.0;
 
-  int get _totalStars => widget.levels.fold(
-      0, (s, l) => s + l.puzzles.fold(0, (ss, p) => ss + (widget.progress[p.id]?.stars ?? 0)));
-  int get _maxStars => widget.levels.fold(0, (s, l) => s + l.puzzles.length * 3);
-  int get _totalCompleted => widget.levels.fold(
-      0, (s, l) => s + l.puzzles.where((p) => (widget.progress[p.id]?.stars ?? 0) > 0).length);
-  int get _totalPuzzles => widget.levels.fold(0, (s, l) => s + l.puzzles.length);
+
 
   @override
   void initState() {
@@ -86,20 +87,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     showSyncModal(context, progress: widget.progress, xp: widget.xp, onSynced: widget.onSynced);
   }
 
-  void _onSurvivalTap() {
-    if (widget.onSurvivalTap != null) {
-      widget.onSurvivalTap!();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Survival mode is coming soon 👀'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.grey.shade900,
-        ),
-      );
-    }
-  }
 
+
+void _onSurvivalTap() {
+  if (widget.onSurvivalTap != null) {
+    widget.onSurvivalTap!();
+  } else {
+    // Navigate to Survival difficulty screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SurvivalDifficultyScreen(),
+      ),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -140,9 +142,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   physics: const BouncingScrollPhysics(),
                   children: [
                     _buildLogoHero(),
-                    const SizedBox(height: 10),
-                    _buildStatsStrip(),
                     const SizedBox(height: 28),
+                    _buildDailyButton(),
+                    const SizedBox(height: 14),
                     _buildModeButtons(),
                     const SizedBox(height: 14),
                     _buildReviewButton(),
@@ -159,27 +161,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // ── HUD bar ────────────────────────────────────────────────────────────────
 
   Widget _buildHUD() {
+    final xpInLevel = widget.xp % 100;
+    final xpToNext  = 100 - xpInLevel;
+    final nextLevel = _level + 1;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _HudPill(icon: Icons.bolt_rounded, iconColor: kGold, label: '${widget.xp} XP'),
-          const Spacer(),
-          if (_isGuest)
-            GestureDetector(
-              onTap: _openSyncModal,
-              child: _HudPill(icon: Icons.cloud_upload_outlined, iconColor: kPurpleLight, label: 'Sync'),
-            )
-          else ...[
-            _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: widget.onSignedOut,
-              child: const Text('Sign out', style: TextStyle(fontSize: 10, color: Colors.white24)),
-            ),
-          ],
-          const SizedBox(width: 10),
-          _LevelBadge(level: _level, xpProgress: _xpProgress),
+          // ── Top row: XP pill | username | level badge ──────────────────
+          Row(
+            children: [
+              _HudPill(icon: Icons.bolt_rounded, iconColor: kGold, label: '${widget.xp} XP'),
+              const Spacer(),
+              if (_isGuest)
+                GestureDetector(
+                  onTap: _openSyncModal,
+                  child: _HudPill(icon: Icons.cloud_upload_outlined, iconColor: kPurpleLight, label: 'Sync'),
+                )
+              else ...[
+                _HudPill(icon: Icons.person_rounded, iconColor: kPurpleLight, label: widget.username ?? 'Player'),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: widget.onSignedOut,
+                  child: const Text('Sign out', style: TextStyle(fontSize: 10, color: Colors.white24)),
+                ),
+              ],
+              const SizedBox(width: 10),
+              _LevelBadge(level: _level, xpProgress: _xpProgress),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // ── XP progress bar ────────────────────────────────────────────
+          _XpProgressBar(
+            xpProgress: _xpProgress,
+            xpInLevel:  xpInLevel,
+            xpToNext:   xpToNext,
+            nextLevel:  nextLevel,
+          ),
         ],
       ),
     );
@@ -206,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       BoxShadow(color: kGold.withOpacity(.14 + .08 * t), blurRadius: 36, spreadRadius: 3),
                     ],
                   ),
-                  child: Image.asset('assets/icon_no_bg.png', width: 190, height: 190, fit: BoxFit.contain),
+                  child: Image.asset('assets/icon_app.png', width: 190, height: 190, fit: BoxFit.contain),
                 ),
                 const SizedBox(height: 8),
                 ShaderMask(
@@ -230,94 +252,141 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ── Aggregated stats strip ─────────────────────────────────────────────────
+  // ── Daily challenge button ─────────────────────────────────────────────────
 
-  Widget _buildStatsStrip() {
-    final ratio = _maxStars > 0 ? _totalStars / _maxStars : 0.0;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.04),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(.06)),
-      ),
-      child: Row(
-        children: [
-          _MiniStat(label: 'PUZZLES', value: '$_totalCompleted/$_totalPuzzles', color: kPurpleLight),
-          const SizedBox(width: 26),
-          _MiniStat(label: 'STARS', value: '$_totalStars/$_maxStars', color: kGold),
-          const Spacer(),
-          SizedBox(
-            width: 42, height: 42,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(
-                  value: ratio,
-                  strokeWidth: 3.5,
-                  backgroundColor: Colors.white12,
-                  valueColor: const AlwaysStoppedAnimation<Color>(kGold),
-                ),
-                Text('${(ratio * 100).toInt()}%',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white70)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Two side-by-side mode buttons ─────────────────────────────────────────
-
-  Widget _buildModeButtons() {
+  Widget _buildDailyButton() {
     return AnimatedBuilder(
       animation: Listenable.merge([_ambientCtrl, _playAnim]),
       builder: (_, __) {
         final t = _ambientCtrl.value;
         return Transform.scale(
           scale: _playAnim.value.clamp(0.0, 1.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: _ModeButton(
-                  label: 'TRAINING',
-                  icon: Icons.fitness_center_rounded,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFFD060), Color(0xFFE6960A), Color(0xFFB36A00)],
+          child: GestureDetector(
+            onTap: widget.dailyCompleted ? null : widget.onDailyTap,
+            child: Opacity(
+              opacity: widget.dailyCompleted ? 0.55 : 1.0,
+              child: Container(
+                height: 76,
+                decoration: BoxDecoration(
+                  gradient: widget.dailyCompleted
+                      ? const LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [Color(0xFF1A2A4A), Color(0xFF1D3461)],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color.lerp(const Color(0xFF1D4ED8), const Color(0xFF2563EB), t)!,
+                            Color.lerp(const Color(0xFF3B82F6), const Color(0xFF60A5FA), t)!,
+                            Color.lerp(const Color(0xFF1D4ED8), const Color(0xFF2563EB), t)!,
+                          ],
+                        ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: widget.dailyCompleted
+                        ? Colors.white.withOpacity(.08)
+                        : const Color(0xFF3B82F6).withOpacity(.5),
+                    width: 1.2,
                   ),
-                  glowColor: kGold,
-                  glowIntensity: t,
-                  onTap: widget.onTrainingTap,
-                  enabled: true,
+                  boxShadow: widget.dailyCompleted
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: const Color(0xFF1D4ED8).withOpacity(.38 + .15 * t),
+                            blurRadius: 20 + 8 * t,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: Image.asset(
+                        'assets/images/calendar_icon.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      widget.dailyCompleted
+                          ? 'DAILY CHALLENGE  ✓'
+                          : 'DAILY CHALLENGE',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 2,
+                        shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    if (!widget.dailyCompleted)
+                      const Icon(Icons.arrow_forward_ios_rounded,
+                          color: Colors.white54, size: 12),
+                  ],
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _ModeButton(
-                  label: 'SURVIVAL',
-                  icon: Icons.sports_kabaddi_rounded,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF3DFF8F), Color(0xFF0CBF5E), Color(0xFF087A3B)],
-                  ),
-                  glowColor: const Color(0xFF0CBF5E),
-                  glowIntensity: t,
-                  badge: 'SOON',
-                  onTap: _onSurvivalTap,
-                  enabled: false,
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
     );
   }
+
+  // ── Two side-by-side mode buttons ─────────────────────────────────────────
+Widget _buildModeButtons() {
+  return AnimatedBuilder(
+    animation: Listenable.merge([_ambientCtrl, _playAnim]),
+    builder: (_, __) {
+      final t = _ambientCtrl.value;
+      return Transform.scale(
+        scale: _playAnim.value.clamp(0.0, 1.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: _ModeButton(
+                label: 'TRAINING',
+                assetIcon: 'assets/images/duel_icon.png',   // ← was Icons.fitness_center
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFFFD060), Color(0xFFE6960A), Color(0xFFB36A00)],
+                ),
+                glowColor: kGold,
+                glowIntensity: t,
+                onTap: widget.onTrainingTap,
+                enabled: true,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _ModeButton(
+                label: 'SURVIVAL',
+                assetIcon: 'assets/images/skull_icon.png',  // ← was Icons.sports_kabaddi
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF3DFF8F), Color(0xFF0CBF5E), Color(0xFF087A3B)],
+                ),
+                glowColor: const Color(0xFF0CBF5E),
+                glowIntensity: t,
+                badge: 'SOON',
+                onTap: _onSurvivalTap,
+                enabled: false,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   // ── Review SQL button (purple) ────────────────────────────────────────────
 
@@ -331,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: GestureDetector(
             onTap: widget.onReviewTap,
             child: Container(
-              height: 58,
+              height: 68,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
@@ -355,13 +424,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 32, height: 32,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 17),
+                  SizedBox(
+  width: 56, height: 56,
+  child: Image.asset('assets/images/sql_book_icon.png', fit: BoxFit.contain),
+
                   ),
                   const SizedBox(width: 12),
                   const Text(
@@ -389,10 +455,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 // ─────────────────────────────────────────────────────────────────────────────
 // Mode button widget — square with rounded corners, gradient fill
 // ─────────────────────────────────────────────────────────────────────────────
-
 class _ModeButton extends StatefulWidget {
   final String label;
-  final IconData icon;
+  final String assetIcon;          // ← was IconData icon
   final LinearGradient gradient;
   final Color glowColor;
   final double glowIntensity;
@@ -402,7 +467,7 @@ class _ModeButton extends StatefulWidget {
 
   const _ModeButton({
     required this.label,
-    required this.icon,
+    required this.assetIcon,       // ← was icon
     required this.gradient,
     required this.glowColor,
     required this.glowIntensity,
@@ -471,15 +536,14 @@ class _ModeButtonState extends State<_ModeButton> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Center(
-                      child: Container(
-                        width: 52, height: 52,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(.18),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Icon(widget.icon, color: Colors.white, size: 28),
-                      ),
-                    ),
+  child: SizedBox(
+    width: 72, height: 72,
+    child: Image.asset(
+      widget.assetIcon,
+      fit: BoxFit.contain,
+    ),
+  ),
+),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -504,7 +568,10 @@ class _ModeButtonState extends State<_ModeButton> {
                             ),
                             child: Text(
                               widget.badge!,
-                              style: const TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: Colors.white70, letterSpacing: 0.5),
+                              style: const TextStyle(
+                                fontSize: 7, fontWeight: FontWeight.w900,
+                                color: Colors.white70, letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ],
@@ -593,23 +660,6 @@ class _LevelBadge extends StatelessWidget {
   }
 }
 
-class _MiniStat extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  const _MiniStat({required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: color.withOpacity(.6), letterSpacing: 1.5)),
-        Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white, height: 1.1)),
-      ],
-    );
-  }
-}
 
 class _GridPainter extends CustomPainter {
   @override
@@ -628,4 +678,146 @@ class _GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GridPainter _) => false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// XP Progress Bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _XpProgressBar extends StatefulWidget {
+  final double xpProgress;   // 0.0 – 1.0 within current level
+  final int    xpInLevel;    // raw XP within this level (e.g. 30)
+  final int    xpToNext;     // XP remaining to next level (e.g. 70)
+  final int    nextLevel;
+
+  const _XpProgressBar({
+    required this.xpProgress,
+    required this.xpInLevel,
+    required this.xpToNext,
+    required this.nextLevel,
+  });
+
+  @override
+  State<_XpProgressBar> createState() => _XpProgressBarState();
+}
+
+class _XpProgressBarState extends State<_XpProgressBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double>   _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+    // Animate from 0 to current value on first build
+    _anim = Tween<double>(begin: 0, end: widget.xpProgress).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
+    );
+    _ctrl.forward();
+  }
+
+  @override
+  void didUpdateWidget(_XpProgressBar old) {
+    super.didUpdateWidget(old);
+    if (old.xpProgress != widget.xpProgress) {
+      _anim = Tween<double>(
+        begin: old.xpProgress,
+        end: widget.xpProgress,
+      ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+      _ctrl
+        ..reset()
+        ..forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Labels row ───────────────────────────────────────────────────
+        Row(
+          children: [
+            Text(
+              '${widget.xpInLevel} / 100 XP',
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: Colors.white38,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const Spacer(),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 10, color: Colors.white38),
+                children: [
+                  TextSpan(text: '${widget.xpToNext} XP '),
+                  TextSpan(
+                    text: 'to Level ${widget.nextLevel}',
+                    style: const TextStyle(
+                      color: kGold,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 5),
+
+        // ── Animated bar ─────────────────────────────────────────────────
+        AnimatedBuilder(
+          animation: _anim,
+          builder: (_, __) {
+            return Stack(
+              children: [
+                // Track
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(.08),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                // Fill
+                FractionallySizedBox(
+                  widthFactor: _anim.value.clamp(0.0, 1.0),
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [kGold, kGoldLight],
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kGold.withOpacity(.55),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
 }

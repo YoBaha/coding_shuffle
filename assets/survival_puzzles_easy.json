@@ -1,0 +1,3359 @@
+{
+  "version": "1.0.0",
+  "difficulty": "easy",
+  "language": "SQL",
+  "puzzles": [
+    {
+      "id": "s_e_001",
+      "title": "Select All Users",
+      "tokens": ["SELECT", "*", "FROM", "users"],
+      "solution": ["SELECT", "*", "FROM", "users"],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_002",
+      "title": "Count All Orders",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "orders"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "orders"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_003",
+      "title": "Active Users Only",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "active", "=", "true"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "active", "=", "true"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_004",
+      "title": "Products Under 50",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "<", "50"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "<", "50"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_005",
+      "title": "Sort by Name",
+      "tokens": ["SELECT", "*", "FROM", "customers", "ORDER BY", "name", "ASC"],
+      "solution": ["SELECT", "*", "FROM", "customers", "ORDER BY", "name", "ASC"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_006",
+      "title": "Top 10 Products",
+      "tokens": ["SELECT", "*", "FROM", "products", "LIMIT", "10"],
+      "solution": ["SELECT", "*", "FROM", "products", "LIMIT", "10"],
+      "category": "Limiting"
+    },
+    {
+      "id": "s_e_007",
+      "title": "Unique Categories",
+      "tokens": ["SELECT", "DISTINCT", "category", "FROM", "products"],
+      "solution": ["SELECT", "DISTINCT", "category", "FROM", "products"],
+      "category": "Distinct"
+    },
+    {
+      "id": "s_e_008",
+      "title": "Total Revenue",
+      "tokens": ["SELECT", "SUM(total)", "FROM", "orders"],
+      "solution": ["SELECT", "SUM(total)", "FROM", "orders"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_009",
+      "title": "Average Price",
+      "tokens": ["SELECT", "AVG(price)", "FROM", "products"],
+      "solution": ["SELECT", "AVG(price)", "FROM", "products"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_010",
+      "title": "Insert New User",
+      "tokens": ["INSERT INTO", "users", "(name,", "email)", "VALUES", "('Alice',", "'alice@example.com')"],
+      "solution": ["INSERT INTO", "users", "(name,", "email)", "VALUES", "('Alice',", "'alice@example.com')"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_011",
+      "title": "Delete Inactive",
+      "tokens": ["DELETE FROM", "users", "WHERE", "active", "=", "false"],
+      "solution": ["DELETE FROM", "users", "WHERE", "active", "=", "false"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_012",
+      "title": "Update Email",
+      "tokens": ["UPDATE", "users", "SET", "email", "=", "'new@mail.com'", "WHERE", "id", "=", "1"],
+      "solution": ["UPDATE", "users", "SET", "email", "=", "'new@mail.com'", "WHERE", "id", "=", "1"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_013",
+      "title": "Max Price",
+      "tokens": ["SELECT", "MAX(price)", "FROM", "products"],
+      "solution": ["SELECT", "MAX(price)", "FROM", "products"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_014",
+      "title": "Min Price",
+      "tokens": ["SELECT", "MIN(price)", "FROM", "products"],
+      "solution": ["SELECT", "MIN(price)", "FROM", "products"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_015",
+      "title": "Admin Users",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_016",
+      "title": "Orders by Date Desc",
+      "tokens": ["SELECT", "*", "FROM", "orders", "ORDER BY", "created_at", "DESC"],
+      "solution": ["SELECT", "*", "FROM", "orders", "ORDER BY", "created_at", "DESC"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_017",
+      "title": "Email Search",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_018",
+      "title": "Price Range",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", "BETWEEN", "10", "AND", "100"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", "BETWEEN", "10", "AND", "100"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_019",
+      "title": "Alias Total",
+      "tokens": ["SELECT", "SUM(total)", "AS", "revenue", "FROM", "orders"],
+      "solution": ["SELECT", "SUM(total)", "AS", "revenue", "FROM", "orders"],
+      "category": "Alias"
+    },
+    {
+      "id": "s_e_020",
+      "title": "Count Per Category",
+      "tokens": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category"],
+      "solution": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_021",
+      "title": "NULL Check",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "phone", "IS", "NULL"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "phone", "IS", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_022",
+      "title": "Not NULL",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "phone", "IS NOT", "NULL"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "phone", "IS NOT", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_023",
+      "title": "Multiple Conditions",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'shipped'", "AND", "total", ">", "100"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'shipped'", "AND", "total", ">", "100"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_024",
+      "title": "IN List",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "role", "IN", "('admin',", "'moderator')"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "role", "IN", "('admin',", "'moderator')"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_025",
+      "title": "NOT IN List",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "category", "NOT IN", "('archived',", "'draft')"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "category", "NOT IN", "('archived',", "'draft')"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_026",
+      "title": "Rename Table Column",
+      "tokens": ["SELECT", "first_name", "AS", "name,", "email", "AS", "contact", "FROM", "users"],
+      "solution": ["SELECT", "first_name", "AS", "name,", "email", "AS", "contact", "FROM", "users"],
+      "category": "Alias"
+    },
+    {
+      "id": "s_e_027",
+      "title": "Top Expensive",
+      "tokens": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "5"],
+      "solution": ["SELECT", "*", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "5"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_028",
+      "title": "Create Table",
+      "tokens": ["CREATE TABLE", "sessions", "(", "id", "SERIAL", "PRIMARY KEY,", "user_id", "INT,", "token", "TEXT", ")"],
+      "solution": ["CREATE TABLE", "sessions", "(", "id", "SERIAL", "PRIMARY KEY,", "user_id", "INT,", "token", "TEXT", ")"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_029",
+      "title": "Drop Table",
+      "tokens": ["DROP TABLE", "IF EXISTS", "temp_logs"],
+      "solution": ["DROP TABLE", "IF EXISTS", "temp_logs"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_030",
+      "title": "Add Column",
+      "tokens": ["ALTER TABLE", "users", "ADD COLUMN", "phone", "VARCHAR(20)"],
+      "solution": ["ALTER TABLE", "users", "ADD COLUMN", "phone", "VARCHAR(20)"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_031",
+      "title": "Count Completed Orders",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_032",
+      "title": "Concat Name",
+      "tokens": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "users"],
+      "solution": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "users"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_033",
+      "title": "Uppercase Name",
+      "tokens": ["SELECT", "UPPER(name)", "FROM", "customers"],
+      "solution": ["SELECT", "UPPER(name)", "FROM", "customers"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_034",
+      "title": "Current Date",
+      "tokens": ["SELECT", "CURRENT_DATE", "AS", "today"],
+      "solution": ["SELECT", "CURRENT_DATE", "AS", "today"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_035",
+      "title": "Orders This Year",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "EXTRACT(YEAR FROM created_at)", "=", "2025"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "EXTRACT(YEAR FROM created_at)", "=", "2025"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_036",
+      "title": "Round Price",
+      "tokens": ["SELECT", "name,", "ROUND(price,", "2)", "AS", "rounded_price", "FROM", "products"],
+      "solution": ["SELECT", "name,", "ROUND(price,", "2)", "AS", "rounded_price", "FROM", "products"],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_037",
+      "title": "Having Count",
+      "tokens": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "3"],
+      "solution": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "3"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_038",
+      "title": "Truncate Table",
+      "tokens": ["TRUNCATE TABLE", "temp_sessions"],
+      "solution": ["TRUNCATE TABLE", "temp_sessions"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_039",
+      "title": "OR Condition",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'", "OR", "role", "=", "'superuser'"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "role", "=", "'admin'", "OR", "role", "=", "'superuser'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_040",
+      "title": "Update Stock",
+      "tokens": ["UPDATE", "products", "SET", "stock", "=", "stock", "-", "1", "WHERE", "id", "=", "42"],
+      "solution": ["UPDATE", "products", "SET", "stock", "=", "stock", "-", "1", "WHERE", "id", "=", "42"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_041",
+      "title": "Length of String",
+      "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_042",
+      "title": "Coalesce Null",
+      "tokens": ["SELECT", "name,", "COALESCE(phone,", "'N/A')", "AS", "phone", "FROM", "users"],
+      "solution": ["SELECT", "name,", "COALESCE(phone,", "'N/A')", "AS", "phone", "FROM", "users"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_043",
+      "title": "Simple Case",
+      "tokens": ["SELECT", "name,", "CASE", "WHEN", "price", ">", "100", "THEN", "'Expensive'", "ELSE", "'Cheap'", "END", "AS", "tier", "FROM", "products"],
+      "solution": ["SELECT", "name,", "CASE", "WHEN", "price", ">", "100", "THEN", "'Expensive'", "ELSE", "'Cheap'", "END", "AS", "tier", "FROM", "products"],
+      "category": "Conditional"
+    },
+    {
+      "id": "s_e_044",
+      "title": "Substring",
+      "tokens": ["SELECT", "SUBSTRING(email,", "1,", "5)", "AS", "email_prefix", "FROM", "users"],
+      "solution": ["SELECT", "SUBSTRING(email,", "1,", "5)", "AS", "email_prefix", "FROM", "users"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_045",
+      "title": "Drop Column",
+      "tokens": ["ALTER TABLE", "users", "DROP COLUMN", "legacy_field"],
+      "solution": ["ALTER TABLE", "users", "DROP COLUMN", "legacy_field"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_046",
+      "title": "Rename Column",
+      "tokens": ["ALTER TABLE", "users", "RENAME COLUMN", "fname", "TO", "first_name"],
+      "solution": ["ALTER TABLE", "users", "RENAME COLUMN", "fname", "TO", "first_name"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_047",
+      "title": "Sum Per User",
+      "tokens": ["SELECT", "user_id,", "SUM(total)", "AS", "total_spent", "FROM", "orders", "GROUP BY", "user_id"],
+      "solution": ["SELECT", "user_id,", "SUM(total)", "AS", "total_spent", "FROM", "orders", "GROUP BY", "user_id"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_048",
+      "title": "Now Function",
+      "tokens": ["SELECT", "id,", "created_at,", "NOW()", "-", "created_at", "AS", "age", "FROM", "sessions"],
+      "solution": ["SELECT", "id,", "created_at,", "NOW()", "-", "created_at", "AS", "age", "FROM", "sessions"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_049",
+      "title": "Not Like",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "NOT LIKE", "'%@test.com'"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "NOT LIKE", "'%@test.com'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_050",
+      "title": "Insert Multiple",
+      "tokens": ["INSERT INTO", "tags", "(name)", "VALUES", "('sql'),", "('database'),", "('query')"],
+      "solution": ["INSERT INTO", "tags", "(name)", "VALUES", "('sql'),", "('database'),", "('query')"],
+      "category": "DML"
+    },
+ {
+      "id": "s_e_051",
+      "title": "Select Name Only",
+      "tokens": [
+        "SELECT",
+        "name",
+        "FROM",
+        "employees"
+      ],
+      "solution": [
+        "SELECT",
+        "name",
+        "FROM",
+        "employees"
+      ],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_052",
+      "title": "Count Distinct Users",
+      "tokens": [
+        "SELECT",
+        "COUNT(DISTINCT",
+        "user_id)",
+        "FROM",
+        "orders"
+      ],
+      "solution": [
+        "SELECT",
+        "COUNT(DISTINCT",
+        "user_id)",
+        "FROM",
+        "orders"
+      ],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_053",
+      "title": "Name Starts With A",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "customers",
+        "WHERE",
+        "name",
+        "LIKE",
+        "'A%'"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "customers",
+        "WHERE",
+        "name",
+        "LIKE",
+        "'A%'"
+      ],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_054",
+      "title": "Newest Record",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "logs",
+        "ORDER BY",
+        "created_at",
+        "DESC",
+        "LIMIT",
+        "1"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "logs",
+        "ORDER BY",
+        "created_at",
+        "DESC",
+        "LIMIT",
+        "1"
+      ],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_055",
+      "title": "Not Equal Filter",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "orders",
+        "WHERE",
+        "status",
+        "!=",
+        "'cancelled'"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "orders",
+        "WHERE",
+        "status",
+        "!=",
+        "'cancelled'"
+      ],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_056",
+      "title": "Lowercase Email",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "LOWER(email)",
+        "AS",
+        "email",
+        "FROM",
+        "users"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "LOWER(email)",
+        "AS",
+        "email",
+        "FROM",
+        "users"
+      ],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_057",
+      "title": "Trim Whitespace",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "TRIM(name)",
+        "AS",
+        "name",
+        "FROM",
+        "products"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "TRIM(name)",
+        "AS",
+        "name",
+        "FROM",
+        "products"
+      ],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_058",
+      "title": "Absolute Value",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "ABS(balance)",
+        "AS",
+        "abs_balance",
+        "FROM",
+        "accounts"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "ABS(balance)",
+        "AS",
+        "abs_balance",
+        "FROM",
+        "accounts"
+      ],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_059",
+      "title": "Ceiling Price",
+      "tokens": [
+        "SELECT",
+        "name,",
+        "CEIL(price)",
+        "AS",
+        "ceil_price",
+        "FROM",
+        "products"
+      ],
+      "solution": [
+        "SELECT",
+        "name,",
+        "CEIL(price)",
+        "AS",
+        "ceil_price",
+        "FROM",
+        "products"
+      ],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_060",
+      "title": "Floor Price",
+      "tokens": [
+        "SELECT",
+        "name,",
+        "FLOOR(price)",
+        "AS",
+        "floor_price",
+        "FROM",
+        "products"
+      ],
+      "solution": [
+        "SELECT",
+        "name,",
+        "FLOOR(price)",
+        "AS",
+        "floor_price",
+        "FROM",
+        "products"
+      ],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_061",
+      "title": "Orders In Status List",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "orders",
+        "WHERE",
+        "status",
+        "IN",
+        "('pending',",
+        "'processing',",
+        "'shipped')"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "orders",
+        "WHERE",
+        "status",
+        "IN",
+        "('pending',",
+        "'processing',",
+        "'shipped')"
+      ],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_062",
+      "title": "Created Today",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "sessions",
+        "WHERE",
+        "created_at::date",
+        "=",
+        "CURRENT_DATE"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "sessions",
+        "WHERE",
+        "created_at::date",
+        "=",
+        "CURRENT_DATE"
+      ],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_063",
+      "title": "Replace String",
+      "tokens": [
+        "SELECT",
+        "REPLACE(phone,",
+        "'-',",
+        "'')",
+        "AS",
+        "clean_phone",
+        "FROM",
+        "contacts"
+      ],
+      "solution": [
+        "SELECT",
+        "REPLACE(phone,",
+        "'-',",
+        "'')",
+        "AS",
+        "clean_phone",
+        "FROM",
+        "contacts"
+      ],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_064",
+      "title": "Left Pad",
+      "tokens": [
+        "SELECT",
+        "LPAD(CAST(id",
+        "AS",
+        "TEXT),",
+        "6,",
+        "'0')",
+        "AS",
+        "padded_id",
+        "FROM",
+        "orders"
+      ],
+      "solution": [
+        "SELECT",
+        "LPAD(CAST(id",
+        "AS",
+        "TEXT),",
+        "6,",
+        "'0')",
+        "AS",
+        "padded_id",
+        "FROM",
+        "orders"
+      ],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_065",
+      "title": "Date Part Year",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "DATE_PART('year',",
+        "birth_date)",
+        "AS",
+        "birth_year",
+        "FROM",
+        "users"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "DATE_PART('year',",
+        "birth_date)",
+        "AS",
+        "birth_year",
+        "FROM",
+        "users"
+      ],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_066",
+      "title": "Age Function",
+      "tokens": [
+        "SELECT",
+        "name,",
+        "AGE(birth_date)",
+        "AS",
+        "age",
+        "FROM",
+        "users"
+      ],
+      "solution": [
+        "SELECT",
+        "name,",
+        "AGE(birth_date)",
+        "AS",
+        "age",
+        "FROM",
+        "users"
+      ],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_067",
+      "title": "Greater Or Equal",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "products",
+        "WHERE",
+        "stock",
+        ">=",
+        "10"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "products",
+        "WHERE",
+        "stock",
+        ">=",
+        "10"
+      ],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_068",
+      "title": "Order By Two Columns",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "employees",
+        "ORDER BY",
+        "department",
+        "ASC,",
+        "salary",
+        "DESC"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "employees",
+        "ORDER BY",
+        "department",
+        "ASC,",
+        "salary",
+        "DESC"
+      ],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_069",
+      "title": "Nullif Zero",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "NULLIF(discount,",
+        "0)",
+        "AS",
+        "discount",
+        "FROM",
+        "orders"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "NULLIF(discount,",
+        "0)",
+        "AS",
+        "discount",
+        "FROM",
+        "orders"
+      ],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_070",
+      "title": "Rename Table",
+      "tokens": [
+        "ALTER TABLE",
+        "old_users",
+        "RENAME TO",
+        "users"
+      ],
+      "solution": [
+        "ALTER TABLE",
+        "old_users",
+        "RENAME TO",
+        "users"
+      ],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_071",
+      "title": "Select With Limit Offset",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "products",
+        "ORDER BY",
+        "id",
+        "LIMIT",
+        "10",
+        "OFFSET",
+        "20"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "products",
+        "ORDER BY",
+        "id",
+        "LIMIT",
+        "10",
+        "OFFSET",
+        "20"
+      ],
+      "category": "Limiting"
+    },
+    {
+      "id": "s_e_072",
+      "title": "Sum With Condition",
+      "tokens": [
+        "SELECT",
+        "SUM(total)",
+        "FROM",
+        "orders",
+        "WHERE",
+        "status",
+        "=",
+        "'completed'"
+      ],
+      "solution": [
+        "SELECT",
+        "SUM(total)",
+        "FROM",
+        "orders",
+        "WHERE",
+        "status",
+        "=",
+        "'completed'"
+      ],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_073",
+      "title": "Distinct On Name",
+      "tokens": [
+        "SELECT",
+        "DISTINCT",
+        "name,",
+        "category",
+        "FROM",
+        "products",
+        "ORDER BY",
+        "name"
+      ],
+      "solution": [
+        "SELECT",
+        "DISTINCT",
+        "name,",
+        "category",
+        "FROM",
+        "products",
+        "ORDER BY",
+        "name"
+      ],
+      "category": "Distinct"
+    },
+    {
+      "id": "s_e_074",
+      "title": "Having Sum",
+      "tokens": [
+        "SELECT",
+        "user_id,",
+        "SUM(total)",
+        "AS",
+        "spent",
+        "FROM",
+        "orders",
+        "GROUP BY",
+        "user_id",
+        "HAVING",
+        "SUM(total)",
+        ">",
+        "500"
+      ],
+      "solution": [
+        "SELECT",
+        "user_id,",
+        "SUM(total)",
+        "AS",
+        "spent",
+        "FROM",
+        "orders",
+        "GROUP BY",
+        "user_id",
+        "HAVING",
+        "SUM(total)",
+        ">",
+        "500"
+      ],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_075",
+      "title": "Create Index",
+      "tokens": [
+        "CREATE INDEX",
+        "idx_email",
+        "ON",
+        "users(email)"
+      ],
+      "solution": [
+        "CREATE INDEX",
+        "idx_email",
+        "ON",
+        "users(email)"
+      ],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_076",
+      "title": "Drop Index",
+      "tokens": [
+        "DROP INDEX",
+        "IF EXISTS",
+        "idx_email"
+      ],
+      "solution": [
+        "DROP INDEX",
+        "IF EXISTS",
+        "idx_email"
+      ],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_077",
+      "title": "Boolean Cast",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "active::TEXT",
+        "AS",
+        "active_text",
+        "FROM",
+        "users"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "active::TEXT",
+        "AS",
+        "active_text",
+        "FROM",
+        "users"
+      ],
+      "category": "Type Casting"
+    },
+    {
+      "id": "s_e_078",
+      "title": "Modulo Filter",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "numbers",
+        "WHERE",
+        "value",
+        "%",
+        "2",
+        "=",
+        "0"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "numbers",
+        "WHERE",
+        "value",
+        "%",
+        "2",
+        "=",
+        "0"
+      ],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_079",
+      "title": "Not Active Users",
+      "tokens": [
+        "SELECT",
+        "*",
+        "FROM",
+        "users",
+        "WHERE",
+        "NOT",
+        "active"
+      ],
+      "solution": [
+        "SELECT",
+        "*",
+        "FROM",
+        "users",
+        "WHERE",
+        "NOT",
+        "active"
+      ],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_080",
+      "title": "Select Constant",
+      "tokens": [
+        "SELECT",
+        "1",
+        "AS",
+        "one,",
+        "'hello'",
+        "AS",
+        "greeting"
+      ],
+      "solution": [
+        "SELECT",
+        "1",
+        "AS",
+        "one,",
+        "'hello'",
+        "AS",
+        "greeting"
+      ],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_081",
+      "title": "Count Rows Per Status",
+      "tokens": [
+        "SELECT",
+        "status,",
+        "COUNT(*)",
+        "AS",
+        "total",
+        "FROM",
+        "orders",
+        "GROUP BY",
+        "status"
+      ],
+      "solution": [
+        "SELECT",
+        "status,",
+        "COUNT(*)",
+        "AS",
+        "total",
+        "FROM",
+        "orders",
+        "GROUP BY",
+        "status"
+      ],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_082",
+      "title": "Char Length",
+      "tokens": [
+        "SELECT",
+        "name,",
+        "CHAR_LENGTH(name)",
+        "AS",
+        "len",
+        "FROM",
+        "categories"
+      ],
+      "solution": [
+        "SELECT",
+        "name,",
+        "CHAR_LENGTH(name)",
+        "AS",
+        "len",
+        "FROM",
+        "categories"
+      ],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_083",
+      "title": "Position In String",
+      "tokens": [
+        "SELECT",
+        "email,",
+        "POSITION('@'",
+        "IN",
+        "email)",
+        "AS",
+        "at_position",
+        "FROM",
+        "users"
+      ],
+      "solution": [
+        "SELECT",
+        "email,",
+        "POSITION('@'",
+        "IN",
+        "email)",
+        "AS",
+        "at_position",
+        "FROM",
+        "users"
+      ],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_084",
+      "title": "Extract Month",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "EXTRACT(MONTH",
+        "FROM",
+        "created_at)",
+        "AS",
+        "month",
+        "FROM",
+        "orders"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "EXTRACT(MONTH",
+        "FROM",
+        "created_at)",
+        "AS",
+        "month",
+        "FROM",
+        "orders"
+      ],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_085",
+      "title": "Date Difference Days",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "(end_date",
+        "-",
+        "start_date)",
+        "AS",
+        "days_duration",
+        "FROM",
+        "projects"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "(end_date",
+        "-",
+        "start_date)",
+        "AS",
+        "days_duration",
+        "FROM",
+        "projects"
+      ],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_086",
+      "title": "Max Per Group",
+      "tokens": [
+        "SELECT",
+        "department,",
+        "MAX(salary)",
+        "AS",
+        "max_salary",
+        "FROM",
+        "employees",
+        "GROUP BY",
+        "department"
+      ],
+      "solution": [
+        "SELECT",
+        "department,",
+        "MAX(salary)",
+        "AS",
+        "max_salary",
+        "FROM",
+        "employees",
+        "GROUP BY",
+        "department"
+      ],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_087",
+      "title": "Case With Three Tiers",
+      "tokens": [
+        "SELECT",
+        "name,",
+        "CASE",
+        "WHEN",
+        "score",
+        ">=",
+        "90",
+        "THEN",
+        "'A'",
+        "WHEN",
+        "score",
+        ">=",
+        "70",
+        "THEN",
+        "'B'",
+        "ELSE",
+        "'C'",
+        "END",
+        "AS",
+        "grade",
+        "FROM",
+        "students"
+      ],
+      "solution": [
+        "SELECT",
+        "name,",
+        "CASE",
+        "WHEN",
+        "score",
+        ">=",
+        "90",
+        "THEN",
+        "'A'",
+        "WHEN",
+        "score",
+        ">=",
+        "70",
+        "THEN",
+        "'B'",
+        "ELSE",
+        "'C'",
+        "END",
+        "AS",
+        "grade",
+        "FROM",
+        "students"
+      ],
+      "category": "Conditional"
+    },
+    {
+      "id": "s_e_088",
+      "title": "Row Count Of Table",
+      "tokens": [
+        "SELECT",
+        "COUNT(*)",
+        "AS",
+        "row_count",
+        "FROM",
+        "large_table"
+      ],
+      "solution": [
+        "SELECT",
+        "COUNT(*)",
+        "AS",
+        "row_count",
+        "FROM",
+        "large_table"
+      ],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_089",
+      "title": "Set Default Column",
+      "tokens": [
+        "ALTER TABLE",
+        "products",
+        "ALTER COLUMN",
+        "stock",
+        "SET DEFAULT",
+        "0"
+      ],
+      "solution": [
+        "ALTER TABLE",
+        "products",
+        "ALTER COLUMN",
+        "stock",
+        "SET DEFAULT",
+        "0"
+      ],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_090",
+      "title": "Add Not Null Constraint",
+      "tokens": [
+        "ALTER TABLE",
+        "users",
+        "ALTER COLUMN",
+        "email",
+        "SET NOT NULL"
+      ],
+      "solution": [
+        "ALTER TABLE",
+        "users",
+        "ALTER COLUMN",
+        "email",
+        "SET NOT NULL"
+      ],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_091",
+      "title": "Repeat String",
+      "tokens": [
+        "SELECT",
+        "REPEAT('*',",
+        "5)",
+        "AS",
+        "stars"
+      ],
+      "solution": [
+        "SELECT",
+        "REPEAT('*',",
+        "5)",
+        "AS",
+        "stars"
+      ],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_092",
+      "title": "Greatest Least",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "GREATEST(a,",
+        "b,",
+        "c)",
+        "AS",
+        "max_val,",
+        "LEAST(a,",
+        "b,",
+        "c)",
+        "AS",
+        "min_val",
+        "FROM",
+        "scores"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "GREATEST(a,",
+        "b,",
+        "c)",
+        "AS",
+        "max_val,",
+        "LEAST(a,",
+        "b,",
+        "c)",
+        "AS",
+        "min_val",
+        "FROM",
+        "scores"
+      ],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_093",
+      "title": "Power Function",
+      "tokens": [
+        "SELECT",
+        "POWER(2,",
+        "10)",
+        "AS",
+        "result"
+      ],
+      "solution": [
+        "SELECT",
+        "POWER(2,",
+        "10)",
+        "AS",
+        "result"
+      ],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_094",
+      "title": "Null Safe Coalesce Chain",
+      "tokens": [
+        "SELECT",
+        "COALESCE(preferred_name,",
+        "first_name,",
+        "'Unknown')",
+        "AS",
+        "display_name",
+        "FROM",
+        "users"
+      ],
+      "solution": [
+        "SELECT",
+        "COALESCE(preferred_name,",
+        "first_name,",
+        "'Unknown')",
+        "AS",
+        "display_name",
+        "FROM",
+        "users"
+      ],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_095",
+      "title": "Bool And Group",
+      "tokens": [
+        "SELECT",
+        "team_id,",
+        "BOOL_AND(active)",
+        "AS",
+        "all_active",
+        "FROM",
+        "members",
+        "GROUP BY",
+        "team_id"
+      ],
+      "solution": [
+        "SELECT",
+        "team_id,",
+        "BOOL_AND(active)",
+        "AS",
+        "all_active",
+        "FROM",
+        "members",
+        "GROUP BY",
+        "team_id"
+      ],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_096",
+      "title": "Bool Or Group",
+      "tokens": [
+        "SELECT",
+        "team_id,",
+        "BOOL_OR(premium)",
+        "AS",
+        "has_premium",
+        "FROM",
+        "members",
+        "GROUP BY",
+        "team_id"
+      ],
+      "solution": [
+        "SELECT",
+        "team_id,",
+        "BOOL_OR(premium)",
+        "AS",
+        "has_premium",
+        "FROM",
+        "members",
+        "GROUP BY",
+        "team_id"
+      ],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_097",
+      "title": "Today Interval Add",
+      "tokens": [
+        "SELECT",
+        "CURRENT_DATE",
+        "+",
+        "INTERVAL '7 days'",
+        "AS",
+        "next_week"
+      ],
+      "solution": [
+        "SELECT",
+        "CURRENT_DATE",
+        "+",
+        "INTERVAL '7 days'",
+        "AS",
+        "next_week"
+      ],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_098",
+      "title": "Type Cast Double",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "CAST(price",
+        "AS",
+        "NUMERIC(10,2))",
+        "AS",
+        "price",
+        "FROM",
+        "products"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "CAST(price",
+        "AS",
+        "NUMERIC(10,2))",
+        "AS",
+        "price",
+        "FROM",
+        "products"
+      ],
+      "category": "Type Casting"
+    },
+    {
+      "id": "s_e_099",
+      "title": "Select True False",
+      "tokens": [
+        "SELECT",
+        "id,",
+        "active,",
+        "active",
+        "=",
+        "true",
+        "AS",
+        "is_active",
+        "FROM",
+        "users"
+      ],
+      "solution": [
+        "SELECT",
+        "id,",
+        "active,",
+        "active",
+        "=",
+        "true",
+        "AS",
+        "is_active",
+        "FROM",
+        "users"
+      ],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_100",
+      "title": "Delete With Returning",
+      "tokens": [
+        "DELETE FROM",
+        "sessions",
+        "WHERE",
+        "expired_at",
+        "<",
+        "NOW()",
+        "RETURNING",
+        "id,",
+        "user_id"
+      ],
+      "solution": [
+        "DELETE FROM",
+        "sessions",
+        "WHERE",
+        "expired_at",
+        "<",
+        "NOW()",
+        "RETURNING",
+        "id,",
+        "user_id"
+      ],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_101",
+      "title": "Select Specific Columns",
+      "tokens": ["SELECT", "first_name,", "last_name,", "email", "FROM", "employees"],
+      "solution": ["SELECT", "first_name,", "last_name,", "email", "FROM", "employees"],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_102",
+      "title": "Filter by Department",
+      "tokens": ["SELECT", "*", "FROM", "employees", "WHERE", "department", "=", "'Sales'"],
+      "solution": ["SELECT", "*", "FROM", "employees", "WHERE", "department", "=", "'Sales'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_103",
+      "title": "Count Active Employees",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "employees", "WHERE", "active", "=", "true"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "employees", "WHERE", "active", "=", "true"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_104",
+      "title": "Products Over $100",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "100"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "100"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_105",
+      "title": "Orders by Date",
+      "tokens": ["SELECT", "order_id,", "order_date", "FROM", "orders", "ORDER BY", "order_date"],
+      "solution": ["SELECT", "order_id,", "order_date", "FROM", "orders", "ORDER BY", "order_date"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_106",
+      "title": "Top 3 Expensive Products",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "3"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "3"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_107",
+      "title": "Customers by City",
+      "tokens": ["SELECT", "name,", "city", "FROM", "customers", "ORDER BY", "city,", "name"],
+      "solution": ["SELECT", "name,", "city", "FROM", "customers", "ORDER BY", "city,", "name"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_108",
+      "title": "Products in Stock",
+      "tokens": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", ">", "0"],
+      "solution": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", ">", "0"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_109",
+      "title": "Count by Department",
+      "tokens": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_110",
+      "title": "Maximum Salary",
+      "tokens": ["SELECT", "MAX(salary)", "FROM", "employees"],
+      "solution": ["SELECT", "MAX(salary)", "FROM", "employees"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_111",
+      "title": "Minimum Salary",
+      "tokens": ["SELECT", "MIN(salary)", "FROM", "employees"],
+      "solution": ["SELECT", "MIN(salary)", "FROM", "employees"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_112",
+      "title": "Salary Sum",
+      "tokens": ["SELECT", "SUM(salary)", "FROM", "employees"],
+      "solution": ["SELECT", "SUM(salary)", "FROM", "employees"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_113",
+      "title": "Average Salary",
+      "tokens": ["SELECT", "AVG(salary)", "FROM", "employees"],
+      "solution": ["SELECT", "AVG(salary)", "FROM", "employees"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_114",
+      "title": "Employees in IT",
+      "tokens": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "department", "=", "'IT'"],
+      "solution": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "department", "=", "'IT'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_115",
+      "title": "Products with Category",
+      "tokens": ["SELECT", "name,", "category,", "price", "FROM", "products", "WHERE", "category", "=", "'Electronics'"],
+      "solution": ["SELECT", "name,", "category,", "price", "FROM", "products", "WHERE", "category", "=", "'Electronics'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_116",
+      "title": "Distinct Departments",
+      "tokens": ["SELECT", "DISTINCT", "department", "FROM", "employees", "ORDER BY", "department"],
+      "solution": ["SELECT", "DISTINCT", "department", "FROM", "employees", "ORDER BY", "department"],
+      "category": "Distinct"
+    },
+    {
+      "id": "s_e_117",
+      "title": "Distinct Product Categories",
+      "tokens": ["SELECT", "DISTINCT", "category", "FROM", "products", "ORDER BY", "category"],
+      "solution": ["SELECT", "DISTINCT", "category", "FROM", "products", "ORDER BY", "category"],
+      "category": "Distinct"
+    },
+    {
+      "id": "s_e_118",
+      "title": "Orders from Today",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "order_date", "=", "CURRENT_DATE"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "order_date", "=", "CURRENT_DATE"],
+      "category": "Date Filtering"
+    },
+    {
+      "id": "s_e_119",
+      "title": "Recent Orders",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "order_date", ">=", "CURRENT_DATE", "-", "INTERVAL", "'7 days'"],
+      "category": "Date Filtering"
+    },
+    {
+      "id": "s_e_120",
+      "title": "Pending Orders",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'pending'"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'pending'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_121",
+      "title": "Completed Orders",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_122",
+      "title": "Products with Price Range",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_123",
+      "title": "Customers in USA",
+      "tokens": ["SELECT", "name,", "city", "FROM", "customers", "WHERE", "country", "=", "'USA'"],
+      "solution": ["SELECT", "name,", "city", "FROM", "customers", "WHERE", "country", "=", "'USA'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_124",
+      "title": "Count Customers by Country",
+      "tokens": ["SELECT", "country,", "COUNT(*)", "FROM", "customers", "GROUP BY", "country"],
+      "solution": ["SELECT", "country,", "COUNT(*)", "FROM", "customers", "GROUP BY", "country"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_125",
+      "title": "Products with No Stock",
+      "tokens": ["SELECT", "name", "FROM", "products", "WHERE", "stock", "=", "0"],
+      "solution": ["SELECT", "name", "FROM", "products", "WHERE", "stock", "=", "0"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_126",
+      "title": "Employees with High Salary",
+      "tokens": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "80000"],
+      "solution": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "80000"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_127",
+      "title": "Sales Total",
+      "tokens": ["SELECT", "SUM(amount)", "FROM", "sales"],
+      "solution": ["SELECT", "SUM(amount)", "FROM", "sales"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_128",
+      "title": "Average Sales Amount",
+      "tokens": ["SELECT", "AVG(amount)", "FROM", "sales"],
+      "solution": ["SELECT", "AVG(amount)", "FROM", "sales"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_129",
+      "title": "Count Sales Transactions",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "sales"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "sales"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_130",
+      "title": "Sales by Region",
+      "tokens": ["SELECT", "region,", "SUM(amount)", "FROM", "sales", "GROUP BY", "region"],
+      "solution": ["SELECT", "region,", "SUM(amount)", "FROM", "sales", "GROUP BY", "region"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_131",
+      "title": "Products with Name Starting with A",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'A%'"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'A%'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_132",
+      "title": "Email Domain Filter",
+      "tokens": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "email", "LIKE", "'%@company.com'"],
+      "solution": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "email", "LIKE", "'%@company.com'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_133",
+      "title": "Products with Empty Description",
+      "tokens": ["SELECT", "name", "FROM", "products", "WHERE", "description", "IS", "NULL"],
+      "solution": ["SELECT", "name", "FROM", "products", "WHERE", "description", "IS", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_134",
+      "title": "Users with Phone Number",
+      "tokens": ["SELECT", "name,", "phone", "FROM", "users", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "phone", "FROM", "users", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_135",
+      "title": "Top 5 Products by Stock",
+      "tokens": ["SELECT", "name,", "stock", "FROM", "products", "ORDER BY", "stock", "DESC", "LIMIT", "5"],
+      "solution": ["SELECT", "name,", "stock", "FROM", "products", "ORDER BY", "stock", "DESC", "LIMIT", "5"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_136",
+      "title": "Update Product Price",
+      "tokens": ["UPDATE", "products", "SET", "price", "=", "price", "+", "10", "WHERE", "category", "=", "'Electronics'"],
+      "solution": ["UPDATE", "products", "SET", "price", "=", "price", "+", "10", "WHERE", "category", "=", "'Electronics'"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_137",
+      "title": "Delete Old Orders",
+      "tokens": ["DELETE FROM", "orders", "WHERE", "order_date", "<", "'2023-01-01'"],
+      "solution": ["DELETE FROM", "orders", "WHERE", "order_date", "<", "'2023-01-01'"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_138",
+      "title": "Insert New Product",
+      "tokens": ["INSERT INTO", "products", "(name,", "price,", "category)", "VALUES", "('Laptop',", "1200,", "'Electronics')"],
+      "solution": ["INSERT INTO", "products", "(name,", "price,", "category)", "VALUES", "('Laptop',", "1200,", "'Electronics')"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_139",
+      "title": "Lowercase Names",
+      "tokens": ["SELECT", "LOWER(name)", "AS", "name_lower", "FROM", "products"],
+      "solution": ["SELECT", "LOWER(name)", "AS", "name_lower", "FROM", "products"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_140",
+      "title": "Uppercase Emails",
+      "tokens": ["SELECT", "UPPER(email)", "AS", "email_upper", "FROM", "users"],
+      "solution": ["SELECT", "UPPER(email)", "AS", "email_upper", "FROM", "users"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_141",
+      "title": "String Length",
+      "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_142",
+      "title": "Concatenate Names",
+      "tokens": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "employees"],
+      "solution": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "employees"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_143",
+      "title": "Year from Date",
+      "tokens": ["SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year", "FROM", "orders"],
+      "solution": ["SELECT", "EXTRACT(YEAR", "FROM", "order_date)", "AS", "year", "FROM", "orders"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_144",
+      "title": "Month from Date",
+      "tokens": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month", "FROM", "orders"],
+      "solution": ["SELECT", "EXTRACT(MONTH", "FROM", "order_date)", "AS", "month", "FROM", "orders"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_145",
+      "title": "Day from Date",
+      "tokens": ["SELECT", "EXTRACT(DAY", "FROM", "order_date)", "AS", "day", "FROM", "orders"],
+      "solution": ["SELECT", "EXTRACT(DAY", "FROM", "order_date)", "AS", "day", "FROM", "orders"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_146",
+      "title": "Round Prices",
+      "tokens": ["SELECT", "name,", "ROUND(price,", "0)", "AS", "rounded_price", "FROM", "products"],
+      "solution": ["SELECT", "name,", "ROUND(price,", "0)", "AS", "rounded_price", "FROM", "products"],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_147",
+      "title": "Ceiling Price",
+      "tokens": ["SELECT", "name,", "CEIL(price)", "AS", "ceil_price", "FROM", "products"],
+      "solution": ["SELECT", "name,", "CEIL(price)", "AS", "ceil_price", "FROM", "products"],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_148",
+      "title": "Floor Price",
+      "tokens": ["SELECT", "name,", "FLOOR(price)", "AS", "floor_price", "FROM", "products"],
+      "solution": ["SELECT", "name,", "FLOOR(price)", "AS", "floor_price", "FROM", "products"],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_149",
+      "title": "Add Column",
+      "tokens": ["ALTER TABLE", "employees", "ADD COLUMN", "bonus", "DECIMAL(10,2)"],
+      "solution": ["ALTER TABLE", "employees", "ADD COLUMN", "bonus", "DECIMAL(10,2)"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_150",
+      "title": "Drop Column",
+      "tokens": ["ALTER TABLE", "employees", "DROP COLUMN", "old_phone"],
+      "solution": ["ALTER TABLE", "employees", "DROP COLUMN", "old_phone"],
+      "category": "DDL"
+    },
+    {
+  "id": "s_e_151",
+  "title": "Select Specific Columns from Employees",
+  "tokens": ["SELECT", "first_name,", "last_name,", "email,", "department", "FROM", "employees"],
+  "solution": ["SELECT", "first_name,", "last_name,", "email,", "department", "FROM", "employees"],
+  "category": "Basic Select"
+},
+{
+  "id": "s_e_152",
+  "title": "Filter by Active Status",
+  "tokens": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "active", "=", "true"],
+  "solution": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "active", "=", "true"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_153",
+  "title": "Select Products with Category",
+  "tokens": ["SELECT", "name,", "price,", "category", "FROM", "products"],
+  "solution": ["SELECT", "name,", "price,", "category", "FROM", "products"],
+  "category": "Basic Select"
+},
+{
+  "id": "s_e_154",
+  "title": "Orders with Total Greater Than 50",
+  "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "total", ">", "50"],
+  "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "total", ">", "50"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_155",
+  "title": "Sort Products by Price",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_156",
+  "title": "Count Total Products",
+  "tokens": ["SELECT", "COUNT(*)", "FROM", "products"],
+  "solution": ["SELECT", "COUNT(*)", "FROM", "products"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_157",
+  "title": "Distinct Departments",
+  "tokens": ["SELECT", "DISTINCT", "department", "FROM", "employees"],
+  "solution": ["SELECT", "DISTINCT", "department", "FROM", "employees"],
+  "category": "Distinct"
+},
+{
+  "id": "s_e_158",
+  "title": "Products with Stock Greater Than 0",
+  "tokens": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", ">", "0"],
+  "solution": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", ">", "0"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_159",
+  "title": "Select Users with Specific Role",
+  "tokens": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "role", "=", "'user'"],
+  "solution": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "role", "=", "'user'"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_160",
+  "title": "Orders by Date Ascending",
+  "tokens": ["SELECT", "id,", "order_date,", "total", "FROM", "orders", "ORDER BY", "order_date", "ASC"],
+  "solution": ["SELECT", "id,", "order_date,", "total", "FROM", "orders", "ORDER BY", "order_date", "ASC"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_161",
+  "title": "Average Product Price",
+  "tokens": ["SELECT", "AVG(price)", "FROM", "products"],
+  "solution": ["SELECT", "AVG(price)", "FROM", "products"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_162",
+  "title": "Products with Price Less Than 100",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "<", "100"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "<", "100"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_163",
+  "title": "Select Top 5 Cheapest Products",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC", "LIMIT", "5"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC", "LIMIT", "5"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_164",
+  "title": "Count Active Users",
+  "tokens": ["SELECT", "COUNT(*)", "FROM", "users", "WHERE", "active", "=", "true"],
+  "solution": ["SELECT", "COUNT(*)", "FROM", "users", "WHERE", "active", "=", "true"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_165",
+  "title": "Products with Specific Category",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "category", "=", "'Books'"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "category", "=", "'Books'"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_166",
+  "title": "Select Employees by Department",
+  "tokens": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "department", "=", "'HR'"],
+  "solution": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "department", "=", "'HR'"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_167",
+  "title": "Sum of All Order Totals",
+  "tokens": ["SELECT", "SUM(total)", "FROM", "orders"],
+  "solution": ["SELECT", "SUM(total)", "FROM", "orders"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_168",
+  "title": "Products with Names Starting with 'S'",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'S%'"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'S%'"],
+  "category": "Pattern Match"
+},
+{
+  "id": "s_e_169",
+  "title": "Select Customers with City",
+  "tokens": ["SELECT", "name,", "city", "FROM", "customers", "WHERE", "city", "=", "'New York'"],
+  "solution": ["SELECT", "name,", "city", "FROM", "customers", "WHERE", "city", "=", "'New York'"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_170",
+  "title": "Orders with Status Completed",
+  "tokens": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+  "solution": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_171",
+  "title": "Distinct Product Categories",
+  "tokens": ["SELECT", "DISTINCT", "category", "FROM", "products"],
+  "solution": ["SELECT", "DISTINCT", "category", "FROM", "products"],
+  "category": "Distinct"
+},
+{
+  "id": "s_e_172",
+  "title": "Select Employees with Salary Over 60000",
+  "tokens": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "60000"],
+  "solution": ["SELECT", "name,", "salary", "FROM", "employees", "WHERE", "salary", ">", "60000"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_173",
+  "title": "Sort Products by Stock Descending",
+  "tokens": ["SELECT", "name,", "stock", "FROM", "products", "ORDER BY", "stock", "DESC"],
+  "solution": ["SELECT", "name,", "stock", "FROM", "products", "ORDER BY", "stock", "DESC"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_174",
+  "title": "Count Orders by User",
+  "tokens": ["SELECT", "user_id,", "COUNT(*)", "FROM", "orders", "GROUP BY", "user_id"],
+  "solution": ["SELECT", "user_id,", "COUNT(*)", "FROM", "orders", "GROUP BY", "user_id"],
+  "category": "Grouping"
+},
+{
+  "id": "s_e_175",
+  "title": "Insert New Customer",
+  "tokens": ["INSERT INTO", "customers", "(name,", "email)", "VALUES", "('John Smith',", "'john@email.com')"],
+  "solution": ["INSERT INTO", "customers", "(name,", "email)", "VALUES", "('John Smith',", "'john@email.com')"],
+  "category": "DML"
+},
+{
+  "id": "s_e_176",
+  "title": "Update Employee Salary",
+  "tokens": ["UPDATE", "employees", "SET", "salary", "=", "75000", "WHERE", "id", "=", "42"],
+  "solution": ["UPDATE", "employees", "SET", "salary", "=", "75000", "WHERE", "id", "=", "42"],
+  "category": "DML"
+},
+{
+  "id": "s_e_177",
+  "title": "Delete Inactive Products",
+  "tokens": ["DELETE FROM", "products", "WHERE", "active", "=", "false"],
+  "solution": ["DELETE FROM", "products", "WHERE", "active", "=", "false"],
+  "category": "DML"
+},
+{
+  "id": "s_e_178",
+  "title": "Products with Price Between 50 and 200",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "200"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_179",
+  "title": "Employees Ordered by Name",
+  "tokens": ["SELECT", "name,", "department", "FROM", "employees", "ORDER BY", "name"],
+  "solution": ["SELECT", "name,", "department", "FROM", "employees", "ORDER BY", "name"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_180",
+  "title": "Select Products with Null Description",
+  "tokens": ["SELECT", "name", "FROM", "products", "WHERE", "description", "IS", "NULL"],
+  "solution": ["SELECT", "name", "FROM", "products", "WHERE", "description", "IS", "NULL"],
+  "category": "Null Handling"
+},
+{
+  "id": "s_e_181",
+  "title": "Customers with Non-Null Phone",
+  "tokens": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "phone", "IS", "NOT", "NULL"],
+  "solution": ["SELECT", "name,", "phone", "FROM", "customers", "WHERE", "phone", "IS", "NOT", "NULL"],
+  "category": "Null Handling"
+},
+{
+  "id": "s_e_182",
+  "title": "Products with Price Greater Than Average",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "(SELECT", "AVG(price)", "FROM", "products)"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "(SELECT", "AVG(price)", "FROM", "products)"],
+  "category": "Subquery"
+},
+{
+  "id": "s_e_183",
+  "title": "Top 10 Highest Salary Employees",
+  "tokens": ["SELECT", "name,", "salary", "FROM", "employees", "ORDER BY", "salary", "DESC", "LIMIT", "10"],
+  "solution": ["SELECT", "name,", "salary", "FROM", "employees", "ORDER BY", "salary", "DESC", "LIMIT", "10"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_184",
+  "title": "Orders from Today",
+  "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "order_date", "=", "CURRENT_DATE"],
+  "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "order_date", "=", "CURRENT_DATE"],
+  "category": "Date Functions"
+},
+{
+  "id": "s_e_185",
+  "title": "Count Employees by Department",
+  "tokens": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department", "ORDER BY", "department"],
+  "solution": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department", "ORDER BY", "department"],
+  "category": "Grouping"
+},
+{
+  "id": "s_e_186",
+  "title": "Max Order Total",
+  "tokens": ["SELECT", "MAX(total)", "FROM", "orders"],
+  "solution": ["SELECT", "MAX(total)", "FROM", "orders"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_187",
+  "title": "Min Order Total",
+  "tokens": ["SELECT", "MIN(total)", "FROM", "orders"],
+  "solution": ["SELECT", "MIN(total)", "FROM", "orders"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_188",
+  "title": "Sum of Product Prices by Category",
+  "tokens": ["SELECT", "category,", "SUM(price)", "FROM", "products", "GROUP BY", "category"],
+  "solution": ["SELECT", "category,", "SUM(price)", "FROM", "products", "GROUP BY", "category"],
+  "category": "Grouping"
+},
+{
+  "id": "s_e_189",
+  "title": "Products Not in Category 'Discontinued'",
+  "tokens": ["SELECT", "name,", "category", "FROM", "products", "WHERE", "category", "!=", "'Discontinued'"],
+  "solution": ["SELECT", "name,", "category", "FROM", "products", "WHERE", "category", "!=", "'Discontinued'"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_190",
+  "title": "Orders with Amount Less Than 20",
+  "tokens": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "total", "<", "20"],
+  "solution": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "total", "<", "20"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_191",
+  "title": "Insert Multiple Products",
+  "tokens": ["INSERT INTO", "products", "(name,", "price)", "VALUES", "('Pencil',", "1.50),", "('Eraser',", "0.75)"],
+  "solution": ["INSERT INTO", "products", "(name,", "price)", "VALUES", "('Pencil',", "1.50),", "('Eraser',", "0.75)"],
+  "category": "DML"
+},
+{
+  "id": "s_e_192",
+  "title": "Update Multiple Emails",
+  "tokens": ["UPDATE", "users", "SET", "email", "=", "LOWER(email)"],
+  "solution": ["UPDATE", "users", "SET", "email", "=", "LOWER(email)"],
+  "category": "DML"
+},
+{
+  "id": "s_e_193",
+  "title": "Delete Users with No Orders",
+  "tokens": ["DELETE FROM", "users", "WHERE", "id", "NOT", "IN", "(SELECT", "user_id", "FROM", "orders)"],
+  "solution": ["DELETE FROM", "users", "WHERE", "id", "NOT", "IN", "(SELECT", "user_id", "FROM", "orders)"],
+  "category": "DML"
+},
+{
+  "id": "s_e_194",
+  "title": "Products with Name Like 'Book'",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'%Book%'"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'%Book%'"],
+  "category": "Pattern Match"
+},
+{
+  "id": "s_e_195",
+  "title": "Employees with Names Containing 'son'",
+  "tokens": ["SELECT", "name", "FROM", "employees", "WHERE", "name", "LIKE", "'%son%'"],
+  "solution": ["SELECT", "name", "FROM", "employees", "WHERE", "name", "LIKE", "'%son%'"],
+  "category": "Pattern Match"
+},
+{
+  "id": "s_e_196",
+  "title": "Select Constant Values",
+  "tokens": ["SELECT", "'Hello'", "AS", "greeting,", "42", "AS", "answer"],
+  "solution": ["SELECT", "'Hello'", "AS", "greeting,", "42", "AS", "answer"],
+  "category": "Basic Select"
+},
+{
+  "id": "s_e_197",
+  "title": "Current Date",
+  "tokens": ["SELECT", "CURRENT_DATE", "AS", "today"],
+  "solution": ["SELECT", "CURRENT_DATE", "AS", "today"],
+  "category": "Date Functions"
+},
+{
+  "id": "s_e_198",
+  "title": "Uppercase Names",
+  "tokens": ["SELECT", "UPPER(name)", "AS", "uppercase_name", "FROM", "users"],
+  "solution": ["SELECT", "UPPER(name)", "AS", "uppercase_name", "FROM", "users"],
+  "category": "String Functions"
+},
+{
+  "id": "s_e_199",
+  "title": "Length of Product Names",
+  "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+  "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+  "category": "String Functions"
+},
+{
+  "id": "s_e_200",
+  "title": "Coalesce Phone Number",
+  "tokens": ["SELECT", "name,", "COALESCE(phone,", "'No Phone')", "AS", "contact", "FROM", "customers"],
+  "solution": ["SELECT", "name,", "COALESCE(phone,", "'No Phone')", "AS", "contact", "FROM", "customers"],
+  "category": "Null Handling"
+},
+{
+  "id": "s_e_201",
+  "title": "Select Categories",
+  "tokens": ["SELECT", "name", "FROM", "categories"],
+  "solution": ["SELECT", "name", "FROM", "categories"],
+  "category": "Basic Select"
+},
+{
+  "id": "s_e_202",
+  "title": "Count Users by Status",
+  "tokens": ["SELECT", "status,", "COUNT(*)", "FROM", "users", "GROUP BY", "status"],
+  "solution": ["SELECT", "status,", "COUNT(*)", "FROM", "users", "GROUP BY", "status"],
+  "category": "Grouping"
+},
+{
+  "id": "s_e_203",
+  "title": "Products with Price Greater Than 20",
+  "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "20"],
+  "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", ">", "20"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_204",
+  "title": "Sort Employees by Hire Date",
+  "tokens": ["SELECT", "name,", "hire_date", "FROM", "employees", "ORDER BY", "hire_date", "DESC"],
+  "solution": ["SELECT", "name,", "hire_date", "FROM", "employees", "ORDER BY", "hire_date", "DESC"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_205",
+  "title": "Select Limited Products",
+  "tokens": ["SELECT", "name", "FROM", "products", "LIMIT", "15"],
+  "solution": ["SELECT", "name", "FROM", "products", "LIMIT", "15"],
+  "category": "Limiting"
+},
+{
+  "id": "s_e_206",
+  "title": "Distinct Job Titles",
+  "tokens": ["SELECT", "DISTINCT", "job_title", "FROM", "employees"],
+  "solution": ["SELECT", "DISTINCT", "job_title", "FROM", "employees"],
+  "category": "Distinct"
+},
+{
+  "id": "s_e_207",
+  "title": "Sum of Inventory",
+  "tokens": ["SELECT", "SUM(quantity)", "FROM", "inventory"],
+  "solution": ["SELECT", "SUM(quantity)", "FROM", "inventory"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_208",
+  "title": "Average Rating",
+  "tokens": ["SELECT", "AVG(rating)", "FROM", "reviews"],
+  "solution": ["SELECT", "AVG(rating)", "FROM", "reviews"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_209",
+  "title": "Insert New Category",
+  "tokens": ["INSERT INTO", "categories", "(name)", "VALUES", "('Electronics')"],
+  "solution": ["INSERT INTO", "categories", "(name)", "VALUES", "('Electronics')"],
+  "category": "DML"
+},
+{
+  "id": "s_e_210",
+  "title": "Delete Products with No Stock",
+  "tokens": ["DELETE FROM", "products", "WHERE", "stock", "=", "0"],
+  "solution": ["DELETE FROM", "products", "WHERE", "stock", "=", "0"],
+  "category": "DML"
+},
+{
+  "id": "s_e_211",
+  "title": "Update Product Name",
+  "tokens": ["UPDATE", "products", "SET", "name", "=", "'Premium Widget'", "WHERE", "id", "=", "5"],
+  "solution": ["UPDATE", "products", "SET", "name", "=", "'Premium Widget'", "WHERE", "id", "=", "5"],
+  "category": "DML"
+},
+{
+  "id": "s_e_212",
+  "title": "Max Rating",
+  "tokens": ["SELECT", "MAX(rating)", "FROM", "reviews"],
+  "solution": ["SELECT", "MAX(rating)", "FROM", "reviews"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_213",
+  "title": "Min Rating",
+  "tokens": ["SELECT", "MIN(rating)", "FROM", "reviews"],
+  "solution": ["SELECT", "MIN(rating)", "FROM", "reviews"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_214",
+  "title": "Active Customers",
+  "tokens": ["SELECT", "*", "FROM", "customers", "WHERE", "active", "=", "true"],
+  "solution": ["SELECT", "*", "FROM", "customers", "WHERE", "active", "=", "true"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_215",
+  "title": "Orders by Date Asc",
+  "tokens": ["SELECT", "*", "FROM", "orders", "ORDER BY", "order_date", "ASC"],
+  "solution": ["SELECT", "*", "FROM", "orders", "ORDER BY", "order_date", "ASC"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_216",
+  "title": "Email Contains 'gmail'",
+  "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%gmail%'"],
+  "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%gmail%'"],
+  "category": "Pattern Match"
+},
+{
+  "id": "s_e_217",
+  "title": "Price Range 5 to 15",
+  "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", "BETWEEN", "5", "AND", "15"],
+  "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", "BETWEEN", "5", "AND", "15"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_218",
+  "title": "Alias Max Price",
+  "tokens": ["SELECT", "MAX(price)", "AS", "highest_price", "FROM", "products"],
+  "solution": ["SELECT", "MAX(price)", "AS", "highest_price", "FROM", "products"],
+  "category": "Alias"
+},
+{
+  "id": "s_e_219",
+  "title": "Count by Department",
+  "tokens": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+  "solution": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+  "category": "Grouping"
+},
+{
+  "id": "s_e_220",
+  "title": "NULL Email Check",
+  "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "IS", "NULL"],
+  "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "IS", "NULL"],
+  "category": "Null Handling"
+},
+{
+  "id": "s_e_221",
+  "title": "Not NULL Phone",
+  "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "phone", "IS", "NOT", "NULL"],
+  "solution": ["SELECT", "*", "FROM", "users", "WHERE", "phone", "IS", "NOT", "NULL"],
+  "category": "Null Handling"
+},
+{
+  "id": "s_e_222",
+  "title": "Orders with Status and Amount",
+  "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'shipped'", "AND", "total", ">", "50"],
+  "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'shipped'", "AND", "total", ">", "50"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_223",
+  "title": "IN List with Colors",
+  "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "color", "IN", "('red',", "'blue',", "'green')"],
+  "solution": ["SELECT", "*", "FROM", "products", "WHERE", "color", "IN", "('red',", "'blue',", "'green')"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_224",
+  "title": "NOT IN Exclude Categories",
+  "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "category", "NOT IN", "('clearance',", "'discontinued')"],
+  "solution": ["SELECT", "*", "FROM", "products", "WHERE", "category", "NOT IN", "('clearance',", "'discontinued')"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_225",
+  "title": "Alias Full Name",
+  "tokens": ["SELECT", "first_name", "AS", "first,", "last_name", "AS", "last", "FROM", "users"],
+  "solution": ["SELECT", "first_name", "AS", "first,", "last_name", "AS", "last", "FROM", "users"],
+  "category": "Alias"
+},
+{
+  "id": "s_e_226",
+  "title": "Top 5 Highest Rated",
+  "tokens": ["SELECT", "name,", "rating", "FROM", "products", "ORDER BY", "rating", "DESC", "LIMIT", "5"],
+  "solution": ["SELECT", "name,", "rating", "FROM", "products", "ORDER BY", "rating", "DESC", "LIMIT", "5"],
+  "category": "Sorting"
+},
+{
+  "id": "s_e_227",
+  "title": "Create Table Posts",
+  "tokens": ["CREATE TABLE", "posts", "(", "id", "SERIAL", "PRIMARY KEY,", "user_id", "INT,", "content", "TEXT", ")"],
+  "solution": ["CREATE TABLE", "posts", "(", "id", "SERIAL", "PRIMARY KEY,", "user_id", "INT,", "content", "TEXT", ")"],
+  "category": "DDL"
+},
+{
+  "id": "s_e_228",
+  "title": "Drop Table Old",
+  "tokens": ["DROP TABLE", "IF EXISTS", "old_products"],
+  "solution": ["DROP TABLE", "IF EXISTS", "old_products"],
+  "category": "DDL"
+},
+{
+  "id": "s_e_229",
+  "title": "Add Column Description",
+  "tokens": ["ALTER TABLE", "products", "ADD COLUMN", "description", "TEXT"],
+  "solution": ["ALTER TABLE", "products", "ADD COLUMN", "description", "TEXT"],
+  "category": "DDL"
+},
+{
+  "id": "s_e_230",
+  "title": "Count Pending Orders",
+  "tokens": ["SELECT", "COUNT(*)", "FROM", "orders", "WHERE", "status", "=", "'pending'"],
+  "solution": ["SELECT", "COUNT(*)", "FROM", "orders", "WHERE", "status", "=", "'pending'"],
+  "category": "Aggregation"
+},
+{
+  "id": "s_e_231",
+  "title": "Concat First and Last",
+  "tokens": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "employees"],
+  "solution": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "employees"],
+  "category": "String Functions"
+},
+{
+  "id": "s_e_232",
+  "title": "Uppercase City",
+  "tokens": ["SELECT", "UPPER(city)", "FROM", "customers"],
+  "solution": ["SELECT", "UPPER(city)", "FROM", "customers"],
+  "category": "String Functions"
+},
+{
+  "id": "s_e_233",
+  "title": "Current Time",
+  "tokens": ["SELECT", "CURRENT_TIME", "AS", "now"],
+  "solution": ["SELECT", "CURRENT_TIME", "AS", "now"],
+  "category": "Date Functions"
+},
+{
+  "id": "s_e_234",
+  "title": "Orders This Month",
+  "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "EXTRACT(MONTH FROM order_date)", "=", "1"],
+  "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "EXTRACT(MONTH FROM order_date)", "=", "1"],
+  "category": "Date Functions"
+},
+{
+  "id": "s_e_235",
+  "title": "Round Price to Integer",
+  "tokens": ["SELECT", "name,", "ROUND(price,", "0)", "AS", "rounded_price", "FROM", "products"],
+  "solution": ["SELECT", "name,", "ROUND(price,", "0)", "AS", "rounded_price", "FROM", "products"],
+  "category": "Math Functions"
+},
+{
+  "id": "s_e_236",
+  "title": "Having Min Count",
+  "tokens": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+  "solution": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+  "category": "Grouping"
+},
+{
+  "id": "s_e_237",
+  "title": "Truncate Table Logs",
+  "tokens": ["TRUNCATE TABLE", "logs"],
+  "solution": ["TRUNCATE TABLE", "logs"],
+  "category": "DDL"
+},
+{
+  "id": "s_e_238",
+  "title": "OR Condition Status",
+  "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'pending'", "OR", "status", "=", "'processing'"],
+  "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'pending'", "OR", "status", "=", "'processing'"],
+  "category": "Filtering"
+},
+{
+  "id": "s_e_239",
+  "title": "Update Stock Decrement",
+  "tokens": ["UPDATE", "products", "SET", "stock", "=", "stock", "-", "5", "WHERE", "id", "=", "10"],
+  "solution": ["UPDATE", "products", "SET", "stock", "=", "stock", "-", "5", "WHERE", "id", "=", "10"],
+  "category": "DML"
+},
+{
+  "id": "s_e_240",
+  "title": "Length of Description",
+  "tokens": ["SELECT", "name,", "LENGTH(description)", "AS", "desc_length", "FROM", "products"],
+  "solution": ["SELECT", "name,", "LENGTH(description)", "AS", "desc_length", "FROM", "products"],
+  "category": "String Functions"
+},
+{
+  "id": "s_e_241",
+  "title": "Coalesce Email",
+  "tokens": ["SELECT", "name,", "COALESCE(email,", "'no-email@example.com')", "AS", "contact_email", "FROM", "users"],
+  "solution": ["SELECT", "name,", "COALESCE(email,", "'no-email@example.com')", "AS", "contact_email", "FROM", "users"],
+  "category": "Null Handling"
+},
+{
+  "id": "s_e_242",
+  "title": "Simple Case Rating",
+  "tokens": ["SELECT", "name,", "CASE", "WHEN", "rating", ">", "4", "THEN", "'Excellent'", "ELSE", "'Average'", "END", "AS", "review", "FROM", "products"],
+  "solution": ["SELECT", "name,", "CASE", "WHEN", "rating", ">", "4", "THEN", "'Excellent'", "ELSE", "'Average'", "END", "AS", "review", "FROM", "products"],
+  "category": "Conditional"
+},
+{
+  "id": "s_e_243",
+  "title": "Substring Email Domain",
+  "tokens": ["SELECT", "SUBSTRING(email,", "POSITION('@'", "IN", "email)", "+", "1)", "AS", "domain", "FROM", "users"],
+  "solution": ["SELECT", "SUBSTRING(email,", "POSITION('@'", "IN", "email)", "+", "1)", "AS", "domain", "FROM", "users"],
+  "category": "String Functions"
+},
+{
+  "id": "s_e_244",
+  "title": "Drop Column Legacy",
+  "tokens": ["ALTER TABLE", "users", "DROP COLUMN", "legacy_id"],
+  "solution": ["ALTER TABLE", "users", "DROP COLUMN", "legacy_id"],
+  "category": "DDL"
+},
+{
+  "id": "s_e_245",
+  "title": "Rename Column",
+  "tokens": ["ALTER TABLE", "users", "RENAME COLUMN", "user_name", "TO", "username"],
+  "solution": ["ALTER TABLE", "users", "RENAME COLUMN", "user_name", "TO", "username"],
+  "category": "DDL"
+},
+{
+  "id": "s_e_246",
+  "title": "Sum Per Category",
+  "tokens": ["SELECT", "category,", "SUM(price)", "AS", "total_value", "FROM", "products", "GROUP BY", "category"],
+  "solution": ["SELECT", "category,", "SUM(price)", "AS", "total_value", "FROM", "products", "GROUP BY", "category"],
+  "category": "Grouping"
+},
+{
+  "id": "s_e_247",
+  "title": "Now Minus Created",
+  "tokens": ["SELECT", "id,", "created_at,", "NOW()", "-", "created_at", "AS", "age", "FROM", "sessions"],
+  "solution": ["SELECT", "id,", "created_at,", "NOW()", "-", "created_at", "AS", "age", "FROM", "sessions"],
+  "category": "Date Functions"
+},
+{
+  "id": "s_e_248",
+  "title": "Not Like Domain",
+  "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "NOT LIKE", "'%spam%'"],
+  "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "NOT LIKE", "'%spam%'"],
+  "category": "Pattern Match"
+},
+{
+  "id": "s_e_249",
+  "title": "Insert Multiple Categories",
+  "tokens": ["INSERT INTO", "categories", "(name)", "VALUES", "('Books'),", "('Movies'),", "('Music')"],
+  "solution": ["INSERT INTO", "categories", "(name)", "VALUES", "('Books'),", "('Movies'),", "('Music')"],
+  "category": "DML"
+},
+{
+  "id": "s_e_250",
+  "title": "Select Specific Employees",
+  "tokens": ["SELECT", "first_name,", "last_name,", "email,", "salary", "FROM", "employees", "WHERE", "department", "=", "'HR'"],
+  "solution": ["SELECT", "first_name,", "last_name,", "email,", "salary", "FROM", "employees", "WHERE", "department", "=", "'HR'"],
+  "category": "Basic Select"
+},
+    {
+      "id": "s_e_251",
+      "title": "Select First and Last Name",
+      "tokens": ["SELECT", "first_name,", "last_name", "FROM", "employees"],
+      "solution": ["SELECT", "first_name,", "last_name", "FROM", "employees"],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_252",
+      "title": "Filter High Quantity Orders",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "quantity", ">", "10"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "quantity", ">", "10"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_253",
+      "title": "Average Customer Rating",
+      "tokens": ["SELECT", "AVG(rating)", "FROM", "reviews"],
+      "solution": ["SELECT", "AVG(rating)", "FROM", "reviews"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_254",
+      "title": "Products Sorted by Name",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "name"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "name"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_255",
+      "title": "Count Active Employees",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "employees", "WHERE", "status", "=", "'active'"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "employees", "WHERE", "status", "=", "'active'"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_256",
+      "title": "Distinct Product Colors",
+      "tokens": ["SELECT", "DISTINCT", "color", "FROM", "products"],
+      "solution": ["SELECT", "DISTINCT", "color", "FROM", "products"],
+      "category": "Distinct"
+    },
+    {
+      "id": "s_e_257",
+      "title": "Orders with Low Total",
+      "tokens": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "total", "<", "50"],
+      "solution": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "total", "<", "50"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_258",
+      "title": "Insert New Department",
+      "tokens": ["INSERT INTO", "departments", "(name)", "VALUES", "('Marketing')"],
+      "solution": ["INSERT INTO", "departments", "(name)", "VALUES", "('Marketing')"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_259",
+      "title": "Update Product Status",
+      "tokens": ["UPDATE", "products", "SET", "status", "=", "'active'", "WHERE", "id", "=", "5"],
+      "solution": ["UPDATE", "products", "SET", "status", "=", "'active'", "WHERE", "id", "=", "5"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_260",
+      "title": "Delete Unused Categories",
+      "tokens": ["DELETE FROM", "categories", "WHERE", "product_count", "=", "0"],
+      "solution": ["DELETE FROM", "categories", "WHERE", "product_count", "=", "0"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_261",
+      "title": "Users with Gmail",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_262",
+      "title": "Products in Price Range",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "price", "BETWEEN", "25", "AND", "75"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "price", "BETWEEN", "25", "AND", "75"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_263",
+      "title": "Total Revenue Alias",
+      "tokens": ["SELECT", "SUM(total)", "AS", "total_revenue", "FROM", "orders"],
+      "solution": ["SELECT", "SUM(total)", "AS", "total_revenue", "FROM", "orders"],
+      "category": "Alias"
+    },
+    {
+      "id": "s_e_264",
+      "title": "Count by Status",
+      "tokens": ["SELECT", "status,", "COUNT(*)", "FROM", "orders", "GROUP BY", "status"],
+      "solution": ["SELECT", "status,", "COUNT(*)", "FROM", "orders", "GROUP BY", "status"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_265",
+      "title": "Employees Without Manager",
+      "tokens": ["SELECT", "*", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL"],
+      "solution": ["SELECT", "*", "FROM", "employees", "WHERE", "manager_id", "IS", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_266",
+      "title": "Products with Description",
+      "tokens": ["SELECT", "name,", "description", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "description", "FROM", "products", "WHERE", "description", "IS", "NOT", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_267",
+      "title": "Orders Filter Two Conditions",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'paid'", "AND", "total", ">", "200"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'paid'", "AND", "total", ">", "200"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_268",
+      "title": "Users in Selected Roles",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "role", "IN", "('admin',", "'editor')"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "role", "IN", "('admin',", "'editor')"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_269",
+      "title": "Exclude Archived Products",
+      "tokens": ["SELECT", "*", "FROM", "products", "WHERE", "status", "NOT IN", "('archived',", "'deleted')"],
+      "solution": ["SELECT", "*", "FROM", "products", "WHERE", "status", "NOT IN", "('archived',", "'deleted')"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_270",
+      "title": "Rename Employee Columns",
+      "tokens": ["SELECT", "first_name", "AS", "fname,", "last_name", "AS", "lname", "FROM", "employees"],
+      "solution": ["SELECT", "first_name", "AS", "fname,", "last_name", "AS", "lname", "FROM", "employees"],
+      "category": "Alias"
+    },
+    {
+      "id": "s_e_271",
+      "title": "Top 3 Cheapest Products",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC", "LIMIT", "3"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC", "LIMIT", "3"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_272",
+      "title": "Create Temporary Table",
+      "tokens": ["CREATE TEMP TABLE", "temp_data", "(", "id", "INT,", "value", "TEXT", ")"],
+      "solution": ["CREATE TEMP TABLE", "temp_data", "(", "id", "INT,", "value", "TEXT", ")"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_273",
+      "title": "Drop Temporary Table",
+      "tokens": ["DROP TABLE", "IF EXISTS", "temp_data"],
+      "solution": ["DROP TABLE", "IF EXISTS", "temp_data"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_274",
+      "title": "Add Employee Phone Column",
+      "tokens": ["ALTER TABLE", "employees", "ADD COLUMN", "phone", "VARCHAR(15)"],
+      "solution": ["ALTER TABLE", "employees", "ADD COLUMN", "phone", "VARCHAR(15)"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_275",
+      "title": "Count Completed Orders",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_276",
+      "title": "Combine First and Last Name",
+      "tokens": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "employees"],
+      "solution": ["SELECT", "first_name", "||", "' '", "||", "last_name", "AS", "full_name", "FROM", "employees"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_277",
+      "title": "Uppercase Country Names",
+      "tokens": ["SELECT", "UPPER(country)", "FROM", "customers"],
+      "solution": ["SELECT", "UPPER(country)", "FROM", "customers"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_278",
+      "title": "Current Timestamp",
+      "tokens": ["SELECT", "CURRENT_TIMESTAMP", "AS", "now"],
+      "solution": ["SELECT", "CURRENT_TIMESTAMP", "AS", "now"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_279",
+      "title": "Orders From 2024",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "EXTRACT(YEAR FROM order_date)", "=", "2024"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "EXTRACT(YEAR FROM order_date)", "=", "2024"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_280",
+      "title": "Round Prices to 2 Decimals",
+      "tokens": ["SELECT", "name,", "ROUND(price,", "2)", "AS", "rounded_price", "FROM", "products"],
+      "solution": ["SELECT", "name,", "ROUND(price,", "2)", "AS", "rounded_price", "FROM", "products"],
+      "category": "Math Functions"
+    },
+    {
+      "id": "s_e_281",
+      "title": "Categories with More Than 5 Products",
+      "tokens": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+      "solution": ["SELECT", "category,", "COUNT(*)", "FROM", "products", "GROUP BY", "category", "HAVING", "COUNT(*)", ">", "5"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_282",
+      "title": "Clear Old Sessions",
+      "tokens": ["TRUNCATE TABLE", "old_sessions"],
+      "solution": ["TRUNCATE TABLE", "old_sessions"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_283",
+      "title": "OR Condition for Status",
+      "tokens": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'pending'", "OR", "status", "=", "'processing'"],
+      "solution": ["SELECT", "*", "FROM", "orders", "WHERE", "status", "=", "'pending'", "OR", "status", "=", "'processing'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_284",
+      "title": "Increment Product Views",
+      "tokens": ["UPDATE", "products", "SET", "view_count", "=", "view_count", "+", "1", "WHERE", "id", "=", "42"],
+      "solution": ["UPDATE", "products", "SET", "view_count", "=", "view_count", "+", "1", "WHERE", "id", "=", "42"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_285",
+      "title": "Name Character Count",
+      "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_286",
+      "title": "Contact Fallback",
+      "tokens": ["SELECT", "name,", "COALESCE(phone,", "'No Phone')", "AS", "contact", "FROM", "customers"],
+      "solution": ["SELECT", "name,", "COALESCE(phone,", "'No Phone')", "AS", "contact", "FROM", "customers"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_287",
+      "title": "Simple Price Tier",
+      "tokens": ["SELECT", "name,", "CASE", "WHEN", "price", ">", "100", "THEN", "'Expensive'", "ELSE", "'Affordable'", "END", "AS", "tier", "FROM", "products"],
+      "solution": ["SELECT", "name,", "CASE", "WHEN", "price", ">", "100", "THEN", "'Expensive'", "ELSE", "'Affordable'", "END", "AS", "tier", "FROM", "products"],
+      "category": "Conditional"
+    },
+    {
+      "id": "s_e_288",
+      "title": "Email Prefix",
+      "tokens": ["SELECT", "SUBSTRING(email,", "1,", "POSITION('@'", "IN", "email)", "-", "1)", "AS", "username", "FROM", "users"],
+      "solution": ["SELECT", "SUBSTRING(email,", "1,", "POSITION('@'", "IN", "email)", "-", "1)", "AS", "username", "FROM", "users"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_289",
+      "title": "Remove Old Column",
+      "tokens": ["ALTER TABLE", "users", "DROP COLUMN", "old_field"],
+      "solution": ["ALTER TABLE", "users", "DROP COLUMN", "old_field"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_290",
+      "title": "Rename Department Column",
+      "tokens": ["ALTER TABLE", "employees", "RENAME COLUMN", "dept", "TO", "department"],
+      "solution": ["ALTER TABLE", "employees", "RENAME COLUMN", "dept", "TO", "department"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_291",
+      "title": "Spending Per Customer",
+      "tokens": ["SELECT", "customer_id,", "SUM(total)", "AS", "total_spent", "FROM", "orders", "GROUP BY", "customer_id"],
+      "solution": ["SELECT", "customer_id,", "SUM(total)", "AS", "total_spent", "FROM", "orders", "GROUP BY", "customer_id"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_292",
+      "title": "Session Age",
+      "tokens": ["SELECT", "id,", "created_at,", "NOW()", "-", "created_at", "AS", "age", "FROM", "sessions"],
+      "solution": ["SELECT", "id,", "created_at,", "NOW()", "-", "created_at", "AS", "age", "FROM", "sessions"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_293",
+      "title": "Not Like Spam",
+      "tokens": ["SELECT", "*", "FROM", "emails", "WHERE", "subject", "NOT LIKE", "'%spam%'"],
+      "solution": ["SELECT", "*", "FROM", "emails", "WHERE", "subject", "NOT LIKE", "'%spam%'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_294",
+      "title": "Insert Multiple Employees",
+      "tokens": ["INSERT INTO", "employees", "(name,", "department)", "VALUES", "('Alice',", "'HR'),", "('Bob',", "'IT')"],
+      "solution": ["INSERT INTO", "employees", "(name,", "department)", "VALUES", "('Alice',", "'HR'),", "('Bob',", "'IT')"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_295",
+      "title": "Select Product Name and Price",
+      "tokens": ["SELECT", "product_name,", "unit_price", "FROM", "inventory"],
+      "solution": ["SELECT", "product_name,", "unit_price", "FROM", "inventory"],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_296",
+      "title": "Count Unique Customers",
+      "tokens": ["SELECT", "COUNT(DISTINCT", "customer_id)", "FROM", "orders"],
+      "solution": ["SELECT", "COUNT(DISTINCT", "customer_id)", "FROM", "orders"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_297",
+      "title": "Name Starts With B",
+      "tokens": ["SELECT", "*", "FROM", "customers", "WHERE", "name", "LIKE", "'B%'"],
+      "solution": ["SELECT", "*", "FROM", "customers", "WHERE", "name", "LIKE", "'B%'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_298",
+      "title": "Latest Record",
+      "tokens": ["SELECT", "*", "FROM", "events", "ORDER BY", "event_time", "DESC", "LIMIT", "1"],
+      "solution": ["SELECT", "*", "FROM", "events", "ORDER BY", "event_time", "DESC", "LIMIT", "1"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_299",
+      "title": "Not Equal Status",
+      "tokens": ["SELECT", "*", "FROM", "tasks", "WHERE", "status", "!=", "'done'"],
+      "solution": ["SELECT", "*", "FROM", "tasks", "WHERE", "status", "!=", "'done'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_300",
+      "title": "Lowercase Emails",
+      "tokens": ["SELECT", "LOWER(email)", "AS", "email_lower", "FROM", "users"],
+      "solution": ["SELECT", "LOWER(email)", "AS", "email_lower", "FROM", "users"],
+      "category": "String Functions"
+    },
+        {
+      "id": "s_e_301",
+      "title": "Select Product Names Only",
+      "tokens": ["SELECT", "product_name", "FROM", "inventory"],
+      "solution": ["SELECT", "product_name", "FROM", "inventory"],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_302",
+      "title": "Users with Gmail Domain",
+      "tokens": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "solution": ["SELECT", "*", "FROM", "users", "WHERE", "email", "LIKE", "'%@gmail.com'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_303",
+      "title": "Sort Products by Price Ascending",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "ASC"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_304",
+      "title": "Count Orders by Status",
+      "tokens": ["SELECT", "status,", "COUNT(*)", "FROM", "orders", "GROUP BY", "status"],
+      "solution": ["SELECT", "status,", "COUNT(*)", "FROM", "orders", "GROUP BY", "status"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_305",
+      "title": "Filter Products with Stock",
+      "tokens": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", ">", "0"],
+      "solution": ["SELECT", "name,", "stock", "FROM", "products", "WHERE", "stock", ">", "0"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_306",
+      "title": "Select Specific Columns",
+      "tokens": ["SELECT", "first_name,", "last_name,", "email", "FROM", "employees"],
+      "solution": ["SELECT", "first_name,", "last_name,", "email", "FROM", "employees"],
+      "category": "Basic Select"
+    },
+    {
+      "id": "s_e_307",
+      "title": "Products Under $100",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "<", "100"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "<", "100"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_308",
+      "title": "Sort Orders by Date",
+      "tokens": ["SELECT", "*", "FROM", "orders", "ORDER BY", "order_date", "DESC"],
+      "solution": ["SELECT", "*", "FROM", "orders", "ORDER BY", "order_date", "DESC"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_309",
+      "title": "Count Total Customers",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "customers"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "customers"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_310",
+      "title": "Active Users Filter",
+      "tokens": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "active", "=", "true"],
+      "solution": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "active", "=", "true"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_311",
+      "title": "Products with Category",
+      "tokens": ["SELECT", "name,", "category", "FROM", "products", "WHERE", "category", "=", "'Electronics'"],
+      "solution": ["SELECT", "name,", "category", "FROM", "products", "WHERE", "category", "=", "'Electronics'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_312",
+      "title": "Top 10 Most Expensive",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "10"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "ORDER BY", "price", "DESC", "LIMIT", "10"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_313",
+      "title": "Distinct Roles",
+      "tokens": ["SELECT", "DISTINCT", "role", "FROM", "users", "ORDER BY", "role"],
+      "solution": ["SELECT", "DISTINCT", "role", "FROM", "users", "ORDER BY", "role"],
+      "category": "Distinct"
+    },
+    {
+      "id": "s_e_314",
+      "title": "Orders with Total Over 100",
+      "tokens": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "total", ">", "100"],
+      "solution": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "total", ">", "100"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_315",
+      "title": "Insert New Customer",
+      "tokens": ["INSERT INTO", "customers", "(name,", "email)", "VALUES", "('Jane Doe',", "'jane@email.com')"],
+      "solution": ["INSERT INTO", "customers", "(name,", "email)", "VALUES", "('Jane Doe',", "'jane@email.com')"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_316",
+      "title": "Update Customer Email",
+      "tokens": ["UPDATE", "customers", "SET", "email", "=", "'new@email.com'", "WHERE", "id", "=", "5"],
+      "solution": ["UPDATE", "customers", "SET", "email", "=", "'new@email.com'", "WHERE", "id", "=", "5"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_317",
+      "title": "Delete Customer",
+      "tokens": ["DELETE FROM", "customers", "WHERE", "id", "=", "10"],
+      "solution": ["DELETE FROM", "customers", "WHERE", "id", "=", "10"],
+      "category": "DML"
+    },
+    {
+      "id": "s_e_318",
+      "title": "Average Product Price",
+      "tokens": ["SELECT", "AVG(price)", "FROM", "products"],
+      "solution": ["SELECT", "AVG(price)", "FROM", "products"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_319",
+      "title": "Highest Salary",
+      "tokens": ["SELECT", "MAX(salary)", "FROM", "employees"],
+      "solution": ["SELECT", "MAX(salary)", "FROM", "employees"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_320",
+      "title": "Lowest Salary",
+      "tokens": ["SELECT", "MIN(salary)", "FROM", "employees"],
+      "solution": ["SELECT", "MIN(salary)", "FROM", "employees"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_321",
+      "title": "Products Starting with 'S'",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'S%'"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "name", "LIKE", "'S%'"],
+      "category": "Pattern Match"
+    },
+    {
+      "id": "s_e_322",
+      "title": "Orders by City",
+      "tokens": ["SELECT", "order_id,", "city", "FROM", "orders", "ORDER BY", "city"],
+      "solution": ["SELECT", "order_id,", "city", "FROM", "orders", "ORDER BY", "city"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_323",
+      "title": "Count Products in Stock",
+      "tokens": ["SELECT", "COUNT(*)", "FROM", "products", "WHERE", "stock", ">", "0"],
+      "solution": ["SELECT", "COUNT(*)", "FROM", "products", "WHERE", "stock", ">", "0"],
+      "category": "Aggregation"
+    },
+    {
+      "id": "s_e_324",
+      "title": "Users with NULL Phone",
+      "tokens": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "phone", "IS", "NULL"],
+      "solution": ["SELECT", "name,", "email", "FROM", "users", "WHERE", "phone", "IS", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_325",
+      "title": "Users with Phone Number",
+      "tokens": ["SELECT", "name,", "phone", "FROM", "users", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "solution": ["SELECT", "name,", "phone", "FROM", "users", "WHERE", "phone", "IS", "NOT", "NULL"],
+      "category": "Null Handling"
+    },
+    {
+      "id": "s_e_326",
+      "title": "Order Totals with Alias",
+      "tokens": ["SELECT", "id,", "total", "AS", "order_total", "FROM", "orders"],
+      "solution": ["SELECT", "id,", "total", "AS", "order_total", "FROM", "orders"],
+      "category": "Alias"
+    },
+    {
+      "id": "s_e_327",
+      "title": "Employees by Department",
+      "tokens": ["SELECT", "name,", "department", "FROM", "employees", "ORDER BY", "department,", "name"],
+      "solution": ["SELECT", "name,", "department", "FROM", "employees", "ORDER BY", "department,", "name"],
+      "category": "Sorting"
+    },
+    {
+      "id": "s_e_328",
+      "title": "Products in Price Range",
+      "tokens": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "150"],
+      "solution": ["SELECT", "name,", "price", "FROM", "products", "WHERE", "price", "BETWEEN", "50", "AND", "150"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_329",
+      "title": "Create Simple Table",
+      "tokens": ["CREATE TABLE", "logs", "(", "id", "INTEGER,", "message", "TEXT", ")"],
+      "solution": ["CREATE TABLE", "logs", "(", "id", "INTEGER,", "message", "TEXT", ")"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_330",
+      "title": "Add Column to Table",
+      "tokens": ["ALTER TABLE", "users", "ADD COLUMN", "age", "INTEGER"],
+      "solution": ["ALTER TABLE", "users", "ADD COLUMN", "age", "INTEGER"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_331",
+      "title": "Drop Column",
+      "tokens": ["ALTER TABLE", "products", "DROP COLUMN", "old_category"],
+      "solution": ["ALTER TABLE", "products", "DROP COLUMN", "old_category"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_332",
+      "title": "Rename Table",
+      "tokens": ["ALTER TABLE", "old_employees", "RENAME TO", "employees"],
+      "solution": ["ALTER TABLE", "old_employees", "RENAME TO", "employees"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_333",
+      "title": "Truncate Logs Table",
+      "tokens": ["TRUNCATE TABLE", "logs"],
+      "solution": ["TRUNCATE TABLE", "logs"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_334",
+      "title": "Drop Table If Exists",
+      "tokens": ["DROP TABLE", "IF EXISTS", "temp_data"],
+      "solution": ["DROP TABLE", "IF EXISTS", "temp_data"],
+      "category": "DDL"
+    },
+    {
+      "id": "s_e_335",
+      "title": "Uppercase Product Names",
+      "tokens": ["SELECT", "UPPER(name)", "AS", "uppercase_name", "FROM", "products"],
+      "solution": ["SELECT", "UPPER(name)", "AS", "uppercase_name", "FROM", "products"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_336",
+      "title": "Lowercase Emails",
+      "tokens": ["SELECT", "LOWER(email)", "AS", "lower_email", "FROM", "users"],
+      "solution": ["SELECT", "LOWER(email)", "AS", "lower_email", "FROM", "users"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_337",
+      "title": "String Length",
+      "tokens": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "solution": ["SELECT", "name,", "LENGTH(name)", "AS", "name_length", "FROM", "products"],
+      "category": "String Functions"
+    },
+    {
+      "id": "s_e_338",
+      "title": "Current Date",
+      "tokens": ["SELECT", "CURRENT_DATE", "AS", "today"],
+      "solution": ["SELECT", "CURRENT_DATE", "AS", "today"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_339",
+      "title": "Current Time",
+      "tokens": ["SELECT", "CURRENT_TIME", "AS", "now"],
+      "solution": ["SELECT", "CURRENT_TIME", "AS", "now"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_340",
+      "title": "Current Timestamp",
+      "tokens": ["SELECT", "CURRENT_TIMESTAMP", "AS", "timestamp"],
+      "solution": ["SELECT", "CURRENT_TIMESTAMP", "AS", "timestamp"],
+      "category": "Date Functions"
+    },
+    {
+      "id": "s_e_341",
+      "title": "Products without Stock",
+      "tokens": ["SELECT", "name", "FROM", "products", "WHERE", "stock", "=", "0"],
+      "solution": ["SELECT", "name", "FROM", "products", "WHERE", "stock", "=", "0"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_342",
+      "title": "Orders with Status Completed",
+      "tokens": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "solution": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "status", "=", "'completed'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_343",
+      "title": "Orders with Status Pending",
+      "tokens": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "status", "=", "'pending'"],
+      "solution": ["SELECT", "id,", "total", "FROM", "orders", "WHERE", "status", "=", "'pending'"],
+      "category": "Filtering"
+    },
+    {
+      "id": "s_e_344",
+      "title": "Count Orders by Status",
+      "tokens": ["SELECT", "status,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "status"],
+      "solution": ["SELECT", "status,", "COUNT(*)", "AS", "order_count", "FROM", "orders", "GROUP BY", "status"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_345",
+      "title": "Sum Orders by Status",
+      "tokens": ["SELECT", "status,", "SUM(total)", "AS", "total_amount", "FROM", "orders", "GROUP BY", "status"],
+      "solution": ["SELECT", "status,", "SUM(total)", "AS", "total_amount", "FROM", "orders", "GROUP BY", "status"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_346",
+      "title": "Count by Department",
+      "tokens": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "COUNT(*)", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_347",
+      "title": "Average Salary by Department",
+      "tokens": ["SELECT", "department,", "AVG(salary)", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "AVG(salary)", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_348",
+      "title": "Max Salary by Department",
+      "tokens": ["SELECT", "department,", "MAX(salary)", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "MAX(salary)", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_349",
+      "title": "Min Salary by Department",
+      "tokens": ["SELECT", "department,", "MIN(salary)", "FROM", "employees", "GROUP BY", "department"],
+      "solution": ["SELECT", "department,", "MIN(salary)", "FROM", "employees", "GROUP BY", "department"],
+      "category": "Grouping"
+    },
+    {
+      "id": "s_e_350",
+      "title": "Count Distinct Product Categories",
+      "tokens": ["SELECT", "COUNT(DISTINCT", "category)", "FROM", "products"],
+      "solution": ["SELECT", "COUNT(DISTINCT", "category)", "FROM", "products"],
+      "category": "Aggregation"
+    }
+  ]
+}
