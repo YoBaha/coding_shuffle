@@ -21,9 +21,9 @@ class MusicService {
   static const _prefKey = 'music_enabled';
 
   static const _homeSongs = [
-    'assets/music/app_song1.mp3',
+    'assets/music/home_song1.mp3',
   ];
-  static const _trainingSong   = 'assets/music/chill_mode.mp3';
+  static const _trainingSong   = 'assets/music/home_song1.mp3';
   static const _survivalSong   = 'assets/music/app_song1.mp3';
 
   final _player = AudioPlayer();
@@ -32,6 +32,7 @@ class MusicService {
   bool _initialized = false;
 
   bool get enabled => _enabled;
+  MusicContext? get currentContext => _currentContext;
 
   // ── Init: load pref, don't start playing yet ────────────────────────────
   Future<void> init() async {
@@ -61,15 +62,15 @@ class MusicService {
 
   // ── Play a random home song on loop ─────────────────────────────────────
   Future<void> playHome() async {
-    _currentContext = MusicContext.home;
-    if (!_enabled) return;
+    if (!_enabled) { _currentContext = MusicContext.home; return; }
 
     // Already playing home — don't restart
-    if (_player.playing &&
-        _player.processingState != ProcessingState.idle &&
-        _currentContext == MusicContext.home) {
+    if (_currentContext == MusicContext.home &&
+        _player.playing &&
+        _player.processingState != ProcessingState.idle) {
       return;
     }
+    _currentContext = MusicContext.home;
 
     final song = _homeSongs[Random().nextInt(_homeSongs.length)];
     await _player.stop();

@@ -15,6 +15,7 @@ import 'support_screen.dart';
 import 'settings_screen.dart';
 import 'package:code_shuffle/services/daily_challenge_service.dart';
 import 'daily_game_screen.dart';
+import 'sql_stream_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -54,7 +55,12 @@ DailyPuzzle? _todaysPuzzle;
     if (state == AppLifecycleState.paused) {
       _music.stop();
     } else if (state == AppLifecycleState.resumed) {
-      _music.playHome();
+      // Resume whichever context was active before pause
+      if (_music.currentContext == MusicContext.survival) {
+        _music.playSurvival();
+      } else {
+        _music.playHome();
+      }
     }
   }
 
@@ -106,6 +112,7 @@ void _openDailyChallenge() {
     );
     return;
   }
+  _music.playHome(); // daily uses home_song1
   Navigator.push(
     context,
     MaterialPageRoute(
@@ -143,16 +150,25 @@ void _openDailyChallenge() {
         },
         onSurvival: () {
           Navigator.pop(context);
+          _music.playSurvival();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => const SurvivalDifficultyScreen(),
             ),
-          );
+          ).then((_) => _music.playHome());
         },
         onDaily: () {
           Navigator.pop(context);
           _openDailyChallenge();
+        },
+        onStream: () {
+          Navigator.pop(context);
+          _music.playHome(); // sql stream uses home_song1
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SqlStreamScreen()),
+          );
         },
       ),
     );
@@ -176,7 +192,7 @@ void _openDailyChallenge() {
   }
 
   void _openLevel(PuzzleLevel level) {
-    _music.playTraining();
+    _music.playHome(); // training uses home_song1
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -230,13 +246,13 @@ void _openDailyChallenge() {
               dailyCompleted: _dailyCompleted,        // ← new
   onDailyTap: _openDailyChallenge,        // ← new
 onSurvivalTap: () {
-    // Navigate to Survival difficulty picker
+    _music.playSurvival();
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const SurvivalDifficultyScreen(),
       ),
-    );
+    ).then((_) => _music.playHome());
   },
 ),
 
@@ -269,12 +285,14 @@ class _DuelModeSheet extends StatelessWidget {
   final VoidCallback onTraining;
   final VoidCallback onSurvival;
   final VoidCallback onDaily;
+  final VoidCallback onStream;
 
   const _DuelModeSheet({
     required this.dailyCompleted,
     required this.onTraining,
     required this.onSurvival,
     required this.onDaily,
+    required this.onStream,
   });
 
   @override
@@ -352,6 +370,18 @@ class _DuelModeSheet extends StatelessWidget {
             badge: dailyCompleted ? '✓ DONE' : 'NEW',
             badgeColor: dailyCompleted ? kGreen : kGold,
             onTap: onDaily,
+          ),
+          const SizedBox(height: 12),
+          // SQL Stream
+          _DuelModeCard(
+            icon: 'assets/images/duel_icon.png',
+            title: 'SQL STREAM',
+            subtitle: 'Catch tokens. Build the query. Beat the flow.',
+            gradientColors: [const Color(0xFF0F3D2E), const Color(0xFF065F46)],
+            borderColor: const Color(0xFF34D399),
+            badge: 'NEW',
+            badgeColor: const Color(0xFF34D399),
+            onTap: onStream,
           ),
           const SizedBox(height: 8),
         ],
